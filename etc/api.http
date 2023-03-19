@@ -1,0 +1,35 @@
+@endpoint = http://localhost:8000
+
+// Token 
+@jwt = THIS_IS_IGNORED.eyJwcmVmZXJyZWRfdXNlcm5hbWUiOiJiZWNvbGVtQG1pY3Jvc29mdC5jb20ifQ.THIS_IS_IGNORED
+
+### Get all monitors
+GET {{endpoint}}/monitors
+Authorization: Bearer {{ jwt }}
+
+### Create a monitor
+POST {{endpoint}}/monitors
+Authorization: Bearer {{ jwt }}
+Content-Type: application/json
+
+{
+  "name": "A test monitor",
+  "type": "http",
+  "interval": "20s",
+  "enabled": true,
+  "properties": {
+    "url": "http://example.net"
+  }
+}
+
+### Get single monitor
+GET {{endpoint}}/monitors/6416d530c963a60b42dcf8d6
+Authorization: Bearer {{ jwt }}
+
+### Delete single monitor
+DELETE {{endpoint}}/monitors/64170494109c886d716ca7b8
+Authorization: Bearer {{ jwt }}
+
+### Get results
+GET {{endpoint}}/monitors/6416d530c963a60b42dcf8d6/results
+Authorization: Bearer {{ jwt }}

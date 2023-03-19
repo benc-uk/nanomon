@@ -1,0 +1,10 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+include_ext = [ "go" ]
+include_dir = [ "services/runner" ]
+cmd = "go build -o ./tmp/main monitr/services/runner"
+
+[misc]
+clean_on_exit = true

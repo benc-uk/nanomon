@@ -1,0 +1,44 @@
+use('monitr');
+
+db.monitors.drop();
+db.results.drop();
+
+db.monitors.insertMany([
+  { 
+    'name': 'Blah example',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '15s',
+    'properties': {
+      'url': 'https://example.net'
+    }
+  },
+  
+  { 
+    'name': 'Monitor benc.dev',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '25s',
+    'properties': {
+      'urlXXX': 'https://benc.dev'
+    }
+  },
+
+  { 
+    'name': 'Local pinger',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '20s',
+    'properties': {
+      'url': 'http://localhost:8000',
+      'allowedStatus': '200-208',
+      'checkFor': 'Ben Coleman',
+      //'notCheckFor': 'Ben'
+    }
+  }
+]);
+
+

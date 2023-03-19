@@ -22,6 +22,10 @@ func (m *Monitor) runHTTP() {
 		storeFailedResult(m.db, m, fmt.Errorf("no URL specified"))
 		return
 	}
+	method := m.Properties["method"]
+	if method == "" {
+		method = "GET"
+	}
 
 	log.Println("### Executing HTTP monitor:", url)
 
@@ -38,10 +42,15 @@ func (m *Monitor) runHTTP() {
 		return
 	}
 
-	start := time.Now()
-	resp, err := client.Get(url)
-	r.Duration = int(time.Since(start).Seconds() * 1000)
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		storeFailedResult(m.db, m, err)
+		return
+	}
 
+	start := time.Now()
+	resp, err := client.Do(req)
+	r.Duration = int(time.Since(start).Milliseconds())
 	if err != nil {
 		storeFailedResult(m.db, m, err)
 		return
@@ -50,6 +59,7 @@ func (m *Monitor) runHTTP() {
 	// Check the status code
 	if !containsStatusCode(statusCodes, resp.StatusCode) {
 		r.Status = STATUS_ERROR
+		r.Message = fmt.Sprintf(resp.Status)
 	}
 
 	// Read response body

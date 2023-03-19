@@ -51,6 +51,10 @@ func (m *Monitor) Start() {
 }
 
 func (m *Monitor) run() {
+	if !m.Enabled {
+		return
+	}
+
 	switch m.Type {
 	case TYPE_HTTP:
 		m.runHTTP()

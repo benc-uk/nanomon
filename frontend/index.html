@@ -4,48 +4,59 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Monitr</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/sandstone/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
     <script src="js/app.mjs" type="module"></script>
+
+    <link rel="shortcut icon" href="static/favicon.png" type="image/png" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Monitr</a>
+        <a class="navbar-brand" href="#home"><img src="static/icon.png" />Monitr</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarColor01">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link active" href="#"
-                >Home
-                <span class="visually-hidden">(current)</span>
-              </a>
+              <a class="nav-link" href="#monitors">Monitors</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
+              <a class="nav-link" href="#dash">Dashboard</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Pricing</a>
+              <a class="nav-link" href="#admin">Admin</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <div id="app" x-data="app">
+    <div id="app" x-data="app" x-cloak>
       <div class="container">
-        <template x-for="topic in topics">
-          <div class="card shadow mb-3 mt-1">
+        <template x-for="m of monitors">
+          <div class="card shadow mb-4 mt-1">
+            <div class="card-header fs-3" :class="m.statusClass" x-text="m.name"></div>
             <div class="card-body">
-              <h3 class="card-title" x-text="topic.title"></h3>
-              <h6 class="card-subtitle mb-2 text-muted">fred@microsoft.com</h6>
-              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-              <a href="#" class="card-link">Card link</a>
+              <div class="d-flex justify-content-between">
+                <div class="p-2">
+                  <h5 class="card-subtitle mb-2 text-muted" x-text="`${m.properties.method || ''} ${m.properties.url}`"></h5>
+
+                  <span class="badge p-3 fs-6" :class="m.statusClass" x-text="m.statusText"></span>
+                  <div class="pt-3" x-text="m.message"></div>
+                </div>
+                <div class="mini-graph">
+                  <canvas :id="`chart_${m.id}`"></canvas>
+                </div>
+              </div>
             </div>
+            <div class="card-footer bg-light" x-text="`Last ran: ${m.lastRan || 'never'}`"></div>
           </div>
         </template>
       </div>

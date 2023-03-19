@@ -11,6 +11,7 @@ const STATUS_ERROR = 1
 const STATUS_TIMEOUT = 2
 const STATUS_CHECK_FAILED = 3
 const STATUS_FAILED = 4
+const STATUS_THRESHOLD = 5
 
 type Result struct {
 	Date      time.Time `bson:"date"`
@@ -39,6 +40,7 @@ func storeFailedResult(db *database.DB, m *Monitor, err error) {
 	r.Status = STATUS_FAILED
 	r.Message = err.Error()
 	r.MonitorID = m.ID
+	r.Duration = 0
 
 	storeResult(db, *r)
 }

@@ -13,6 +13,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/benc-uk/go-rest-api/pkg/problem"
@@ -23,13 +24,13 @@ import (
 )
 
 type MonitorResp struct {
-	ID         string `bson:"_id"`
-	Name       string
-	Type       string
-	Interval   string
-	Updated    time.Time
-	Enabled    bool
-	Properties map[string]string
+	ID         string            `bson:"_id" json:"id"`
+	Name       string            `json:"name"`
+	Type       string            `json:"type"`
+	Interval   string            `json:"interval"`
+	Updated    time.Time         `json:"updated"`
+	Enabled    bool              `json:"enabled"`
+	Properties map[string]string `json:"properties"`
 }
 
 type MonitorReq struct {
@@ -42,10 +43,10 @@ type MonitorReq struct {
 }
 
 type Result struct {
-	Date     time.Time
-	Status   int
-	Duration int
-	Message  string
+	Date     time.Time `json:"date"`
+	Status   int       `json:"status"`
+	Duration int       `json:"duration"`
+	Message  string    `json:"message"`
 }
 
 // Get all monitors
@@ -97,13 +98,20 @@ func (api API) getMonitor(resp http.ResponseWriter, req *http.Request) {
 // Get results for monitor with id
 func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 	oidStr := chi.URLParam(req, "id")
+	// Url query max param
+	maxStr := req.URL.Query().Get("max")
+	if maxStr == "" {
+		maxStr = "100"
+	}
+	max, _ := strconv.Atoi(maxStr)
 
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Limit to 100 results
-	opts := options.Find().SetLimit(100)
-	cur, err := api.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oidStr}, opts)
+	limitOpt := options.Find().SetLimit(int64(max))
+	sortOpt := options.Find().SetSort(bson.M{"date": -1})
+	cur, err := api.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oidStr}, limitOpt, sortOpt)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
 		return

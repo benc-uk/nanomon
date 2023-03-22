@@ -8,13 +8,21 @@
 
 .mini-graph {
   width: 250px;
-  /* height: 100px; */
-}
-
-[x-cloak] {
-  display: none !important;
 }
 
 .bg-warning {
   background-color: #f7b933 !important;
+}
+
+.bg-failed {
+  background-color: #5a2971 !important;
+}
+
+a .card-header {
+  color: #fff;
+  text-decoration: none;
+}
+a {
+  color: #fff;
+  text-decoration: none;
 }

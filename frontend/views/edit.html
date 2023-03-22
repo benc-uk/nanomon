@@ -1,0 +1,60 @@
+<div class="alert alert-info" role="alert" x-show="error" x-text="error"></div>
+
+<template x-if="monitor">
+  <div class="card shadow mb-4">
+    <div class="card-header fs-3 bg-info text-light">Create Monitor</div>
+    <div class="card-body">
+      <form>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" x-model="monitor.name" class="form-control" id="name" placeholder="Enter name for this monitor" />
+        </div>
+
+        <div class="form-group">
+          <label for="type">Type</label>
+          <select class="form-control" id="type" x-model="monitor.type">
+            <template x-for="type of types">
+              <option x-text="type" :value="type" :selected="monitor.type === type"></option>
+            </template>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="interval">Interval</label>
+          <input type="text" x-model="monitor.interval" class="form-control" id="interval" placeholder="Interval, e.g. 20s or 5m or 1.5h" />
+        </div>
+
+        <div class="form-check mt-3">
+          <input type="checkbox" x-model="monitor.enabled" class="form-check-input" id="enableCheck" checked />
+          <label class="form-check-label" for="enableCheck">Enabled</label>
+        </div>
+      </form>
+
+      <!-- props -->
+      <div class="d-flex justify-content-between align-items-end">
+        <h4 class="mt-4">Properties</h4>
+
+        <button class="btn btn-sm btn-info" style="height: 40px">Add Property</button>
+      </div>
+
+      <table class="table table-sm table-hover mt-3">
+        <thead class="table-primary">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="val,key in monitor.properties">
+            <tr>
+              <td x-text="key"></td>
+              <td x-text="val"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <button class="btn btn-success" @click="save" :disabled="!canSave()"><i class="fa fa-fw fa-check"></i> Create</button>
+      <a href="#home" class="btn btn-warning"><i class="fa fa-fw fa-stop"></i> Cancel</a>
+    </div>
+  </div>
+</template>

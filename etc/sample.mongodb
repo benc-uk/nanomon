@@ -1,0 +1,44 @@
+use('monitr');
+
+// db.monitors.drop();
+db.results.drop();
+
+/*db.monitors.insertMany([
+  { 
+    'name': 'NAS example',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '5s',
+    'properties': {
+      'url': 'http://192.168.0.100:8080'
+    }
+  },
+  
+  { 
+    'name': 'Blog benc.dev',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '30s',
+    'properties': {
+      'url': 'https://benc.dev'
+    }
+  },
+
+  { 
+    'name': 'Local API pinger',
+    'type': 'http',
+    'updated': new Date(),
+    'enabled': true,
+    'interval': '5s',
+    'properties': {
+      'url': 'http://localhost:8000/monitors',
+      'method': 'POST',
+      'allowedStatus': '200-208',
+      'checkFor': 'Ben Coleman',
+      //'notCheckFor': 'Ben'
+    }
+  }
+]);
+*/

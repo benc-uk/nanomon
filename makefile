@@ -32,13 +32,11 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
-	@$(GOLINT_PATH) > /dev/null || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh
-	cd $(SVC_DIR); $(GOLINT_PATH) run --modules-download-mode=mod *.go
+	$(GOLINT_PATH) run ./services/...
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
-	@$(GOLINT_PATH) > /dev/null || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh
-	cd $(SVC_DIR); golangci-lint run --modules-download-mode=mod *.go --fix
+	$(GOLINT_PATH) run ./services/...--fix
 
 image: ## 📦 Build container image from Dockerfile
 	@figlet $@ || true
@@ -49,30 +47,25 @@ image: ## 📦 Build container image from Dockerfile
 
 push: ## 📤 Push container image to registry
 	@figlet $@ || true
-	docker push $(IMAGE_PREFIX):$(IMAGE_TAG)
-
-build: ## 🔨 Run a local build without a container
-	@figlet $@ || true
 	@echo "Not implemented yet!"
-	#go build -o __CHANGE_ME__ $(SVC_DIR)/...
-	#cd $(SVC_DIR); npm run build
+	zzzdocker push $(IMAGE_PREFIX):$(IMAGE_TAG)
 
-run-api: ## 🏃 Run API
+run-api: ## 🎯 Run API service
 	@figlet $@ || true
 	@$(AIR_PATH) -c services/api/.air.toml
 
-run-frontend: ## 🏃 Run FE Host
+run-fe-host: ## 🔷 Run frontend HTTP server
 	@figlet $@ || true
 	@$(AIR_PATH) -c services/frontend/.air.toml
 
-run-runner: ## 🏃 Run runner
+run-runner: ## 🏃 Run the monitor runner
 	@figlet $@ || true
 	@$(AIR_PATH) -c services/runner/.air.toml
 
-local-server: ## 🌐 Start a local HTTP server for development
+run-frontend: ## 🌐 Serve the frontend with a local dev server
 	@figlet $@ || true
 	@$(BS_PATH) start -s frontend --no-ui --watch --no-notify
 
-run-db: ## 🍃 Run DB
+run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
-	docker run --rm -it --network host mongo:6-jammy
+	docker run --rm -it --network host -v ./data:/data/db mongo:6-jammy

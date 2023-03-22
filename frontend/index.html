@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/sandstone/bootstrap.min.css" />
     <link rel="stylesheet" href="css/main.css" />
-    <script src="js/app.mjs" type="module"></script>
+
+    <script src="app.mjs" type="module"></script>
 
     <link rel="shortcut icon" href="static/favicon.png" type="image/png" />
   </head>
@@ -24,41 +25,25 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarColor01">
           <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#monitors">Monitors</a>
+            <li class="nav-item btn btn-info m-1">
+              <a class="nav-link" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#dash">Dashboard</a>
+            <li class="nav-item btn btn-info m-1">
+              <a class="nav-link" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#admin">Admin</a>
+            <li class="nav-item btn btn-info m-1">
+              <a class="nav-link" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <div id="app" x-data="app" x-cloak>
-      <div class="container">
-        <template x-for="m of monitors">
-          <div class="card shadow mb-4 mt-1">
-            <div class="card-header fs-3" :class="m.statusClass" x-text="m.name"></div>
-            <div class="card-body">
-              <div class="d-flex justify-content-between">
-                <div class="p-2">
-                  <h5 class="card-subtitle mb-2 text-muted" x-text="`${m.properties.method || ''} ${m.properties.url}`"></h5>
-
-                  <span class="badge p-3 fs-6" :class="m.statusClass" x-text="m.statusText"></span>
-                  <div class="pt-3" x-text="m.message"></div>
-                </div>
-                <div class="mini-graph">
-                  <canvas :id="`chart_${m.id}`"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="card-footer bg-light" x-text="`Last ran: ${m.lastRan || 'never'}`"></div>
-          </div>
-        </template>
+    <div id="app" x-data="app" @hashchange.window="hashListener">
+      <div class="container pt-3">
+        <div x-cloak x-transition x-data="home(api)" x-html="await (await fetch('views/home.html')).text()" x-show="view === '#home'"></div>
+        <div x-cloak x-transition x-data="monitor(api)" x-html="await (await fetch('views/monitor.html')).text()" x-show="view.startsWith('#monitor')"></div>
+        <div x-cloak x-transition x-data="edit(api)" x-html="await (await fetch('views/edit.html')).text()" x-show="view.startsWith('#edit')"></div>
       </div>
     </div>
   </body>

@@ -23,32 +23,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MonitorResp struct {
-	ID         string            `bson:"_id" json:"id"`
-	Name       string            `json:"name"`
-	Type       string            `json:"type"`
-	Interval   string            `json:"interval"`
-	Updated    time.Time         `json:"updated"`
-	Enabled    bool              `json:"enabled"`
-	Properties map[string]string `json:"properties"`
-}
-
-type MonitorReq struct {
-	Name       string
-	Type       string
-	Interval   string
-	Enabled    bool
-	Properties map[string]string
-	Updated    time.Time
-}
-
-type Result struct {
-	Date     time.Time `json:"date"`
-	Status   int       `json:"status"`
-	Duration int       `json:"duration"`
-	Message  string    `json:"message"`
-}
-
 // Get all monitors
 func (api API) getMonitors(resp http.ResponseWriter, req *http.Request) {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -109,9 +83,9 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 	defer cancel()
 
 	// Limit to 100 results
-	limitOpt := options.Find().SetLimit(int64(max))
-	sortOpt := options.Find().SetSort(bson.M{"date": -1})
-	cur, err := api.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oidStr}, limitOpt, sortOpt)
+	//limitOpt := options.Find().SetLimit(int64(max))
+	sortOpt := options.Find().SetSort(bson.M{"date": -1}).SetLimit(int64(max))
+	cur, err := api.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oidStr}, sortOpt)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
 		return
@@ -196,18 +170,4 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	api.ReturnJSON(resp, respMonitor)
-}
-
-func (m MonitorReq) validate() (string, bool) {
-	if m.Name == "" {
-		return "missing name", false
-	}
-	if m.Type == "" {
-		return "missing type", false
-	}
-	if m.Interval == "" {
-		return "missing interval", false
-	}
-
-	return "", true
 }

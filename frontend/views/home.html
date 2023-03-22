@@ -1,0 +1,24 @@
+<div class="alert alert-info" role="alert" x-show="error" x-text="error"></div>
+
+<template x-for="m of monitors">
+  <div class="card shadow mb-4">
+    <a :href="'#monitor/'+m.id">
+      <div class="card-header fs-3" :class="m.status.class" x-text="m.name"></div>
+    </a>
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <div class="p-2">
+          <h5 class="card-subtitle mb-2" x-text="`${m.properties.method || 'GET'} &mdash; ${m.properties.url}`"></h5>
+          <span class="badge p-3 fs-6" :class="m.status.class" x-text="m.status.text"></span>
+          <div class="pt-3" x-text="m.message"></div>
+        </div>
+        <div class="mini-graph">
+          <canvas :id="`chart_${m.id}`"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer bg-light" x-text="`Last ran: ${m.lastRan || 'never'}`"></div>
+  </div>
+</template>
+
+<div class="footer text-muted">Updated: <span x-text="updated.toLocaleString()"></span> &mdash; Auto update every <span x-text="autoUpdate"></span> seconds</div>

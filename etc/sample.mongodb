@@ -1,9 +1,9 @@
 use('monitr');
 
-// db.monitors.drop();
-db.results.drop();
+//db.monitors.drop();
+//db.results.drop();
 
-/*db.monitors.insertMany([
+db.monitors.insertMany([
   { 
     'name': 'NAS example',
     'type': 'http',
@@ -14,7 +14,7 @@ db.results.drop();
       'url': 'http://192.168.0.100:8080'
     }
   },
-  
+  /*
   { 
     'name': 'Blog benc.dev',
     'type': 'http',
@@ -39,6 +39,6 @@ db.results.drop();
       'checkFor': 'Ben Coleman',
       //'notCheckFor': 'Ben'
     }
-  }
+  }*/
 ]);
-*/
+

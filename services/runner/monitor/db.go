@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"monitr/services/common/database"
+	"monitr/services/common/types"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,8 +40,8 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	return monitors, nil
 }
 
-func storeResult(db *database.DB, r Result) error {
-	log.Printf("### Storing result: %d (%s)", r.Status, r.Message)
+func storeResult(db *database.DB, r types.Result) error {
+	log.Printf("###   Storing result: %d %s", r.Status, r.Message)
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
 

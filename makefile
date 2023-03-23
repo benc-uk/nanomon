@@ -1,14 +1,13 @@
 # Common variables
 VERSION := 0.0.1
-BUILD_INFO := Manual build 
+BUILD_INFO := Manual build
 SVC_DIR := ./services
 SPA_DIR := ./frontend
 
 # Most likely want to override these when calling `make image`
 IMAGE_REG ?= ghcr.io
-IMAGE_REPO ?= monitr
+IMAGE_NAME ?= monitr
 IMAGE_TAG ?= latest
-IMAGE_PREFIX := $(IMAGE_REG)/$(IMAGE_REPO)
 
 # Things you don't want to change
 REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
@@ -17,6 +16,7 @@ GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint              # Remove if not using 
 AIR_PATH := $(REPO_DIR)/bin/air                           # Remove if not using Go
 BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync # Remove if local server not needed
 
+.EXPORT_ALL_VARIABLES:
 .PHONY: help image push build run lint lint-fix
 .DEFAULT_GOAL := help
 
@@ -38,17 +38,17 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	$(GOLINT_PATH) run ./services/...--fix
 
-image: ## 📦 Build container image from Dockerfile
+images: ## 📦 Build all container images
 	@figlet $@ || true
-	docker build --file ./build/Dockerfile \
-	--build-arg BUILD_INFO="$(BUILD_INFO)" \
-	--build-arg VERSION="$(VERSION)" \
-	--tag $(IMAGE_PREFIX):$(IMAGE_TAG) . 
+	docker compose -f build/compose.yaml build
 
-push: ## 📤 Push container image to registry
+images: ## 📦 Build all container images
 	@figlet $@ || true
-	@echo "Not implemented yet!"
-	zzzdocker push $(IMAGE_PREFIX):$(IMAGE_TAG)
+	docker compose -f build/compose.yaml build
+
+blah: ## 📦 Build all container images
+	@figlet $@ || true
+	docker compose -f build/compose.yaml up
 
 run-api: ## 🎯 Run API service
 	@figlet $@ || true
@@ -60,7 +60,7 @@ run-fe-host: ## 🔷 Run frontend HTTP server
 
 run-runner: ## 🏃 Run the monitor runner
 	@figlet $@ || true
-	@$(AIR_PATH) -c services/runner/.air.toml
+	@MONITOR_CHANGE_INTERVAL=10s $(AIR_PATH) -c services/runner/.air.toml
 
 run-frontend: ## 🌐 Serve the frontend with a local dev server
 	@figlet $@ || true

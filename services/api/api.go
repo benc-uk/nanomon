@@ -30,6 +30,7 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 func (api API) addProtectedRoutes(r chi.Router) {
 	r.Post("/monitors", api.createMonitor)
 	r.Delete("/monitors/{id}", api.deleteMonitor)
+	r.Put("/monitors/{id}", api.updateMonitor)
 }
 
 func NewAPI(db *database.DB) API {

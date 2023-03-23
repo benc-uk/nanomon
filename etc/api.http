@@ -14,7 +14,7 @@ Content-Type: application/json
 {
   "name": "Test {{$randomInt 1 1000}}",
   "type": "http",
-  "interval": "1s",
+  "interval": "10s",
   "enabled": true,
   "properties": {
     "url": "http://example.net"
@@ -30,3 +30,19 @@ Authorization: Bearer {{ jwt }}
 
 ### Get results
 GET {{endpoint}}/monitors/641716bfcd41146100d341f3/results?max=2
+
+### Update a monitor
+PUT {{endpoint}}/monitors/641b26191394844e49c86467
+Authorization: Bearer {{ jwt }}
+Content-Type: application/json
+
+{
+  "name": "AAAABBBB",
+  "type": "http",
+  "interval": "1110s",
+  "enabled": false,
+  "properties": {
+    "url": "http://examplezzzz.net",
+    "blah": "some words"
+  }
+}

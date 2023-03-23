@@ -5,9 +5,12 @@ const charts = {}
 export const homeComponent = (api) => ({
   monitors: [],
   error: '',
-  autoUpdate: 4,
+  autoUpdate: 5,
   updated: new Date(),
   intervalToken: null,
+  loading: true,
+  updateText: 'Never updated',
+  paused: false,
 
   async init() {
     window.addEventListener('view-changed', async (e) => {
@@ -16,6 +19,7 @@ export const homeComponent = (api) => ({
       // If we're not the active view stop the refresh
       if (!view || !view.startsWith('#home')) {
         clearInterval(this.intervalToken)
+        this.intervalToken = null
 
         // Remove old charts
         for (let c in charts) {
@@ -27,30 +31,41 @@ export const homeComponent = (api) => ({
       }
 
       // Otherwise start the refresh
-      this.intervalToken = setInterval(async () => {
-        await this.fetchMonitors()
-      }, this.autoUpdate * 1000)
+      if (!this.intervalToken) {
+        this.intervalToken = setInterval(async () => {
+          await this.fetchMonitors()
+        }, this.autoUpdate * 1000)
+      }
 
       await this.fetchMonitors()
     })
   },
 
   async fetchMonitors() {
-    console.log('Fetching monitors')
-    let monitors = []
-    try {
-      monitors = await api.getMonitors()
-    } catch (err) {
-      this.error = err.message
+    if (this.paused) {
       return
     }
 
-    this.updated = new Date()
+    let monitors = []
+    this.loading = true
+
+    try {
+      monitors = await api.getMonitors()
+      this.error = ''
+    } catch (err) {
+      this.error = err.message
+      this.loading = false
+      return
+    }
+
+    this.loading = false
+    this.updateText = new Date().toLocaleTimeString()
 
     for (let m of monitors) {
       const results = await api.getResultsForMonitor(m.id, 1)
+      const last = new Date(results[0]?.date)
       m.message = results[0]?.message
-      m.lastRan = results[0]?.date.replace('T', ' ').split('.')[0]
+      m.lastRan = results[0]?.date ? last.toLocaleString() : 'Never'
       m.status = getStatusFields(results[0]?.status)
     }
 
@@ -71,7 +86,7 @@ export const homeComponent = (api) => ({
       const resultLabels = []
       for (let i = results.length - 1; i >= 0; i--) {
         const r = results[i]
-        resultValues.push(r.duration)
+        resultValues.push(r.values)
         resultLabels.push(r.date.replace('T', ' ').split('.')[0])
       }
 

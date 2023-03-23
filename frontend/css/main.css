@@ -11,7 +11,11 @@
 }
 
 .bg-warning {
-  background-color: #f7b933 !important;
+  background-color: #f8a933 !important;
+}
+
+.bg-success {
+  background-color: #44a855 !important;
 }
 
 .bg-failed {
@@ -22,7 +26,16 @@ a .card-header {
   color: #fff;
   text-decoration: none;
 }
+
 a {
   color: #fff;
   text-decoration: none;
+}
+
+.dash {
+  box-shadow: 0px 4px 12px 2px rgba(0, 0, 0, 0.4) !important;
+  width: 8rem;
+  height: 8rem;
+  text-align: center;
+  cursor: pointer;
 }

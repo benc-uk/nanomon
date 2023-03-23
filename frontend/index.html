@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/sandstone/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/main.css" />
 
     <script src="app.mjs" type="module"></script>
@@ -19,20 +20,20 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#home"><img src="static/icon.png" />Monitr</a>
+        <a class="navbar-brand" href="#home"><img src="./static/icon.png" />Monitr</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarColor01">
           <ul class="navbar-nav me-auto">
             <li class="nav-item btn btn-info m-1">
-              <a class="nav-link" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
+              <a class="nav-link fs-6" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
             </li>
             <li class="nav-item btn btn-info m-1">
-              <a class="nav-link" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
+              <a class="nav-link fs-6" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
             </li>
             <li class="nav-item btn btn-info m-1">
-              <a class="nav-link" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
+              <a class="nav-link fs-6" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
             </li>
           </ul>
         </div>
@@ -41,6 +42,7 @@
 
     <div id="app" x-data="app" @hashchange.window="hashListener">
       <div class="container pt-3">
+        <div x-cloak x-transition x-data="dash(api)" x-html="await (await fetch('views/dash.html')).text()" x-show="view === '#dash'"></div>
         <div x-cloak x-transition x-data="home(api)" x-html="await (await fetch('views/home.html')).text()" x-show="view === '#home'"></div>
         <div x-cloak x-transition x-data="monitor(api)" x-html="await (await fetch('views/monitor.html')).text()" x-show="view.startsWith('#monitor')"></div>
         <div x-cloak x-transition x-data="edit(api)" x-html="await (await fetch('views/edit.html')).text()" x-show="view.startsWith('#edit')"></div>

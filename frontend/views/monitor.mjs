@@ -25,7 +25,6 @@ export const monitorComponent = (api) => ({
   },
 
   async loadMonitor(monId) {
-    console.log('### Monitor view changed:', monId)
     this.monitor = null
     this.results = []
     this.status = null
@@ -46,7 +45,7 @@ export const monitorComponent = (api) => ({
       for (let i = this.results.length - 1; i >= 0; i--) {
         const r = this.results[i]
         this.results[i].dateNice = r.date.replace('T', ' ').split('.')[0]
-        resultValues.push(r.duration)
+        resultValues.push(r.value)
         resultLabels.push(r.date.replace('T', ' ').split('.')[0])
       }
 
@@ -89,6 +88,15 @@ export const monitorComponent = (api) => ({
     } catch (err) {
       this.monitor = null
       this.error = err
+    }
+  },
+
+  async deleteMonitor() {
+    try {
+      await api.deleteMonitor(this.monitor.id)
+      window.location.hash = '#home'
+    } catch (e) {
+      this.error = e
     }
   },
 })

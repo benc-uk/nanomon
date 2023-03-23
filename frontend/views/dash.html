@@ -1,0 +1,20 @@
+<div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
+
+<div class="d-flex flex-wrap">
+  <template x-for="m of monitors">
+    <div class="dash m-2 p-1 rounded-2 d-flex flex-column justify-content-center" :class="m.status.class" @click="window.location.hash = '#monitor/'+m.id">
+      <i class="fas fa-2x" :class="m.status.icon"></i>
+      <hr />
+      <div x-text="m.name"></div>
+    </div>
+  </template>
+</div>
+
+<div class="footer text-muted">
+  <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <span x-text="updateText"></span>
+
+  &mdash; Auto update every <span x-text="autoUpdate"></span> seconds &mdash; <a class="badge rounded-pill text-bg-light" style="cursor: pointer" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
+</div>

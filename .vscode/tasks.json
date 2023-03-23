@@ -1,0 +1,52 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "database",
+      "type": "shell",
+      "command": "make run-db",
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "database",
+        "color": "terminal.ansiGreen"
+      }
+    },
+
+    {
+      "label": "api",
+      "type": "shell",
+      "command": "make run-api",
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "plug",
+        "color": "terminal.ansiCyan"
+      }
+    },
+    
+    {
+      "label": "runner",
+      "type": "shell",
+      "command": "make run-runner",
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "run-all",
+        "color": "terminal.ansiMagenta"
+      }
+    },
+
+    {
+      "label": "frontend",
+      "type": "shell",
+      "command": "make run-frontend",
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "browser",
+        "color": "terminal.ansiBlue"
+      }
+    }
+  ]
+}

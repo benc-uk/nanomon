@@ -10,14 +10,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/benc-uk/go-rest-api/pkg/static"
-
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	var dir string
-	flag.StringVar(&dir, "dir", "./app", "the directory to serve files from")
+	flag.StringVar(&dir, "dir", "./", "the directory to serve files from")
 	flag.Parse()
 
 	port := os.Getenv("PORT")
@@ -30,11 +28,7 @@ func main() {
 	// The simple config endpoint
 	r.Get("/.config", routeConfig)
 
-	// Serve SPA from root
-	r.Handle("/", static.SpaHandler{
-		StaticPath: dir,
-		IndexFile:  "index.html",
-	})
+	FileServer(r, dir)
 
 	srv := &http.Server{
 		Handler:      r,
@@ -44,7 +38,7 @@ func main() {
 	}
 
 	log.Println("### 🌐 Monitr Frontend, listening on port:", port)
-	log.Println("### Serving static content from:", dir)
+	log.Println("### Serving app content from:", dir)
 	log.Fatal(srv.ListenAndServe())
 }
 
@@ -66,4 +60,16 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	resp.Header().Add("Content-Type", "application/json")
 	_, _ = resp.Write([]byte(configJSON))
+}
+
+func FileServer(router *chi.Mux, root string) {
+	fs := http.FileServer(http.Dir(root))
+
+	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat(root + r.RequestURI); os.IsNotExist(err) {
+			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)
+		} else {
+			fs.ServeHTTP(w, r)
+		}
+	})
 }

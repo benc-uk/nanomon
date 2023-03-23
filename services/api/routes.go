@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"monitr/services/common/types"
 	"net/http"
 	"strconv"
 	"time"
@@ -91,9 +92,9 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	results := make([]*Result, 0)
+	results := make([]*types.Result, 0)
 	for cur.Next(context.TODO()) {
-		r := &Result{}
+		r := &types.Result{}
 		if err := cur.Decode(&r); err != nil {
 			problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
 			return
@@ -161,6 +162,58 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 	oid, _ := insertRes.InsertedID.(primitive.ObjectID)
 	respMonitor := MonitorResp{
 		ID:         oid.Hex(),
+		Name:       m.Name,
+		Type:       m.Type,
+		Interval:   m.Interval,
+		Updated:    m.Updated,
+		Enabled:    m.Enabled,
+		Properties: m.Properties,
+	}
+
+	api.ReturnJSON(resp, respMonitor)
+}
+
+// Update existing monitor with a PUT request and upsert into the DB
+func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
+	oidStr := chi.URLParam(req, "id")
+	oid, err := primitive.ObjectIDFromHex(oidStr)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+
+	// get body and encode to struct
+	m := MonitorReq{}
+
+	err = json.NewDecoder(req.Body).Decode(&m)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+
+	if msg, ok := m.validate(); !ok {
+		problem.Wrap(400, req.RequestURI, "monitors", errors.New(msg)).Send(resp)
+		return
+	}
+
+	log.Printf("### Updating monitor %+v", m)
+	m.Updated = time.Now()
+
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	updateResp, err := api.db.Monitors.ReplaceOne(timeoutCtx, bson.M{"_id": oid}, m)
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+
+	if updateResp.MatchedCount == 0 {
+		problem.Wrap(404, req.RequestURI, "monitors", errors.New("Monitor not found")).Send(resp)
+		return
+	}
+
+	respMonitor := MonitorResp{
+		ID:         oidStr,
 		Name:       m.Name,
 		Type:       m.Type,
 		Interval:   m.Interval,

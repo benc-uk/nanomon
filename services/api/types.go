@@ -21,13 +21,6 @@ type MonitorReq struct {
 	Updated    time.Time
 }
 
-type Result struct {
-	Date     time.Time `json:"date"`
-	Status   int       `json:"status"`
-	Duration int       `json:"duration"`
-	Message  string    `json:"message"`
-}
-
 func (m MonitorReq) validate() (string, bool) {
 	if m.Name == "" {
 		return "missing name", false

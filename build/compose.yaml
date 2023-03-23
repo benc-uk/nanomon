@@ -1,0 +1,70 @@
+name: nano-realms
+version: "3.9"
+
+# Docker compose file for nano-realms
+# Call via the makefile, otherwise you'll need to set all the vars
+
+services:
+  frontend:
+    image: ${IMAGE_REG}/${IMAGE_NAME}-frontend:${IMAGE_TAG}
+    build:
+      context: ..
+      dockerfile: ./build/Dockerfile.frontend
+      args:
+        VERSION: ${VERSION}
+        BUILD_INFO: ${BUILD_INFO}
+    ports:
+      - "8001:8001"
+    environment:
+      API_ENDPOINT: http://xxxxxxlocalhost:8000
+    networks:
+      - front
+
+  api:
+    image: ${IMAGE_REG}/${IMAGE_NAME}-api:${IMAGE_TAG}
+    build:
+      context: ..
+      dockerfile: ./build/Dockerfile.api
+      args:
+        VERSION: ${VERSION}
+        BUILD_INFO: ${BUILD_INFO}
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: mongodb://database:27017
+    restart: always
+    networks:
+      - back
+      - front
+
+  # runner:
+  #   image: ${IMAGE_REG}/${IMAGE_NAME}-runner:${IMAGE_TAG}
+  #   build:
+  #     context: ..
+  #     dockerfile: ./build/Dockerfile.runner
+  #     args:
+  #       VERSION: ${VERSION}
+  #       BUILD_INFO: ${BUILD_INFO}
+  #   environment:
+  #     MONGO_URI: mongodb://database:27017
+  #   restart: always
+  #   networks:
+  #     - back
+
+  database:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - type: volume
+        source: db-data
+        target: /data/db
+    networks:
+      - back
+
+networks:
+  front:
+  back:
+
+volumes:
+  db-data:

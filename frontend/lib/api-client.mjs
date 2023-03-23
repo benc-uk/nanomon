@@ -19,6 +19,18 @@ export class APIClient {
     return this.baseRequest(`monitors/${monId}/results?max=${max}`)
   }
 
+  async createMonitor(monitor) {
+    return this.baseRequest('monitors', 'POST', monitor, false)
+  }
+
+  async deleteMonitor(monId) {
+    return this.baseRequest(`monitors/${monId}`, 'DELETE', null, false)
+  }
+
+  async updateMonitor(monId, monitor) {
+    return this.baseRequest(`monitors/${monId}`, 'PUT', monitor, false)
+  }
+
   async baseRequest(path, method = 'GET', body, authenticated = false) {
     let tokenRes = null
     if (authenticated) {

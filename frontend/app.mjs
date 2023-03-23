@@ -4,6 +4,7 @@ import { APIClient } from '../lib/api-client.mjs'
 import { homeComponent } from './views/home.mjs'
 import { monitorComponent } from './views/monitor.mjs'
 import { editComponent } from './views/edit.mjs'
+import { dashComponent } from './views/dash.mjs'
 
 const VERSION = '0.0.1'
 
@@ -16,6 +17,8 @@ Alpine.data('app', () => ({
   api: null,
 
   async init() {
+    console.log('### Starting Monitr frontend')
+    console.log(`###  - Endpoint: ${API_ENDPOINT}, clientId: ${AUTH_CLIENT_ID || 'None'}`)
     this.api = new APIClient(API_ENDPOINT, ['monitr.admin'])
     if (window.location.hash) {
       this.view = window.location.hash
@@ -36,9 +39,11 @@ Alpine.data('app', () => ({
 Alpine.data('home', homeComponent)
 Alpine.data('monitor', monitorComponent)
 Alpine.data('edit', editComponent)
+Alpine.data('dash', dashComponent)
 
 async function startApp() {
   try {
+    console.log('### Loading config from .config')
     const configResp = await fetch('.config')
     if (configResp.ok) {
       const config = await configResp.json()

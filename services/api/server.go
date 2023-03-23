@@ -85,16 +85,6 @@ func main() {
 		api.addAnonymousRoutes(publicRouter)
 	})
 
-	// *OPTIONAL* Add support for single page applications (SPA) with client-side routing
-	//log.Printf("### 🌏 Serving static files for SPA from: %s", "./")
-	//router.Handle("/", static.SpaHandler{
-	//	StaticPath: "./",
-	//	IndexFile:  "index.html",
-	//})
-
-	// Main REST API routes for the application
-	//api.addRoutes(router)
-
 	// Start the API server, this function will block until the server is stopped
 	api.StartServer(serverPort, router, 10*time.Second)
 }

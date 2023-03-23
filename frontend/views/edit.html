@@ -1,4 +1,4 @@
-<div class="alert alert-info" role="alert" x-show="error" x-text="error"></div>
+<div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
 
 <template x-if="monitor">
   <div class="card shadow mb-4">
@@ -7,7 +7,7 @@
       <form>
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" x-model="monitor.name" class="form-control" id="name" placeholder="Enter name for this monitor" />
+          <input type="text" x-model="monitor.name" class="form-control" id="name" placeholder="Enter name for this monitor" autocomplete="new-password" />
         </div>
 
         <div class="form-group">
@@ -21,7 +21,7 @@
 
         <div class="form-group">
           <label for="interval">Interval</label>
-          <input type="text" x-model="monitor.interval" class="form-control" id="interval" placeholder="Interval, e.g. 20s or 5m or 1.5h" />
+          <input type="text" x-model="monitor.interval" class="form-control" id="interval" placeholder="Interval, e.g. 20s or 5m or 1.5h" autocomplete="new-password" />
         </div>
 
         <div class="form-check mt-3">
@@ -31,11 +31,7 @@
       </form>
 
       <!-- props -->
-      <div class="d-flex justify-content-between align-items-end">
-        <h4 class="mt-4">Properties</h4>
-
-        <button class="btn btn-sm btn-info" style="height: 40px">Add Property</button>
-      </div>
+      <h4 class="mt-4">Properties</h4>
 
       <table class="table table-sm table-hover mt-3">
         <thead class="table-primary">
@@ -47,13 +43,13 @@
         <tbody>
           <template x-for="val,key in monitor.properties">
             <tr>
-              <td x-text="key"></td>
-              <td x-text="val"></td>
+              <td x-text="key" valign="middle"></td>
+              <td><input type="text" class="form-control" x-model="monitor.properties[key]" autocomplete="new-password" /></td>
             </tr>
           </template>
         </tbody>
       </table>
-      <button class="btn btn-success" @click="save" :disabled="!canSave()"><i class="fa fa-fw fa-check"></i> Create</button>
+      <button class="btn btn-success" @click="save" :disabled="!canSave()"><i class="fa fa-fw fa-check"></i> <span x-text="monId == 'new' ? 'CREATE' : 'UPDATE'"></span></button>
       <a href="#home" class="btn btn-warning"><i class="fa fa-fw fa-stop"></i> Cancel</a>
     </div>
   </div>

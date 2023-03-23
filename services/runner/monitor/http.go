@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"monitr/services/common/types"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,7 +12,7 @@ import (
 )
 
 func (m *Monitor) runHTTP() {
-	r := NewResult(m)
+	r := types.NewResult(m.ID)
 
 	client := http.Client{
 		Timeout: 10 * time.Second,
@@ -27,7 +28,7 @@ func (m *Monitor) runHTTP() {
 		method = "GET"
 	}
 
-	log.Println("### Executing HTTP monitor:", url)
+	log.Printf("### Executing '%s': %s", m.Name, url)
 
 	// Specify the range of status codes to check for
 	allowedStatus := "200-299"
@@ -50,7 +51,7 @@ func (m *Monitor) runHTTP() {
 
 	start := time.Now()
 	resp, err := client.Do(req)
-	r.Duration = int(time.Since(start).Milliseconds())
+	r.Value = int(time.Since(start).Milliseconds())
 	if err != nil {
 		storeFailedResult(m.db, m, err)
 		return
@@ -58,7 +59,7 @@ func (m *Monitor) runHTTP() {
 
 	// Check the status code
 	if !containsStatusCode(statusCodes, resp.StatusCode) {
-		r.Status = STATUS_ERROR
+		r.Status = types.STATUS_ERROR
 		r.Message = fmt.Sprintf(resp.Status)
 	}
 
@@ -70,16 +71,16 @@ func (m *Monitor) runHTTP() {
 	}
 	bodyStr := string(body)
 
-	if m.Properties["checkFor"] != "" && r.Status == STATUS_OK {
+	if m.Properties["checkFor"] != "" && r.Status == types.STATUS_OK {
 		if !strings.Contains(bodyStr, m.Properties["checkFor"]) {
-			r.Status = STATUS_CHECK_FAILED
+			r.Status = types.STATUS_ERROR
 			r.Message = fmt.Sprintf("'%s' not found in response", m.Properties["checkFor"])
 		}
 	}
 
-	if m.Properties["notCheckFor"] != "" && r.Status == STATUS_OK {
+	if m.Properties["notCheckFor"] != "" && r.Status == types.STATUS_OK {
 		if strings.Contains(bodyStr, m.Properties["notCheckFor"]) {
-			r.Status = STATUS_CHECK_FAILED
+			r.Status = types.STATUS_ERROR
 			r.Message = fmt.Sprintf("'%s' was found in response", m.Properties["notCheckFor"])
 		}
 	}

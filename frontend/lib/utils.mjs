@@ -34,3 +34,17 @@ export function getStatusFields(statusCode) {
 export function niceDate(d) {
   return d.replace('T', ' ').split('.')[0]
 }
+
+export function monitorIcon(monitor) {
+  switch (monitor.type) {
+    case 'http':
+      return '<i class="fas fa-globe"></i>'
+    case 'ping':
+      return '<i class="fas fa-heart-pulse"></i>'
+    case 'tcp':
+      return '<i class="fas fa-plug"></i>'
+
+    default:
+      return '<i class="far fa-circle-question"></i>'
+  }
+}

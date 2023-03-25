@@ -1,7 +1,7 @@
 export const editComponent = (api) => ({
   error: '',
   monitor: {},
-  types: ['http', 'ping', 'ssh', 'grpc'],
+  types: ['http', 'ping', 'tcp'],
   monId: null,
 
   async init() {
@@ -31,12 +31,10 @@ export const editComponent = (api) => ({
       type: 'http',
       interval: '30s',
       enabled: true,
+      target: 'http://',
+      rule: 'status == 200 && respTime < 1200',
       properties: {
-        url: 'http://',
         method: 'GET',
-        allowedStatus: '200-299',
-        checkFor: '',
-        notCheckFor: '',
       },
     }
   },
@@ -56,15 +54,11 @@ export const editComponent = (api) => ({
   },
 
   canSave() {
-    let ok = this.monitor.name != '' && this.monitor.type != '' && this.monitor.interval != ''
+    let ok = this.monitor.name != '' && this.monitor.type != '' && this.monitor.interval != '' && this.monitor.target != ''
 
     // regex to check interval ends with 's' or 'm' or 'h' and starts with floating point number
     const intervalRegex = /^(\d+\.?\d*)(s|m|h)$/
     if (!intervalRegex.test(this.monitor.interval)) {
-      ok = false
-    }
-
-    if (!this.monitor.properties?.url) {
       ok = false
     }
 

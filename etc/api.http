@@ -13,36 +13,35 @@ Content-Type: application/json
 
 {
   "name": "Test {{$randomInt 1 1000}}",
-  "type": "http",
+  "type": "ping",
   "interval": "10s",
-  "enabled": true,
-  "properties": {
-    "url": "http://example.net"
-  }
+  "target": "amazon.co.jp",
+  "enabled": true
 }
 
 ### Get single monitor
 GET {{endpoint}}/monitors/6416d530c963a60b42dcf8d6
 
 ### Delete single monitor
-DELETE {{endpoint}}/monitors/64170494109c886d716ca7b8
+DELETE {{endpoint}}/monitors/641e346f23b333094cd3bc91
 Authorization: Bearer {{ jwt }}
 
 ### Get results
 GET {{endpoint}}/monitors/641716bfcd41146100d341f3/results?max=2
 
 ### Update a monitor
-PUT {{endpoint}}/monitors/641b26191394844e49c86467
+PUT {{endpoint}}/monitors/641e3c2a23b333094cd3bc94
 Authorization: Bearer {{ jwt }}
 Content-Type: application/json
 
 {
-  "name": "AAAABBBB",
-  "type": "http",
-  "interval": "1110s",
-  "enabled": false,
+  "name": "aaaa",
+  "type": "tcp",
+  "interval": "10s",
+  "enabled": true,
+  "target": "192.168.0.100:80",
+  "rule": "respTime < 1200",
   "properties": {
-    "url": "http://examplezzzz.net",
-    "blah": "some words"
+    "timeout": "20s"
   }
 }

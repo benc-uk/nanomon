@@ -1,93 +1,66 @@
 package monitor
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"monitr/services/common/types"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 )
 
-func (m *Monitor) runHTTP() {
+func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	r := types.NewResult(m.ID)
 
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
+	var err error
+	method := "GET"
+	timeout := time.Duration(5) * time.Second
 
-	url := m.Properties["url"]
-	if url == "" {
-		storeFailedResult(m.db, m, fmt.Errorf("no URL specified"))
-		return
-	}
-	method := m.Properties["method"]
-	if method == "" {
+	methodProp := m.Properties["method"]
+	if methodProp != "" {
 		method = "GET"
 	}
 
-	log.Printf("### Executing '%s': %s", m.Name, url)
-
-	// Specify the range of status codes to check for
-	allowedStatus := "200-299"
-	if m.Properties["allowedStatus"] != "" {
-		allowedStatus = m.Properties["allowedStatus"]
+	timeoutProp := m.Properties["timeout"]
+	if timeoutProp != "" {
+		timeout, err = time.ParseDuration(timeoutProp)
+		if err != nil {
+			return types.NewFailedResult(m.ID, err), nil
+		}
 	}
 
-	// Parse the allowed status code string, can be a range or a list
-	statusCodes, err := parseStatusRange(allowedStatus)
+	req, err := http.NewRequest(method, m.Target, nil)
 	if err != nil {
-		storeFailedResult(m.db, m, err)
-		return
+		return types.NewFailedResult(m.ID, err), nil
 	}
 
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		storeFailedResult(m.db, m, err)
-		return
+	client := http.Client{
+		Timeout: timeout,
 	}
 
 	start := time.Now()
 	resp, err := client.Do(req)
-	r.Value = int(time.Since(start).Milliseconds())
 	if err != nil {
-		storeFailedResult(m.db, m, err)
-		return
+		return types.NewFailedResult(m.ID, err), nil
 	}
-
-	// Check the status code
-	if !containsStatusCode(statusCodes, resp.StatusCode) {
-		r.Status = types.STATUS_ERROR
-		r.Message = fmt.Sprintf(resp.Status)
-	}
+	r.Value = int(time.Since(start).Milliseconds())
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		storeFailedResult(m.db, m, err)
-		return
+		return types.NewFailedResult(m.ID, err), nil
 	}
 	bodyStr := string(body)
 
-	if m.Properties["checkFor"] != "" && r.Status == types.STATUS_OK {
-		if !strings.Contains(bodyStr, m.Properties["checkFor"]) {
-			r.Status = types.STATUS_ERROR
-			r.Message = fmt.Sprintf("'%s' not found in response", m.Properties["checkFor"])
-		}
+	outputs := map[string]any{
+		"body":     bodyStr,
+		"bodyLen":  len(body),
+		"status":   resp.StatusCode,
+		"respTime": r.Value,
 	}
 
-	if m.Properties["notCheckFor"] != "" && r.Status == types.STATUS_OK {
-		if strings.Contains(bodyStr, m.Properties["notCheckFor"]) {
-			r.Status = types.STATUS_ERROR
-			r.Message = fmt.Sprintf("'%s' was found in response", m.Properties["notCheckFor"])
-		}
-	}
-
-	storeResult(m.db, *r)
+	return r, outputs
 }
 
+/*
 // parseStatusRange parses a string containing a range of status codes
 // in the format "200-299" or "200,201,202,..."
 func parseStatusRange(statusRange string) ([]int, error) {
@@ -145,3 +118,4 @@ func containsStatusCode(statusCodes []int, code int) bool {
 	}
 	return false
 }
+*/

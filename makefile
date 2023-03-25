@@ -68,4 +68,4 @@ run-frontend: ## 🌐 Serve the frontend with a local dev server
 
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
-	docker run --rm -it --network host -v ./data:/data/db mongo:6-jammy
+	docker run --rm -it --network host -v ./_data:/data/db mongo:6-jammy

@@ -1,4 +1,4 @@
-import { getStatusFields } from '../lib/utils.mjs'
+import { getStatusFields, monitorIcon } from '../lib/utils.mjs'
 
 const charts = {}
 
@@ -67,6 +67,7 @@ export const homeComponent = (api) => ({
       m.message = results[0]?.message
       m.lastRan = results[0]?.date ? last.toLocaleString() : 'Never'
       m.status = getStatusFields(results[0]?.status)
+      m.icon = monitorIcon(m)
     }
 
     this.monitors = monitors

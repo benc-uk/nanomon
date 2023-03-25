@@ -23,3 +23,13 @@ func NewResult(id string) *Result {
 		MonitorID: id,
 	}
 }
+
+func NewFailedResult(id string, err error) *Result {
+	return &Result{
+		Date:      time.Now(),
+		Status:    STATUS_FAILED,
+		Value:     0,
+		Message:   err.Error(),
+		MonitorID: id,
+	}
+}

@@ -1,4 +1,4 @@
-import { getStatusFields, niceDate } from '../lib/utils.mjs'
+import { getStatusFields, niceDate, monitorIcon } from '../lib/utils.mjs'
 
 export const monitorComponent = (api) => ({
   results: [],
@@ -8,6 +8,8 @@ export const monitorComponent = (api) => ({
   error: '',
   updatedDate: '',
   lastResultDate: '',
+  icon: '',
+  getStatusFields: getStatusFields,
 
   async init() {
     this.shown = false
@@ -33,7 +35,9 @@ export const monitorComponent = (api) => ({
     try {
       this.monitor = await api.getMonitor(monId)
       this.results = await api.getResultsForMonitor(monId, 50)
+
       this.updatedDate = niceDate(this.monitor.updated)
+      this.icon = monitorIcon(this.monitor)
 
       if (this.results.length > 0) {
         this.status = getStatusFields(this.results[0]?.status)

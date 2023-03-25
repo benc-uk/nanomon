@@ -3,13 +3,13 @@
 <template x-for="m of monitors">
   <div class="card shadow mb-4">
     <a :href="'#monitor/'+m.id">
-      <div class="card-header fs-3" :class="m.status.class" x-text="m.name"></div>
+      <div class="card-header fs-3" :class="m.status.class" x-html="`${m.icon} ${m.name}`"></div>
     </a>
     <div class="card-body">
       <div class="d-flex justify-content-between">
         <div class="p-2">
           <!-- TODO: Support more monitor types! -->
-          <h5 class="card-subtitle mb-2" x-text="`${m.properties?.method || 'GET'} &mdash; ${m.properties?.url}`"></h5>
+          <h5 class="card-subtitle mb-2" x-text="m.target"></h5>
           <span class="badge p-2 fs-6" :class="m.status.class" x-html="`<i class='${m.status?.icon}'></i>&nbsp;&nbsp;${m.status?.text || 'None'}`"></span>
           <div class="pt-3" x-text="m.message"></div>
         </div>

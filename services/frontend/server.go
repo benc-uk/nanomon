@@ -74,7 +74,6 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 
 func FileServer(router *chi.Mux, root string) {
 	fs := http.FileServer(http.Dir(root))
-
 	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := os.Stat(root + r.RequestURI); os.IsNotExist(err) {
 			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)

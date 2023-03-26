@@ -5,20 +5,20 @@
     <thead>
       <tr>
         <th scope="col">Date</th>
+        <th scope="col">Monitor</th>
         <th scope="col">Status</th>
         <th scope="col">Value</th>
         <th scope="col">Message</th>
-        <th scope="col">Monitor</th>
       </tr>
     </thead>
     <tbody>
       <template x-for="r of results">
         <tr :class="r.statusDetails.class">
           <td x-text="r.dateNice"></td>
+          <td x-text="r.monitor_name"></td>
           <td x-text="r.statusDetails.text"></td>
           <td x-text="r.value"></td>
-          <td x-text="r.message || '-'"></td>
-          <td x-text="r.monitor_name"></td>
+          <td x-text="r.message || '-'" style="font-size: 0.8rem"></td>
         </tr>
       </template>
     </tbody>

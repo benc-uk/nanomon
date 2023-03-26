@@ -1,4 +1,4 @@
-# Monitr - A simple monitoring system & microservices reference app
+# Monitr - Monitoring tool & microservices reference app
 
 Monitr is a lightweight network and HTTP monitoring system, designed to be run with Kubernetes (or other container compatible host). It is written in Go and based on a microservices pattern, as such it is decomposed into several discreet but interlinked components
 

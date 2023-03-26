@@ -86,7 +86,7 @@ func (m *Monitor) run() {
 		return
 	}
 
-	//log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
+	log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
 
 	if m.Rule != "" && outputs != nil {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)

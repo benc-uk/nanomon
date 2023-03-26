@@ -68,10 +68,11 @@
               placeholder="Status rule expression"
               autocomplete="new-password"
             />
+
             <div class="popWrap">
-              <button class="btn btn-secondary ms-4" @click="rulePop = !rulePop">
-                <i class="fa fa-fw fa-question-circle"></i>
-              </button>
+              <a class="btn btn-secondary ms-4" @click="rulePop = !rulePop">
+                <i class="fas fa-fw fa-gears"></i>
+              </a>
               <div class="popup" x-show="rulePop" x-html="ruleHints[monitor.type]"></div>
             </div>
           </div>

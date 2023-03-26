@@ -5,12 +5,12 @@ export const editComponent = (api) => ({
   monId: null,
   rulePop: false,
   ruleHints: {
-    http: 'Outputs: <b>respTime, status, body, bodyLen</b><br>Functions: <b>bodyContains(str)</b>',
+    http: 'Outputs: <b>respTime, status, body, bodyLen</b>',
     ping: 'Outputs: <b>minRtt, avgRtt, maxRtt, packetsRecv, packetLoss, ipAddress</b>',
     tcp: 'Outputs: <b>respTime, ipAddress</b>',
   },
   allowedProps: {
-    http: ['method', 'timeout'],
+    http: ['method', 'timeout', 'validateTLS'],
     ping: ['timeout', 'count', 'interval'],
     tcp: ['timeout'],
   },

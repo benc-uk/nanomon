@@ -1,9 +1,11 @@
 package monitor
 
 import (
+	"crypto/tls"
 	"io"
 	"monitr/services/common/types"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -14,6 +16,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 
 	method := "GET"
 	timeout := time.Duration(5) * time.Second
+	validateTLS := true
 
 	methodProp := m.Properties["method"]
 	if methodProp != "" {
@@ -28,10 +31,20 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 		}
 	}
 
+	validateTLSProp := m.Properties["validateTLS"]
+	if validateTLSProp != "" {
+		validateTLS, err = strconv.ParseBool(validateTLSProp)
+		if err != nil {
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		}
+	}
+
 	req, err := http.NewRequest(method, m.Target, nil)
 	if err != nil {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !validateTLS}
 
 	client := http.Client{
 		Timeout: timeout,

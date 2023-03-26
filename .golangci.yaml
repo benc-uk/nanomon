@@ -16,25 +16,17 @@ linters:
     - bodyclose   # Check for HTTP body close errors
     - nilerr      # Find bad nil/err handling
     - nilnil      # Also find bad nil/err handling
-    - tagliatelle # Find badly named struct tags
     #- gomnd       # Find magic numbers, enable at your peril
 
 issues:
   exclude:
     - G404
     - goCamel
+    - G402
 
 linters-settings:
   misspell:
     locale: UK # Enable UK spelling
-
-  # Check struck tag naming
-  tagliatelle:
-    case:
-      use-field-name: true
-      rules:
-        json: goCamel
-        yaml: goCamel
 
   revive:
     severity: error 

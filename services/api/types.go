@@ -25,6 +25,18 @@ type MonitorReq struct {
 	Updated    time.Time
 }
 
+type ResultWithMonitor struct {
+	Date    time.Time `bson:"date" json:"date"`
+	Status  int       `bson:"status" json:"status"`
+	Value   int       `bson:"value" json:"value"`
+	Message string    `bson:"message" json:"message"`
+	Monitor []struct {
+		Name   string `bson:"name" json:"name"`
+		Type   string `bson:"type" json:"type"`
+		Target string `bson:"target" json:"target"`
+	} `bson:"monitor" json:"monitor"`
+}
+
 func (m MonitorReq) validate() (string, bool) {
 	if m.Name == "" {
 		return "missing name", false

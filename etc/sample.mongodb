@@ -1,8 +1,9 @@
 use('monitr');
 
-//db.monitors.drop();
-//db.results.drop();
+db.monitors.drop();
+db.results.drop();
 
+/*
 db.monitors.insertMany([
   { 
     'name': 'NAS example',
@@ -14,7 +15,7 @@ db.monitors.insertMany([
       'url': 'http://192.168.0.100:8080'
     }
   },
-  /*
+  
   { 
     'name': 'Blog benc.dev',
     'type': 'http',
@@ -39,6 +40,8 @@ db.monitors.insertMany([
       'checkFor': 'Ben Coleman',
       //'notCheckFor': 'Ben'
     }
-  }*/
+  }
 ]);
 
+
+*/

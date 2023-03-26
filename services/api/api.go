@@ -25,6 +25,7 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 	r.Get("/monitors", api.getMonitors)
 	r.Get("/monitors/{id}", api.getMonitor)
 	r.Get("/monitors/{id}/results", api.getMonitorResults)
+	r.Get("/results", api.getResults)
 }
 
 func (api API) addProtectedRoutes(r chi.Router) {

@@ -9,7 +9,7 @@ import (
 )
 
 func (m *Monitor) runPing() (*types.Result, map[string]any) {
-	r := types.NewResult(m.ID)
+	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
 	count := 6
@@ -20,7 +20,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if countProp != "" {
 		count, err = strconv.Atoi(countProp)
 		if err != nil {
-			return types.NewFailedResult(m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 		}
 	}
 
@@ -28,7 +28,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if intervalProp != "" {
 		interval, err = time.ParseDuration(intervalProp)
 		if err != nil {
-			return types.NewFailedResult(m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 		}
 	}
 
@@ -36,13 +36,13 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 		}
 	}
 
 	pinger, err := ping.NewPinger(m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
 
 	pinger.SetPrivileged(true)
@@ -52,7 +52,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 
 	err = pinger.Run() // NOTE: Blocks
 	if err != nil {
-		return types.NewFailedResult(m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
 
 	stats := pinger.Statistics()

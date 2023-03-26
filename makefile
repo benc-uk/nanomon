@@ -44,7 +44,7 @@ images: ## 📦 Build all container images
 
 images: ## 📦 Build all container images
 	@figlet $@ || true
-	docker compose -f build/compose.yaml build
+	docker compose -f build/compose.yaml build frontend
 
 blah: ## 📦 Build all container images
 	@figlet $@ || true
@@ -68,4 +68,5 @@ run-frontend: ## 🌐 Serve the frontend with a local dev server
 
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
-	docker run --rm -it --network host -v ./_data:/data/db mongo:6-jammy
+	@docker rm -f mongo || true
+	@docker run --rm -it --network host -v ./_data:/data/db --name mongo mongo:6-jammy 

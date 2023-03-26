@@ -7,18 +7,18 @@ import (
 )
 
 func (m *Monitor) runTCP() (*types.Result, map[string]any) {
-	r := types.NewResult(m.ID)
+	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	start := time.Now()
 	tcpAddr, err := net.ResolveTCPAddr("tcp", m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
 	dnsTime := int(time.Since(start).Milliseconds())
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
-		return types.NewFailedResult(m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
 	r.Value = int(time.Since(start).Milliseconds())
 

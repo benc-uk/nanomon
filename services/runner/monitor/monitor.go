@@ -84,8 +84,7 @@ func (m *Monitor) run() {
 		return
 	}
 
-	// log outputs
-	log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
+	//log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
 
 	if m.Rule != "" && outputs != nil {
 		functions := map[string]govaluate.ExpressionFunction{}
@@ -105,21 +104,21 @@ func (m *Monitor) run() {
 
 		ruleExp, err := govaluate.NewEvaluableExpressionWithFunctions(m.Rule, functions)
 		if err != nil {
-			result = types.NewFailedResult(m.ID, fmt.Errorf("Rule error: "+err.Error()))
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule error: "+err.Error()))
 			storeResult(m.db, *result)
 			return
 		}
 
 		res, err := ruleExp.Evaluate(outputs)
 		if err != nil {
-			result = types.NewFailedResult(m.ID, fmt.Errorf("Rule error: "+err.Error()))
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule error: "+err.Error()))
 			storeResult(m.db, *result)
 			return
 		}
 
 		ruleResult, isBool := res.(bool)
 		if !isBool {
-			result = types.NewFailedResult(m.ID, fmt.Errorf("Rule didn't return a bool"))
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule didn't return a bool"))
 			storeResult(m.db, *result)
 			return
 		}

@@ -1,47 +1,58 @@
 @endpoint = http://localhost:8000
 
-// Token 
-@jwt = THIS_IS_IGNORED.eyJwcmVmZXJyZWRfdXNlcm5hbWUiOiJiZWNvbGVtQG1pY3Jvc29mdC5jb20ifQ.THIS_IS_IGNORED
-
+##########################################
 ### Get all monitors
+##########################################
 GET {{endpoint}}/monitors
 
+##########################################
 ### Create a monitor
+##########################################
 POST {{endpoint}}/monitors
-Authorization: Bearer {{ jwt }}
 Content-Type: application/json
 
 {
   "name": "Test {{$randomInt 1 1000}}",
-  "type": "ping",
-  "interval": "10s",
-  "target": "amazon.co.jp",
-  "enabled": true
+  "type": "http",
+  "interval": "20s",
+  "target": "https://cataclysmdda.org/",
+  "enabled": true,
+  "properties": {
+    "method": "GET"
+  }
 }
 
+##########################################
 ### Get single monitor
-GET {{endpoint}}/monitors/6416d530c963a60b42dcf8d6
+##########################################
+GET {{endpoint}}/monitors/641f75c9062e612df8596c70
 
+##########################################
 ### Delete single monitor
+##########################################
 DELETE {{endpoint}}/monitors/641e346f23b333094cd3bc91
-Authorization: Bearer {{ jwt }}
 
+##########################################
 ### Get results
-GET {{endpoint}}/monitors/641716bfcd41146100d341f3/results?max=2
+##########################################
+GET {{endpoint}}/monitors/641f6415bcb6e797bdabdade/results?max=200
 
+##########################################
 ### Update a monitor
-PUT {{endpoint}}/monitors/641e3c2a23b333094cd3bc94
-Authorization: Bearer {{ jwt }}
+##########################################
+PUT {{endpoint}}/monitors/641f7415062e612df8596c6f
 Content-Type: application/json
 
 {
-  "name": "aaaa",
+  "name": "Check Router",
   "type": "tcp",
   "interval": "10s",
   "enabled": true,
-  "target": "192.168.0.100:80",
-  "rule": "respTime < 1200",
-  "properties": {
-    "timeout": "20s"
-  }
+  "target": "192.168.0.1:802",
+  "rule": "respTime < 1"
 }
+
+##########################################
+### Get results for ALL monitors
+##########################################
+GET {{endpoint}}/results?max=10

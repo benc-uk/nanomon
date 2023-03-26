@@ -33,7 +33,7 @@ var (
 	defaultPort = 8000
 )
 
-const authScope = "monitr.admin"
+const authScope = "system.admin"
 
 func main() {
 	// Port to listen on, change the default as you see fit

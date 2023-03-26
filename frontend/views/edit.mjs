@@ -1,6 +1,6 @@
 export const editComponent = (api) => ({
   error: '',
-  monitor: {},
+  monitor: null,
   types: ['http', 'ping', 'tcp'],
   monId: null,
 
@@ -19,7 +19,12 @@ export const editComponent = (api) => ({
       } else {
         if (!this.monId) return
 
-        this.monitor = await api.getMonitor(this.monId)
+        try {
+          const monitor = await api.getMonitor(this.monId)
+          this.monitor = monitor
+        } catch (e) {
+          this.error = e
+        }
       }
     })
   },

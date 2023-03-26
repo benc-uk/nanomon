@@ -2,12 +2,19 @@
 
 <template x-if="monitor">
   <div class="card shadow mb-4">
-    <div class="card-header fs-3 bg-info text-light">Create Monitor</div>
+    <div class="card-header fs-3 bg-info text-light" x-text="monId !== 'new' ? 'Edit Monitor' : 'Create Monitor'"></div>
     <div class="card-body">
       <form>
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" x-model="monitor.name" class="form-control" id="name" placeholder="Enter name for this monitor" autocomplete="new-password" />
+          <input
+            type="text"
+            x-model="monitor.name"
+            class="form-control"
+            id="name"
+            placeholder="Enter name for this monitor"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="form-group">
@@ -21,17 +28,38 @@
 
         <div class="form-group">
           <label for="interval">Target</label>
-          <input type="text" x-model="monitor.target" class="form-control" id="interval" placeholder="Status rule expression" autocomplete="new-password" />
+          <input
+            type="text"
+            x-model="monitor.target"
+            class="form-control"
+            id="interval"
+            placeholder="Status rule expression"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="form-group">
           <label for="interval">Interval</label>
-          <input type="text" x-model="monitor.interval" class="form-control" id="interval" placeholder="Interval, e.g. 20s or 5m or 1.5h" autocomplete="new-password" />
+          <input
+            type="text"
+            x-model="monitor.interval"
+            class="form-control"
+            id="interval"
+            placeholder="Interval, e.g. 20s or 5m or 1.5h"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="form-group">
           <label for="interval">Rule</label>
-          <input type="text" x-model="monitor.rule" class="form-control" id="interval" placeholder="Status rule expression" autocomplete="new-password" />
+          <input
+            type="text"
+            x-model="monitor.rule"
+            class="form-control"
+            id="interval"
+            placeholder="Status rule expression"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="form-check mt-3">
@@ -41,26 +69,44 @@
       </form>
 
       <!-- props -->
-      <h4 class="mt-4">Properties</h4>
+
+      <div class="d-flex align-items-baseline">
+        <h4 class="mt-4">Properties</h4>
+        <button class="btn btn-primary ms-auto" style="height: 2.5rem" @click="monitor.properties[prompt('Property Name')]=''">
+          <i class="fa fa-fw fa-plus"></i> Add Property
+        </button>
+      </div>
 
       <table class="table table-sm table-hover mt-3">
         <thead class="table-primary">
           <tr>
             <th scope="col">Name</th>
             <th scope="col">Value</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
-          <template x-for="val,key in monitor.properties">
+          <template x-for="key in Object.keys(monitor.properties)" :key="key">
             <tr>
               <td x-text="key" valign="middle"></td>
-              <td><input type="text" class="form-control" x-model="monitor.properties[key]" autocomplete="new-password" /></td>
+              <td>
+                <input type="text" class="form-control" x-model="monitor.properties[key]" autocomplete="new-password" />
+              </td>
+              <td>
+                <button class="btn btn-danger" @click="delete monitor.properties[key]">
+                  <i class="fa fa-fw fa-trash"></i>
+                </button>
+              </td>
             </tr>
           </template>
         </tbody>
       </table>
-      <button class="btn btn-success" @click="save" :disabled="!canSave()"><i class="fa fa-fw fa-check"></i> <span x-text="monId == 'new' ? 'CREATE' : 'UPDATE'"></span></button>
-      <a href="#home" class="btn btn-warning"><i class="fa fa-fw fa-stop"></i> Cancel</a>
+
+      <button class="btn btn-success" @click="save" :disabled="!canSave()">
+        <i class="fa fa-fw fa-check"></i> <span x-text="monId == 'new' ? 'CREATE' : 'UPDATE'"></span>
+      </button>
+
+      <a :href="monId== 'new' ? '#home':`#monitor/${monId}`" class="btn btn-warning"><i class="fa fa-fw fa-stop"></i> Cancel</a>
     </div>
   </div>
 </template>

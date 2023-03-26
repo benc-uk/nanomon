@@ -1,10 +1,12 @@
 export class APIClient {
-  apiEndpoint
-  apiScopes
+  apiEndpoint = 'http://localhost:8000'
+  apiScopes = []
+  msalApp = null
 
-  constructor(apiEndpoint, apiScopes) {
+  constructor(apiEndpoint, apiScopes, msalApp) {
     this.apiEndpoint = apiEndpoint.replace(/\/$/, '')
     this.apiScopes = apiScopes
+    this.msalApp = msalApp
   }
 
   async getMonitors() {
@@ -20,26 +22,31 @@ export class APIClient {
   }
 
   async createMonitor(monitor) {
-    return this.baseRequest('monitors', 'POST', monitor, false)
+    return this.baseRequest('monitors', 'POST', monitor, true)
   }
 
   async deleteMonitor(monId) {
-    return this.baseRequest(`monitors/${monId}`, 'DELETE', null, false)
+    return this.baseRequest(`monitors/${monId}`, 'DELETE', null, true)
   }
 
   async updateMonitor(monId, monitor) {
-    return this.baseRequest(`monitors/${monId}`, 'PUT', monitor, false)
+    return this.baseRequest(`monitors/${monId}`, 'PUT', monitor, true)
   }
 
-  async baseRequest(path, method = 'GET', body, authenticated = false) {
+  async getResults(max) {
+    return this.baseRequest(`results?max=${max}`)
+  }
+
+  async baseRequest(path, method = 'GET', body, authRequest = false) {
     let tokenRes = null
-    if (authenticated) {
+    if (authRequest && this.msalApp) {
+      console.log('### Getting access token with scopes', this.apiScopes)
       try {
-        tokenRes = await msalInstance.acquireTokenSilent({
+        tokenRes = await this.msalApp.acquireTokenSilent({
           scopes: this.apiScopes,
         })
       } catch (e) {
-        tokenRes = await msalInstance.acquireTokenPopup({
+        tokenRes = await this.msalApp.acquireTokenPopup({
           scopes: this.apiScopes,
         })
       }

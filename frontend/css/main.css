@@ -14,12 +14,20 @@
   background-color: #f8a933 !important;
 }
 
-.bg-success {
+.bg-success,
+.btn-success {
   background-color: #44a855 !important;
 }
 
 .bg-failed {
   background-color: #5a2971 !important;
+}
+
+.btn-main {
+  background-color: #351f58;
+}
+.btn-main:hover {
+  background-color: #241838;
 }
 
 a .card-header {
@@ -38,4 +46,16 @@ a {
   height: 8rem;
   text-align: center;
   cursor: pointer;
+}
+
+.code {
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+}
+
+.valign-middle {
+  vertical-align: middle;
+}
+
+[x-cloak] {
+  display: none !important;
 }

@@ -26,7 +26,7 @@ func main() {
 	r := chi.NewRouter()
 
 	// The simple config endpoint
-	r.Get("/.config", routeConfig)
+	r.Get("/config", routeConfig)
 
 	FileServer(r, dir)
 

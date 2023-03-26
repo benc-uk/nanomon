@@ -1,6 +1,6 @@
 import { getStatusFields, niceDate, monitorIcon } from '../lib/utils.mjs'
 
-export const monitorComponent = (api) => ({
+export const monitorComponent = (api, userAccount) => ({
   results: [],
   monitor: null,
   status: null,
@@ -10,11 +10,12 @@ export const monitorComponent = (api) => ({
   lastResultDate: '',
   icon: '',
   getStatusFields: getStatusFields,
+  userAccount: userAccount,
 
   async init() {
     this.shown = false
 
-    window.addEventListener('view-changed', (e) => {
+    window.addEventListener('view-changed', async (e) => {
       const view = e.detail
 
       if (!view || !view.startsWith('#monitor')) return
@@ -23,6 +24,10 @@ export const monitorComponent = (api) => ({
       if (!monId) return
 
       this.loadMonitor(monId)
+    })
+
+    window.addEventListener('user-changed', (e) => {
+      this.userAccount = e.detail
     })
   },
 

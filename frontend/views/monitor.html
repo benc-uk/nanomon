@@ -21,7 +21,7 @@
   <div class="card shadow mb-4">
     <div class="card-header fs-3" :class="status?.class || 'bg-secondary'" x-html="`${icon} ${monitor.name}`"></div>
     <div class="card-body">
-      <div class="float-end">
+      <div class="float-end" x-show="userAccount">
         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fas fa-trash fa-fw"></i> DELETE</button>
         <a class="btn btn-info" :href="`#edit/${monitor.id}`"><i class="fas fa-edit fa-fw"></i> EDIT</a>
       </div>
@@ -35,12 +35,10 @@
             <td>Target:</td>
             <td x-text="monitor.target"></td>
           </tr>
-          <template x-if="results[0]?.message">
-            <tr>
-              <td>Message:</td>
-              <td x-text="results[0]?.message"></td>
-            </tr>
-          </template>
+          <tr x-show="results[0]?.message">
+            <td>Message:</td>
+            <td x-text="results[0]?.message"></td>
+          </tr>
           <tr>
             <td>Type:</td>
             <td x-html="`${icon} ${monitor.type}`"></td>
@@ -53,9 +51,9 @@
             <td>Enabled:</td>
             <td x-html="monitor.enabled ? `<i class='fa fa-check-circle text-success'>` : `<i class='fa fa-circle-xmark text-danger'>`"></td>
           </tr>
-          <tr>
+          <tr x-show="monitor.rule">
             <td>Rule(s):</td>
-            <td x-text="monitor.rule" style="font-family: 'Courier New', Courier, monospace"></td>
+            <td x-text="monitor.rule" class="code"></td>
           </tr>
           <tr>
             <td>Updated:</td>
@@ -68,24 +66,22 @@
         </tbody>
       </table>
 
-      <template x-if="monitor.properties">
-        <table class="table table-sm table-hover mt-3">
-          <thead class="table-primary">
+      <table class="table table-sm table-hover mt-3" x-show="monitor.properties">
+        <thead class="table-primary">
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="[key, value] of Object.entries(monitor.properties || {})" :key="key">
             <tr>
-              <th scope="col">Property</th>
-              <th scope="col">Value</th>
+              <td x-text="key"></td>
+              <td x-text="value"></td>
             </tr>
-          </thead>
-          <tbody>
-            <template x-for="val,key in monitor.properties">
-              <tr>
-                <td x-text="key"></td>
-                <td x-text="val"></td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </template>
+          </template>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>

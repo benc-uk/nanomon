@@ -12,7 +12,7 @@ export function getStatusFields(statusCode) {
 
     case 1:
       status.text = 'Error'
-      status.class = 'bg-warning text-light'
+      status.class = 'bg-warning text-dark'
       status.icon = 'fas fa-exclamation-triangle'
       break
 

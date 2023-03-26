@@ -1,0 +1,4 @@
+{
+  "API_ENDPOINT": "http://localhost:8000",
+  "AUTH_CLIENT_ID": ""
+}

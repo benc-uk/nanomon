@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"monitr/services/common/database"
 	"monitr/services/common/types"
-	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -90,22 +89,7 @@ func (m *Monitor) run() {
 	//log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
 
 	if m.Rule != "" && outputs != nil {
-		functions := map[string]govaluate.ExpressionFunction{}
-
-		if outputs["body"] != nil {
-			body := outputs["body"].(string)
-
-			functions["bodyContains"] = func(args ...interface{}) (interface{}, error) {
-				lookfor := args[0].(string)
-				if lookfor == "" {
-					return false, nil
-				}
-
-				return strings.Contains(body, lookfor), nil
-			}
-		}
-
-		ruleExp, err := govaluate.NewEvaluableExpressionWithFunctions(m.Rule, functions)
+		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
 			_ = storeResult(m.db, *result)

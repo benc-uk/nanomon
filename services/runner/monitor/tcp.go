@@ -3,6 +3,7 @@ package monitor
 import (
 	"monitr/services/common/types"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -32,8 +33,8 @@ func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 	r.Value = int(time.Since(start).Milliseconds())
 
 	outputs := map[string]any{
-		"respTime": r.Value,
-		"address":  conn.RemoteAddr().String(),
+		"respTime":  r.Value,
+		"ipAddress": strings.Split(conn.RemoteAddr().String(), ":")[0],
 	}
 
 	defer conn.Close()

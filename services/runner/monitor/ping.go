@@ -63,6 +63,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 		"avgRtt":      stats.AvgRtt.Milliseconds(),
 		"packetLoss":  stats.PacketLoss,
 		"packetsRecv": stats.PacketsRecv,
+		"ipAddress":   stats.IPAddr,
 	}
 
 	r.Value = int(stats.AvgRtt.Milliseconds())

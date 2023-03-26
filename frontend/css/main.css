@@ -55,3 +55,25 @@ a {
 [x-cloak] {
   display: none !important;
 }
+
+.popWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.popup {
+  position: absolute;
+  top: 40px;
+  left: -14rem;
+  z-index: 10000;
+  width: 20rem;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.dropdown-item {
+  cursor: pointer;
+}

@@ -1,5 +1,12 @@
 <div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
 
+<div x-show="monId == 'new'" class="mb-3">
+  Templates:
+  <button class="btn btn-primary" @click="newHTTP">HTTP</button>
+  <button class="btn btn-primary" @click="newTCP">TCP</button>
+  <button class="btn btn-primary" @click="newPing">PING</button>
+</div>
+
 <template x-if="monitor">
   <div class="card shadow mb-4">
     <div class="card-header fs-3 bg-info text-light" x-text="monId !== 'new' ? 'Edit Monitor' : 'Create Monitor'"></div>
@@ -52,14 +59,22 @@
 
         <div class="form-group">
           <label for="interval">Rule</label>
-          <input
-            type="text"
-            x-model="monitor.rule"
-            class="form-control"
-            id="interval"
-            placeholder="Status rule expression"
-            autocomplete="new-password"
-          />
+          <div class="d-flex">
+            <input
+              type="text"
+              x-model="monitor.rule"
+              class="form-control"
+              id="interval"
+              placeholder="Status rule expression"
+              autocomplete="new-password"
+            />
+            <div class="popWrap">
+              <button class="btn btn-secondary ms-4" @click="rulePop = !rulePop">
+                <i class="fa fa-fw fa-question-circle"></i>
+              </button>
+              <div class="popup" x-show="rulePop" x-html="ruleHints[monitor.type]"></div>
+            </div>
+          </div>
         </div>
 
         <div class="form-check mt-3">
@@ -72,9 +87,14 @@
 
       <div class="d-flex align-items-baseline">
         <h4 class="mt-4">Properties</h4>
-        <button class="btn btn-primary ms-auto" style="height: 2.5rem" @click="monitor.properties[prompt('Property Name')]=''">
-          <i class="fa fa-fw fa-plus"></i> Add Property
-        </button>
+        <div class="dropdown ms-auto">
+          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add Property</button>
+          <ul class="dropdown-menu">
+            <template x-for="prop of allowedProps[monitor.type]">
+              <li><a class="dropdown-item" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
+            </template>
+          </ul>
+        </div>
       </div>
 
       <table class="table table-sm table-hover mt-3">

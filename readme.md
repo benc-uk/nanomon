@@ -1,12 +1,40 @@
 # Monitr - A simple monitoring system & microservices reference app
 
+Monitr is a lightweight network and HTTP monitoring system, designed to be run with Kubernetes (or other container compatible host). It is written in Go and based on a microservices pattern, as such it is decomposed into several discreet but interlinked components
+
+## Architecture
+
+Some picture here
+
+## Concepts
+
+Monitr executes monitoring calls remotely over the network using standard protocols, it does this periodically per monitor, and validates the results of the execution to determine the status or success. There are currently three statuses: **OK, Error** & **Failed**
+
+### Monitor
+
+A *monitor* represents an instance of a given monitor *type* (see below) with it's associated configuration. Common properties of all monitors include the interval on which they are run, and the target. The target is *type* dependant but typically is a hostname or URL.
+
+### Result
+
+When a *monitor* runs it generates a *result*. The *result* as the name implies, holds the results of a run of a monitor, such as the timestamp, status, message and a value. The value of a *result* is dependant on the type of *monitor* however it currently represents the duration of the execution in millseconds.
+
+### Monitor Type
+
+- HTTP
+- Ping
+- TCP
+
 ## Components
 
-- API
-- Runner
-- Frontend
-- Frontend Host
-- MongoDB
+- **API** - REST API acting as interface for the frontend
+- **Runner** - Monitors execute from here
+- **Frontend** - The web interface, i.e. the HTML and JS
+- **Frontend Host** - The server host for the frontend
+- **MongoDB** - Backend data store
+
+## Repo Index
+
+## Getting Started
 
 ## Configuration
 

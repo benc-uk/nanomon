@@ -12,6 +12,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
+
 	count := 6
 	interval := time.Duration(150) * time.Millisecond
 	timeout := time.Duration(1) * time.Second

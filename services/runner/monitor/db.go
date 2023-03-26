@@ -11,7 +11,6 @@ import (
 )
 
 func FetchMonitors(db *database.DB) ([]*Monitor, error) {
-
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
 
@@ -21,6 +20,7 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	}
 
 	monitors := make([]*Monitor, 0)
+
 	for cur.Next(ctx) {
 		m := NewMonitor(db)
 		if err := cur.Decode(&m); err != nil {
@@ -42,9 +42,11 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 
 func storeResult(db *database.DB, r types.Result) error {
 	log.Printf("###   Storing result: %d %s", r.Status, r.Message)
+
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
 
 	_, err := db.Results.InsertOne(ctx, r)
+
 	return err
 }

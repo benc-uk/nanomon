@@ -13,8 +13,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+var (
+	version   = "0.0.1"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
+	buildInfo = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
+)
+
 func main() {
 	var dir string
+
 	flag.StringVar(&dir, "dir", "./", "the directory to serve files from")
 	flag.Parse()
 
@@ -38,6 +44,7 @@ func main() {
 	}
 
 	log.Println("### 🌐 Monitr Frontend, listening on port:", port)
+	log.Println("### Version:", version)
 	log.Println("### Serving app content from:", dir)
 	log.Fatal(srv.ListenAndServe())
 }
@@ -48,11 +55,14 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	if apiEndpoint == "" {
 		apiEndpoint = "/"
 	}
-	authClientId := os.Getenv("AUTH_CLIENT_ID")
+
+	authClientID := os.Getenv("AUTH_CLIENT_ID")
 
 	config := map[string]string{
 		"API_ENDPOINT":   apiEndpoint,
-		"AUTH_CLIENT_ID": authClientId,
+		"AUTH_CLIENT_ID": authClientID,
+		"VERSION":        version,
+		"BUILD_INFO":     buildInfo,
 	}
 
 	configJSON, _ := json.Marshal(config)

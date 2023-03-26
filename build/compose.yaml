@@ -37,19 +37,19 @@ services:
       - back
       - front
 
-  # runner:
-  #   image: ${IMAGE_REG}/${IMAGE_NAME}-runner:${IMAGE_TAG}
-  #   build:
-  #     context: ..
-  #     dockerfile: ./build/Dockerfile.runner
-  #     args:
-  #       VERSION: ${VERSION}
-  #       BUILD_INFO: ${BUILD_INFO}
-  #   environment:
-  #     MONGO_URI: mongodb://database:27017
-  #   restart: always
-  #   networks:
-  #     - back
+  runner:
+    image: ${IMAGE_REG}/${IMAGE_NAME}-runner:${IMAGE_TAG}
+    build:
+      context: ..
+      dockerfile: ./build/Dockerfile.runner
+      args:
+        VERSION: ${VERSION}
+        BUILD_INFO: ${BUILD_INFO}
+    environment:
+      MONGO_URI: mongodb://database:27017
+    restart: always
+    networks:
+      - back
 
   database:
     image: mongo:6-jammy

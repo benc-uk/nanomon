@@ -75,7 +75,7 @@ export const homeComponent = (api) => ({
       this.error = 'No monitors found! Create one to get started'
     }
 
-    this.updateCharts()
+    await this.updateCharts()
   },
 
   async updateCharts() {
@@ -87,7 +87,7 @@ export const homeComponent = (api) => ({
       const resultLabels = []
       for (let i = results.length - 1; i >= 0; i--) {
         const r = results[i]
-        resultValues.push(r.values)
+        resultValues.push(r.value)
         resultLabels.push(r.date.replace('T', ' ').split('.')[0])
       }
 

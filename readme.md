@@ -20,12 +20,18 @@ Env vars used by both API service and runner:
 | MONGO_DB      | Database name to use                         | monitr                    |
 | MONGO_TIMEOUT | Timeout for connecting to & querying MongoDB | 10s                       |
 
-Env vars used only by the API:
+Env vars used by the API and frontend host:
 
-| _Name_         | _Description_                 | _Default_ |
-| -------------- | ----------------------------- | --------- |
-| PORT           | Port for service to listen on | 8000      |
-| AUTH_CLIENT_ID | Used to enable authentication | _blank_   |
+| _Name_         | _Description_                 | _Default_   |
+| -------------- | ----------------------------- | ----------- |
+| PORT           | Port for service to listen on | 8001 & 8001 |
+| AUTH_CLIENT_ID | Used to enable authentication | _blank_     |
+
+Env vars used only by the frontend host:
+
+| _Name_       | _Description_                                    | _Default_ |
+| ------------ | ------------------------------------------------ | --------- |
+| API_ENDPOINT | Instructs the frontend SPA where to find the API | /         |
 
 Env vars used only by the runner:
 

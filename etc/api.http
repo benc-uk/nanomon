@@ -14,12 +14,9 @@ Content-Type: application/json
 {
   "name": "Test {{$randomInt 1 1000}}",
   "type": "http",
-  "interval": "20s",
-  "target": "https://cataclysmdda.org/",
-  "enabled": true,
-  "properties": {
-    "method": "GET"
-  }
+  "interval": "10s",
+  "target": "http://192.168.0.100/",
+  "enabled": true
 }
 
 ##########################################
@@ -30,7 +27,7 @@ GET {{endpoint}}/monitors/641f75c9062e612df8596c70
 ##########################################
 ### Delete single monitor
 ##########################################
-DELETE {{endpoint}}/monitors/641e346f23b333094cd3bc91
+DELETE {{endpoint}}/monitors/641fdbfb1717fb28657215ad
 
 ##########################################
 ### Get results

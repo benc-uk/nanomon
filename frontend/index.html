@@ -20,13 +20,13 @@
     <link rel="stylesheet" href="css/main.css" />
     <script src="app.mjs" type="module"></script>
 
-    <link rel="shortcut icon" href="static/favicon.png" type="image/png" />
+    <link rel="shortcut icon" href="static/icon.png" type="image/png" />
   </head>
   <body>
     <div id="app" x-data="app">
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#home"><img src="./static/icon.png" />Monitr</a>
+          <a class="navbar-brand" href="#home"><img src="static/icon.png" /> Monitr</a>
           <button
             class="navbar-toggler"
             type="button"
@@ -41,16 +41,19 @@
           <div class="collapse navbar-collapse" id="navbarColor01">
             <ul class="navbar-nav me-auto">
               <li class="nav-item btn btn-main m-1">
-                <a class="nav-link fs-6" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
+                <a class="nav-link fs-6 text-dark" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
               </li>
               <li class="nav-item btn btn-main m-1">
-                <a class="nav-link fs-6" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
+                <a class="nav-link fs-6 text-dark" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
               </li>
               <li class="nav-item btn btn-main m-1">
-                <a class="nav-link fs-6" href="#results"><i class="fa fa-fw fa-list-alt"></i> Results</a>
+                <a class="nav-link fs-6 text-dark" href="#results"><i class="fa fa-fw fa-list-alt"></i> Results</a>
               </li>
               <li class="nav-item btn btn-main m-1" x-show="userAccount" x-cloak>
-                <a class="nav-link fs-6" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
+                <a class="nav-link fs-6 text-dark" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
+              </li>
+              <li class="nav-item btn btn-main m-1">
+                <a class="nav-link fs-6 text-dark" href="#about"><i class="fa fa-fw fa-info-circle"></i> About</a>
               </li>
             </ul>
 
@@ -80,6 +83,13 @@
           x-show="view.startsWith('#monitor')"
         ></div>
         <div x-cloak x-transition x-data="edit(api)" x-html="await (await fetch('views/edit.html')).text()" x-show="view.startsWith('#edit')"></div>
+        <div
+          x-cloak
+          x-transition
+          x-data="about(api)"
+          x-html="await (await fetch('views/about.html')).text()"
+          x-show="view.startsWith('#about')"
+        ></div>
       </div>
     </div>
   </body>

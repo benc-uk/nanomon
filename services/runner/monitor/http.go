@@ -11,6 +11,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
+
 	method := "GET"
 	timeout := time.Duration(5) * time.Second
 
@@ -37,10 +38,13 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	}
 
 	start := time.Now()
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
+	defer resp.Body.Close()
+
 	r.Value = int(time.Since(start).Milliseconds())
 
 	// Read response body
@@ -48,6 +52,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	if err != nil {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
+
 	bodyStr := string(body)
 
 	outputs := map[string]any{

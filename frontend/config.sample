@@ -1,4 +1,6 @@
 {
   "API_ENDPOINT": "http://localhost:8000",
   "AUTH_CLIENT_ID": ""
+  "VERSION": "0.0.1",
+  "BUILD_INFO": "Running locally, no build"
 }

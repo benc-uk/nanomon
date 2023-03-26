@@ -8,15 +8,16 @@ import { monitorComponent } from './views/monitor.mjs'
 import { editComponent } from './views/edit.mjs'
 import { dashComponent } from './views/dash.mjs'
 import { resultsComponent } from './views/results.mjs'
+import { aboutComponent } from './views/about.mjs'
 
-const VERSION = '0.0.1'
+export let VERSION = '0.0.1'
+export let BUILD_INFO = 'None'
+export let API_ENDPOINT = 'http://localhost:8000'
+export let AUTH_CLIENT_ID = ''
 
-let API_ENDPOINT = 'http://localhost:8000'
-let AUTH_CLIENT_ID = ''
 let msalApp = null
 
 Alpine.data('app', () => ({
-  version: VERSION,
   view: '#home',
   api: null,
   userAccount: null,
@@ -111,14 +112,17 @@ Alpine.data('monitor', monitorComponent)
 Alpine.data('edit', editComponent)
 Alpine.data('dash', dashComponent)
 Alpine.data('results', resultsComponent)
+Alpine.data('about', aboutComponent)
 
 async function startApp() {
   try {
     const configResp = await fetch('config')
     if (configResp.ok) {
       const config = await configResp.json()
-      API_ENDPOINT = config.API_ENDPOINT
-      AUTH_CLIENT_ID = config.AUTH_CLIENT_ID
+      API_ENDPOINT = config.API_ENDPOINT || 'http://localhost:8000'
+      AUTH_CLIENT_ID = config.AUTH_CLIENT_ID || ''
+      VERSION = config.VERSION || '0.0.1'
+      BUILD_INFO = config.BUILD_INFO || 'None'
       console.log('### Config loaded:', config)
     }
   } catch (err) {

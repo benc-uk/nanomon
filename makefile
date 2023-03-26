@@ -1,23 +1,23 @@
 # Common variables
 VERSION := 0.0.1
-BUILD_INFO := Manual build
+BUILD_INFO := Local and manual build
 SVC_DIR := ./services
 SPA_DIR := ./frontend
 
-# Most likely want to override these when calling `make image`
+# Override these if building your own images
 IMAGE_REG ?= ghcr.io
-IMAGE_NAME ?= monitr
+IMAGE_NAME ?= benc-uk/monitr
 IMAGE_TAG ?= latest
 
 # Things you don't want to change
 REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 # Tools
-GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint              # Remove if not using Go
-AIR_PATH := $(REPO_DIR)/bin/air                           # Remove if not using Go
-BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync # Remove if local server not needed
+GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint
+AIR_PATH := $(REPO_DIR)/bin/air
+BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help image push build run lint lint-fix
+.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)
@@ -32,37 +32,29 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
-	$(GOLINT_PATH) run ./services/...
+	$(GOLINT_PATH) run
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
-	$(GOLINT_PATH) run ./services/...--fix
+	$(GOLINT_PATH) run --fix
 
 images: ## 📦 Build all container images
 	@figlet $@ || true
 	docker compose -f build/compose.yaml build
-
-images: ## 📦 Build all container images
+	
+push: ## 📤 Push all container images
 	@figlet $@ || true
-	docker compose -f build/compose.yaml build frontend
+	docker compose -f build/compose.yaml push
 
-blah: ## 📦 Build all container images
-	@figlet $@ || true
-	docker compose -f build/compose.yaml up
-
-run-api: ## 🎯 Run API service
+run-api: ## 🎯 Run API service locally with hot-reload
 	@figlet $@ || true
 	@$(AIR_PATH) -c services/api/.air.toml
 
-run-fe-host: ## 🔷 Run frontend HTTP server
+run-runner: ## 🏃 Run the monitor runner locally with hot-reload
 	@figlet $@ || true
-	@$(AIR_PATH) -c services/frontend/.air.toml
+	@MONITOR_CHANGE_INTERVAL=20s $(AIR_PATH) -c services/runner/.air.toml
 
-run-runner: ## 🏃 Run the monitor runner
-	@figlet $@ || true
-	@MONITOR_CHANGE_INTERVAL=10s $(AIR_PATH) -c services/runner/.air.toml
-
-run-frontend: ## 🌐 Serve the frontend with a local dev server
+run-frontend: ## 🌐 Serve the frontend with a local dev server with hot-reload
 	@figlet $@ || true
 	@$(BS_PATH) start -s frontend --no-ui --watch --no-notify
 

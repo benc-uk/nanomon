@@ -19,15 +19,11 @@
   background-color: #44a855 !important;
 }
 
-.bg-failed {
-  background-color: #5a2971 !important;
-}
-
 .btn-main {
-  background-color: #351f58;
+  background-color: #3ec8ac;
 }
 .btn-main:hover {
-  background-color: #241838;
+  background-color: #2daf94;
 }
 
 a .card-header {

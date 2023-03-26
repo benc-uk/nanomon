@@ -6,9 +6,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const STATUS_OK = 0
-const STATUS_ERROR = 1
-const STATUS_FAILED = 2
+const StatusOK = 0
+const StatusError = 1
+const StatusFailed = 2
 
 type Result struct {
 	Date    time.Time `bson:"date" json:"date"`
@@ -26,7 +26,7 @@ func NewResult(monName, monTarget, monID string) *Result {
 
 	return &Result{
 		Date:          time.Now(),
-		Status:        STATUS_OK,
+		Status:        StatusOK,
 		Value:         0,
 		Message:       "",
 		MonitorName:   monName,
@@ -40,7 +40,7 @@ func NewFailedResult(monName, monTarget, monID string, err error) *Result {
 
 	return &Result{
 		Date:          time.Now(),
-		Status:        STATUS_FAILED,
+		Status:        StatusFailed,
 		Value:         0,
 		Message:       err.Error(),
 		MonitorName:   monName,

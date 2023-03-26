@@ -41,12 +41,15 @@ func (m MonitorReq) validate() (string, bool) {
 	if m.Name == "" {
 		return "missing name", false
 	}
+
 	if m.Type == "" {
 		return "missing type", false
 	}
+
 	if m.Interval == "" {
 		return "missing interval", false
 	}
+
 	if m.Target == "" {
 		return "missing target", false
 	}

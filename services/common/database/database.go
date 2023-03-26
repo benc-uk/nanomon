@@ -26,12 +26,14 @@ func ConnectToDB() *DB {
 	if timeoutEnv == "" {
 		timeoutEnv = "10s"
 	}
+
 	db.Timeout, _ = time.ParseDuration(timeoutEnv)
 
 	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {
 		mongoURI = "mongodb://localhost:27017"
 	}
+
 	log.Println("### Connecting to MongoDB at:", mongoURI)
 
 	mongoDB := os.Getenv("MONGO_DB")
@@ -41,7 +43,9 @@ func ConnectToDB() *DB {
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
+
 	var err error
+
 	db.client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatalln("### FATAL! MongoDB client error", err.Error())

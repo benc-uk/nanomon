@@ -9,21 +9,29 @@ import (
 func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
-	start := time.Now()
-	tcpAddr, err := net.ResolveTCPAddr("tcp", m.Target)
-	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
-	}
-	dnsTime := int(time.Since(start).Milliseconds())
+	var err error
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	timeout := time.Duration(5) * time.Second
+
+	timeoutProp := m.Properties["timeout"]
+	if timeoutProp != "" {
+		timeout, err = time.ParseDuration(timeoutProp)
+		if err != nil {
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		}
+	}
+
+	dialer := net.Dialer{Timeout: timeout}
+	start := time.Now()
+
+	conn, err := dialer.Dial("tcp", m.Target)
 	if err != nil {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
 	}
+
 	r.Value = int(time.Since(start).Milliseconds())
 
 	outputs := map[string]any{
-		"dnsTime":  dnsTime,
 		"respTime": r.Value,
 		"address":  conn.RemoteAddr().String(),
 	}

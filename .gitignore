@@ -3,3 +3,5 @@ _data/
 bin/
 tmp/
 frontend/config
+
+# Binaries from `go build`

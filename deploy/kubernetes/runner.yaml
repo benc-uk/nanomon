@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitr-runner
+spec:
+  selector:
+    matchLabels:
+      app: monitr-runner
+  template:
+    metadata:
+      labels:
+        app: monitr-runner
+    spec:
+      containers:
+      - name: monitr-runner
+        image: ghcr.io/benc-uk/monitr-runner:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        env:
+          - name: MONGO_URI
+            value: mongodb://mongo:27017
+          - name: MONITOR_CHANGE_INTERVAL
+            value: 20s

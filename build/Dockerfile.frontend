@@ -30,7 +30,7 @@ RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
 # ================================================================================================
 # === Stage 2: Get binary into a lightweight container ===========================================
 # ================================================================================================
-FROM ubuntu
+FROM scratch
 WORKDIR /app 
 
 # Copy the Go server binary

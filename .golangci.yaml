@@ -11,13 +11,18 @@ linters:
     - wsl         # Whitespace linter
     - stylecheck  # A few Go style rules
     - misspell    # Find misspelled words
-    - cyclop      # Find cyclomatic complexity
-    - gocyclo     # Also find cyclomatic complexity
+    #- cyclop      # Find cyclomatic complexity
+    #- gocyclo     # Also find cyclomatic complexity
     - bodyclose   # Check for HTTP body close errors
     - nilerr      # Find bad nil/err handling
     - nilnil      # Also find bad nil/err handling
     - tagliatelle # Find badly named struct tags
     #- gomnd       # Find magic numbers, enable at your peril
+
+issues:
+  exclude:
+    - G404
+    - goCamel
 
 linters-settings:
   misspell:

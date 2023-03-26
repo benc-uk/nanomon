@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitr-api
+spec:
+  selector:
+    matchLabels:
+      app: monitr-api
+  template:
+    metadata:
+      labels:
+        app: monitr-api
+    spec:
+      containers:
+      - name: monitr-api
+        image: ghcr.io/benc-uk/monitr-api:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        env:
+          - name: MONGO_URI
+            value: mongodb://mongo:27017
+        ports:
+          - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitr-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: monitr-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000

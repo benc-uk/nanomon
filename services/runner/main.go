@@ -12,12 +12,17 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var db *database.DB
-var monitors []*monitor.Monitor
+var (
+	db        *database.DB
+	monitors  []*monitor.Monitor
+	version   = "0.0.1"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
+	buildInfo = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
+)
 
 func main() {
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
 		<-c
 		shutdown()
@@ -28,14 +33,18 @@ func main() {
 	if changeIntervalEnv == "" {
 		changeIntervalEnv = "120s"
 	}
+
 	changeInterval, _ := time.ParseDuration(changeIntervalEnv)
 
-	log.Println("### Monitr runner is starting...")
+	log.Println("### 🏃 Monitr runner is starting...")
+	log.Println("### Version:", version, buildInfo)
 	log.Println("### Checking for monitor changes every", changeIntervalEnv)
+
 	db = database.ConnectToDB()
 	defer db.Close()
 
 	var err error
+
 	monitors, err = monitor.FetchMonitors(db)
 	if err != nil {
 		log.Fatalln("### Error loading monitors:", err)
@@ -60,6 +69,7 @@ func main() {
 		// First pass to find new & updated monitors
 		for _, newMon := range updatedMonitors {
 			found := false
+
 			for oi, oldMon := range monitors {
 				if oldMon.ID == newMon.ID {
 					found = true
@@ -68,6 +78,7 @@ func main() {
 					if newMon.Updated.After(oldMon.Updated) {
 						log.Println("### Updating monitor:", oldMon.Name)
 						oldMon.Stop()
+
 						go newMon.Start()
 						monitors[oi] = newMon
 					}
@@ -87,6 +98,7 @@ func main() {
 		// Finding deleted monitors requires a second pass but in different order
 		for oi, oldMon := range monitors {
 			found := false
+
 			for _, newMon := range updatedMonitors {
 				if newMon.ID == oldMon.ID {
 					found = true
@@ -107,6 +119,7 @@ func main() {
 func shutdown() {
 	log.Println("### Runner shuting down, attempting clean exit")
 	db.Close()
+
 	for _, m := range monitors {
 		log.Println("### Stopping monitor:", m.Name)
 		go m.Stop()

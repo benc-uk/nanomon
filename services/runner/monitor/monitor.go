@@ -12,9 +12,9 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
-const TYPE_HTTP = "http"
-const TYPE_PING = "ping"
-const TYPE_TCP = "tcp"
+const typeHTTP = "http"
+const typePing = "ping"
+const typeTCP = "tcp"
 
 type Monitor struct {
 	ID               string `bson:"_id"`
@@ -40,7 +40,11 @@ func NewMonitor(db *database.DB) *Monitor {
 
 // Use a timer.Ticker to run this monitor in the background
 func (m *Monitor) Start() {
-	log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
+	if m.Enabled {
+		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
+	} else {
+		log.Printf("### Monitor '%s' is disabled, will not be run", m.Name)
+	}
 
 	// This offsets the start by random amount preventing monitors from running at the same time
 	delaySecs := rand.Intn(int(m.IntervalDuration.Seconds()))
@@ -52,10 +56,8 @@ func (m *Monitor) Start() {
 
 	// This will block, so Start() should always be called with a goroutine
 	for {
-		select {
-		case <-m.ticker.C:
-			m.run()
-		}
+		<-m.ticker.C
+		m.run()
 	}
 }
 
@@ -65,18 +67,19 @@ func (m *Monitor) run() {
 	}
 
 	var result *types.Result
+
 	var outputs map[string]interface{}
 
 	log.Printf("### Running monitor '%s' at '%s'", m.Name, m.Target)
 
 	switch m.Type {
-	case TYPE_HTTP:
+	case typeHTTP:
 		result, outputs = m.runHTTP()
 
-	case TYPE_PING:
+	case typePing:
 		result, outputs = m.runPing()
 
-	case TYPE_TCP:
+	case typeTCP:
 		result, outputs = m.runTCP()
 
 	default:
@@ -104,32 +107,35 @@ func (m *Monitor) run() {
 
 		ruleExp, err := govaluate.NewEvaluableExpressionWithFunctions(m.Rule, functions)
 		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule error: "+err.Error()))
-			storeResult(m.db, *result)
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
+			_ = storeResult(m.db, *result)
+
 			return
 		}
 
 		res, err := ruleExp.Evaluate(outputs)
 		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule error: "+err.Error()))
-			storeResult(m.db, *result)
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
+			_ = storeResult(m.db, *result)
+
 			return
 		}
 
 		ruleResult, isBool := res.(bool)
 		if !isBool {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("Rule didn't return a bool"))
-			storeResult(m.db, *result)
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
+			_ = storeResult(m.db, *result)
+
 			return
 		}
 
 		if !ruleResult {
-			result.Status = types.STATUS_ERROR
-			result.Message = fmt.Sprintf("Rule breached: %s", m.Rule)
+			result.Status = types.StatusError
+			result.Message = fmt.Sprintf("Rule failed: %s", m.Rule)
 		}
 	}
 
-	storeResult(m.db, *result)
+	_ = storeResult(m.db, *result)
 }
 
 func (m *Monitor) Stop() {

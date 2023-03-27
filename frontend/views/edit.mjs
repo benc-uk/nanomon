@@ -10,7 +10,7 @@ export const editComponent = (api) => ({
     tcp: 'Outputs: <b>respTime, ipAddress</b>',
   },
   allowedProps: {
-    http: ['method', 'timeout', 'validateTLS'],
+    http: ['method', 'timeout', 'validateTLS', 'body', 'headers'],
     ping: ['timeout', 'count', 'interval'],
     tcp: ['timeout'],
   },

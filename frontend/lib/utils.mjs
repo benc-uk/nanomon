@@ -40,7 +40,7 @@ export function monitorIcon(monitor) {
     case 'http':
       return '<i class="fas fa-globe"></i>'
     case 'ping':
-      return '<i class="fas fa-heart-pulse"></i>'
+      return '<i class="fas fa-satellite-dish"></i>'
     case 'tcp':
       return '<i class="fas fa-plug"></i>'
 

@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"monitr/services/common/database"
 	"monitr/services/common/types"
+	"os"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -86,7 +87,9 @@ func (m *Monitor) run() {
 		return
 	}
 
-	log.Printf("### Monitor '%s' outputs: %v", m.Name, outputs)
+	if os.Getenv("DEBUG") == "true" {
+		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, outputs)
+	}
 
 	if m.Rule != "" && outputs != nil {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
@@ -119,7 +122,10 @@ func (m *Monitor) run() {
 		}
 	}
 
-	_ = storeResult(m.db, *result)
+	err := storeResult(m.db, *result)
+	if err != nil {
+		log.Printf("### Error storing result: %s", err.Error())
+	}
 }
 
 func (m *Monitor) Stop() {

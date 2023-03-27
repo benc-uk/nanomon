@@ -22,16 +22,16 @@ type API struct {
 }
 
 func (api API) addAnonymousRoutes(r chi.Router) {
-	r.Get("/monitors", api.getMonitors)
-	r.Get("/monitors/{id}", api.getMonitor)
-	r.Get("/monitors/{id}/results", api.getMonitorResults)
-	r.Get("/results", api.getResults)
+	r.Get("/api/monitors", api.getMonitors)
+	r.Get("/api/monitors/{id}", api.getMonitor)
+	r.Get("/api/monitors/{id}/results", api.getMonitorResults)
+	r.Get("/api/results", api.getResults)
 }
 
 func (api API) addProtectedRoutes(r chi.Router) {
-	r.Post("/monitors", api.createMonitor)
-	r.Delete("/monitors/{id}", api.deleteMonitor)
-	r.Put("/monitors/{id}", api.updateMonitor)
+	r.Post("/api/monitors", api.createMonitor)
+	r.Delete("/api/monitors/{id}", api.deleteMonitor)
+	r.Put("/api/monitors/{id}", api.updateMonitor)
 }
 
 func NewAPI(db *database.DB) API {

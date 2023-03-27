@@ -2,10 +2,12 @@ package monitor
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"io"
 	"monitr/services/common/types"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,7 +22,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 
 	methodProp := m.Properties["method"]
 	if methodProp != "" {
-		method = "GET"
+		method = strings.ToUpper(methodProp)
 	}
 
 	timeoutProp := m.Properties["timeout"]
@@ -42,6 +44,23 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	req, err := http.NewRequest(method, m.Target, nil)
 	if err != nil {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+	}
+
+	if m.Properties["body"] != "" {
+		req.Body = io.NopCloser(strings.NewReader(m.Properties["body"]))
+	}
+
+	if m.Properties["headers"] != "" {
+		var headers map[string]string
+
+		err = json.Unmarshal([]byte(m.Properties["headers"]), &headers)
+		if err != nil {
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		}
+
+		for k, v := range headers {
+			req.Header.Add(k, v)
+		}
 	}
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !validateTLS}

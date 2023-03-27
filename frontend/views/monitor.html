@@ -28,8 +28,12 @@
       <table class="table-sm">
         <tbody>
           <tr>
-            <td style="width: 8rem">Status:</td>
-            <td x-html="`<i class='${status?.icon}'></i> ${status?.text || 'None'}`" class="fw-bold"></td>
+            <td style="width: 8rem">Type:</td>
+            <td x-html="`${icon} ${monitor.type}`"></td>
+          </tr>
+          <tr>
+            <td>Status:</td>
+            <td x-html="`<i class='${status?.icon}'></i> ${status?.text || 'None'}`"></td>
           </tr>
           <tr>
             <td>Target:</td>
@@ -38,10 +42,6 @@
           <tr x-show="results[0]?.message">
             <td>Message:</td>
             <td x-text="results[0]?.message"></td>
-          </tr>
-          <tr>
-            <td>Type:</td>
-            <td x-html="`${icon} ${monitor.type}`"></td>
           </tr>
           <tr>
             <td>Interval:</td>
@@ -53,7 +53,7 @@
           </tr>
           <tr x-show="monitor.rule">
             <td>Rule(s):</td>
-            <td x-text="monitor.rule" class="code"></td>
+            <td x-text="monitor.rule"></td>
           </tr>
           <tr>
             <td>Updated:</td>
@@ -107,7 +107,7 @@
               <td x-text="r.dateNice"></td>
               <td x-text="r.status"></td>
               <td x-text="r.value"></td>
-              <td x-text="r.message"></td>
+              <td x-text="r.message" style="font-size: 0.8rem"></td>
             </tr>
           </template>
         </tbody>

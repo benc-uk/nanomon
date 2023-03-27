@@ -1,29 +1,27 @@
 <div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
 
-<div class="d-flex flex-wrap">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th scope="col">Date</th>
-        <th scope="col">Monitor</th>
-        <th scope="col">Status</th>
-        <th scope="col">Value</th>
-        <th scope="col">Message</th>
+<table class="table table-hover border border-3 border-dark-subtle shadow-lg">
+  <thead>
+    <tr>
+      <th scope="col">Date</th>
+      <th scope="col">Monitor</th>
+      <th scope="col">Status</th>
+      <th scope="col">Value</th>
+      <th scope="col">Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <template x-for="r of results">
+      <tr :class="r.statusDetails.class">
+        <td x-text="r.dateNice"></td>
+        <td x-text="r.monitor_name"></td>
+        <td x-text="r.statusDetails.text"></td>
+        <td x-text="r.value"></td>
+        <td x-text="r.message || '-'" style="font-size: 0.8rem"></td>
       </tr>
-    </thead>
-    <tbody>
-      <template x-for="r of results">
-        <tr :class="r.statusDetails.class">
-          <td x-text="r.dateNice"></td>
-          <td x-text="r.monitor_name"></td>
-          <td x-text="r.statusDetails.text"></td>
-          <td x-text="r.value"></td>
-          <td x-text="r.message || '-'" style="font-size: 0.8rem"></td>
-        </tr>
-      </template>
-    </tbody>
-  </table>
-</div>
+    </template>
+  </tbody>
+</table>
 
 <div class="footer text-muted mt-4">
   <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">

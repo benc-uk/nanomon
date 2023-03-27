@@ -18,7 +18,9 @@
           <div class="pt-3" x-text="m.message"></div>
         </div>
         <div class="mini-graph">
-          <canvas :id="`chart_${m.id}`"></canvas>
+          <a :href="'#monitor/'+m.id">
+            <canvas :id="`chart_${m.id}`"></canvas>
+          </a>
         </div>
       </div>
     </div>

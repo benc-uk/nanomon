@@ -17,5 +17,8 @@ jobs:
       with:
         go-version: 1.19
 
+    - name: Build
+      run: make build
+
     - name: Linting of Go code
       uses: golangci/golangci-lint-action@v3

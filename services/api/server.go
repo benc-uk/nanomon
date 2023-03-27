@@ -75,11 +75,12 @@ func main() {
 	// Anonymous routes
 	router.Group(func(publicRouter chi.Router) {
 		// Add Prometheus metrics endpoint, must be before the other routes
-		api.AddMetricsEndpoint(publicRouter, "metrics")
+		api.AddMetricsEndpoint(publicRouter, "api/metrics")
 
 		// Add optional root, health & status endpoints
-		api.AddHealthEndpoint(publicRouter, "health")
-		api.AddStatusEndpoint(publicRouter, "status")
+		api.AddHealthEndpoint(publicRouter, "api/health")
+		api.AddStatusEndpoint(publicRouter, "api/status")
+		api.AddOKEndpoint(publicRouter, "api/")
 		api.AddOKEndpoint(publicRouter, "")
 
 		api.addAnonymousRoutes(publicRouter)

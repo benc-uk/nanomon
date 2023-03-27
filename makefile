@@ -17,7 +17,7 @@ AIR_PATH := $(REPO_DIR)/bin/air
 BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner
+.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)
@@ -37,6 +37,11 @@ lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	$(GOLINT_PATH) run --fix
+
+build: ## 🏗️ Build all binaries into bin directory
+	@figlet $@ || true
+	@mkdir -p bin
+	@go build -o bin monitr/services/...
 
 images: ## 📦 Build all container images
 	@figlet $@ || true

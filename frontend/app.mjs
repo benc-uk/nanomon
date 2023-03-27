@@ -12,7 +12,7 @@ import { aboutComponent } from './views/about.mjs'
 
 export let VERSION = '0.0.1'
 export let BUILD_INFO = 'None'
-export let API_ENDPOINT = 'http://localhost:8000'
+export let API_ENDPOINT = 'http://localhost:8000/api'
 export let AUTH_CLIENT_ID = ''
 
 let msalApp = null
@@ -119,7 +119,7 @@ async function startApp() {
     const configResp = await fetch('config')
     if (configResp.ok) {
       const config = await configResp.json()
-      API_ENDPOINT = config.API_ENDPOINT || 'http://localhost:8000'
+      API_ENDPOINT = config.API_ENDPOINT || 'http://localhost:8000/api'
       AUTH_CLIENT_ID = config.AUTH_CLIENT_ID || ''
       VERSION = config.VERSION || '0.0.1'
       BUILD_INFO = config.BUILD_INFO || 'None'

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitr-front
+spec:
+  selector:
+    matchLabels:
+      app: monitr-front
+  template:
+    metadata:
+      labels:
+        app: monitr-front
+    spec:
+      containers:
+      - name: monitr-front
+        image: ghcr.io/benc-uk/monitr-frontend:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        env:
+          - name: API_ENDPOINT
+            value: /api
+        ports:
+          - containerPort: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitr-front
+spec:
+  selector:
+    app: monitr-front
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8001

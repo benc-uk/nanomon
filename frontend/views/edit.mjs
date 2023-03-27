@@ -21,14 +21,18 @@ export const editComponent = (api) => ({
     window.addEventListener('view-changed', async (e) => {
       const view = e.detail
 
-      if (!view || !view.startsWith('#edit')) return
+      if (!view || !view.startsWith('#edit')) {
+        return
+      }
 
       this.monId = view.split('#edit/')[1]
-      if (this.monId == 'new') {
+      if (this.monId === 'new') {
         this.newMonitor()
         return
       } else {
-        if (!this.monId) return
+        if (!this.monId) {
+          return
+        }
 
         try {
           const monitor = await api.getMonitor(this.monId)
@@ -97,7 +101,7 @@ export const editComponent = (api) => ({
 
   async save() {
     try {
-      if (this.monId == 'new') {
+      if (this.monId === 'new') {
         await api.createMonitor(this.monitor)
         window.location.hash = '#home'
       } else {
@@ -110,9 +114,9 @@ export const editComponent = (api) => ({
   },
 
   canSave() {
-    let ok = this.monitor.name != '' && this.monitor.type != '' && this.monitor.interval != '' && this.monitor.target != ''
+    let ok = this.monitor.name !== '' && this.monitor.type !== '' && this.monitor.interval !== '' && this.monitor.target !== ''
 
-    // regex to check interval ends with 's' or 'm' or 'h' and starts with floating point number
+    // Regex to check interval ends with 's' or 'm' or 'h' and starts with floating point number
     const intervalRegex = /^(\d+\.?\d*)(s|m|h)$/
     if (!intervalRegex.test(this.monitor.interval)) {
       ok = false

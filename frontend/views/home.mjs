@@ -22,7 +22,7 @@ export const homeComponent = (api) => ({
         this.intervalToken = null
 
         // Remove old charts
-        for (let c in charts) {
+        for (const c in charts) {
           charts[c].destroy()
           delete charts[c]
         }
@@ -61,7 +61,7 @@ export const homeComponent = (api) => ({
     this.loading = false
     this.updateText = new Date().toLocaleTimeString()
 
-    for (let m of monitors) {
+    for (const m of monitors) {
       const results = await api.getResultsForMonitor(m.id, 1)
       const last = new Date(results[0]?.date)
       m.message = results[0]?.message
@@ -79,7 +79,7 @@ export const homeComponent = (api) => ({
   },
 
   async updateCharts() {
-    for (let m of this.monitors) {
+    for (const m of this.monitors) {
       const results = await api.getResultsForMonitor(m.id, 20)
 
       // Build data arrays for chart

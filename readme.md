@@ -12,11 +12,11 @@ Monitr executes monitoring calls remotely over the network using standard protoc
 
 ### Monitor
 
-A *monitor* represents an instance of a given monitor *type* (see below) with it's associated configuration. Common properties of all monitors include the interval on which they are run, and the target. The target is *type* dependant but typically is a hostname or URL.
+A _monitor_ represents an instance of a given monitor _type_ (see below) with it's associated configuration. Common properties of all monitors include the interval on which they are run, and the target. The target is _type_ dependant but typically is a hostname or URL.
 
 ### Result
 
-When a *monitor* runs it generates a *result*. The *result* as the name implies, holds the results of a run of a monitor, such as the timestamp, status, message and a value. The value of a *result* is dependant on the type of *monitor* however it currently represents the duration of the execution in millseconds.
+When a _monitor_ runs it generates a _result_. The _result_ as the name implies, holds the results of a run of a monitor, such as the timestamp, status, message and a value. The value of a _result_ is dependant on the type of _monitor_ however it currently represents the duration of the execution in millseconds.
 
 ### Monitor Type
 
@@ -59,10 +59,14 @@ Env vars used only by the frontend host:
 
 | _Name_       | _Description_                                    | _Default_ |
 | ------------ | ------------------------------------------------ | --------- |
-| API_ENDPOINT | Instructs the frontend SPA where to find the API | /         |
+| API_ENDPOINT | Instructs the frontend SPA where to find the API | /api      |
 
 Env vars used only by the runner:
 
-| _Name_                  | _Description_                                     | _Default_ |
-| ----------------------- | ------------------------------------------------- | --------- |
-| MONITOR_CHANGE_INTERVAL | How frequently to check for configuration changes | 120s      |
+| _Name_                  | _Description_                                                      | _Default_ |
+| ----------------------- | ------------------------------------------------------------------ | --------- |
+| MONITOR_CHANGE_INTERVAL | How frequently to check for configuration changes                  | 120s      |
+| ALERT_SMTP_PASSWORD     | For alerting, the password for mail server                         | _blank_   |
+| ALERT_SMTP_FROM         | Username and from address for alerts                               | _blank_   |
+| ALERT_SMTP_TO           | Address alert emails are sent to                                   | _blank_   |
+| ALERT_FAIL_COUNT        | How many time a monitor needs to fail in a row to trigger an alert | 3         |

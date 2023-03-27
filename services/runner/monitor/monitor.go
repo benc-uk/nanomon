@@ -27,6 +27,8 @@ type Monitor struct {
 	Rule             string
 	Target           string
 	Properties       map[string]string
+	FailCount        int
+	FailedState      bool
 
 	ticker *time.Ticker
 	db     *database.DB
@@ -95,7 +97,7 @@ func (m *Monitor) run() {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
-			_ = storeResult(m.db, *result)
+			_ = storeResult(m, *result)
 
 			return
 		}
@@ -103,7 +105,7 @@ func (m *Monitor) run() {
 		res, err := ruleExp.Evaluate(outputs)
 		if err != nil {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
-			_ = storeResult(m.db, *result)
+			_ = storeResult(m, *result)
 
 			return
 		}
@@ -111,7 +113,7 @@ func (m *Monitor) run() {
 		ruleResult, isBool := res.(bool)
 		if !isBool {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
-			_ = storeResult(m.db, *result)
+			_ = storeResult(m, *result)
 
 			return
 		}
@@ -122,7 +124,7 @@ func (m *Monitor) run() {
 		}
 	}
 
-	err := storeResult(m.db, *result)
+	err := storeResult(m, *result)
 	if err != nil {
 		log.Printf("### Error storing result: %s", err.Error())
 	}

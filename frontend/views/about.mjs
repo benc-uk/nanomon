@@ -1,10 +1,10 @@
-import { API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO } from '../app.mjs'
+import { config } from '../app.mjs'
 
 export const aboutComponent = (api) => ({
-  clientID: AUTH_CLIENT_ID,
-  apiEndpoint: API_ENDPOINT,
-  version: VERSION,
-  buildInfo: BUILD_INFO,
+  clientID: config.AUTH_CLIENT_ID,
+  apiEndpoint: config.API_ENDPOINT,
+  version: config.VERSION,
+  buildInfo: config.BUILD_INFO,
 
   async init() {},
 })

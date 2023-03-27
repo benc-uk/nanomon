@@ -50,7 +50,7 @@ export class APIClient {
           scopes: this.apiScopes,
         })
       }
-      if (!tokenRes) throw new Error('Failed to get auth token')
+      if (!tokenRes) {throw new Error('Failed to get auth token')}
     }
 
     const headers = new Headers({ 'Content-Type': 'application/json' })

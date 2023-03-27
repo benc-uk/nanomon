@@ -2,9 +2,12 @@ package monitor
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"monitr/services/common/database"
 	"monitr/services/common/types"
+	"os"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -40,13 +43,46 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	return monitors, nil
 }
 
-func storeResult(db *database.DB, r types.Result) error {
+func storeResult(m *Monitor, r types.Result) error {
+	maxFailCount := 3
+	maxFailCountEnv := os.Getenv("ALERT_FAIL_COUNT")
+
+	if maxFailCountEnv != "" {
+		maxFailCount, _ = strconv.Atoi(maxFailCountEnv)
+	}
+
+	if r.Status > 0 {
+		m.FailCount++
+	} else {
+		m.FailCount = 0
+		m.FailedState = false
+	}
+
+	if m.FailCount >= maxFailCount && !m.FailedState {
+		log.Printf("###   Sending email alert")
+
+		body := fmt.Sprintf(`Monitor '%s' has failed %d times!
+  - Reason:%s
+  - When: %s
+
+Configuration:
+  - Target: %s
+  - Type: %s
+  - Interval: %s
+  - Rule: %s
+  - Properties: %+v`, m.Name, m.FailCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
+			m.Target, m.Type, m.Interval, m.Rule, m.Properties)
+		sendEmail(body, fmt.Sprintf("⚠️ Monitr alert for: %s", m.Name))
+
+		m.FailedState = true
+	}
+
 	log.Printf("###   Storing result: %d %s", r.Status, r.Message)
 
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), m.db.Timeout)
 	defer cancel()
 
-	_, err := db.Results.InsertOne(ctx, r)
+	_, err := m.db.Results.InsertOne(ctx, r)
 
 	return err
 }

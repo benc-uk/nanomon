@@ -18,10 +18,14 @@ export const monitorComponent = (api, userAccount) => ({
     window.addEventListener('view-changed', async (e) => {
       const view = e.detail
 
-      if (!view || !view.startsWith('#monitor')) return
+      if (!view || !view.startsWith('#monitor')) {
+        return
+      }
 
       const monId = view.split('#monitor/')[1]
-      if (!monId) return
+      if (!monId) {
+        return
+      }
 
       this.loadMonitor(monId)
     })
@@ -58,8 +62,8 @@ export const monitorComponent = (api, userAccount) => ({
         resultLabels.push(r.date.replace('T', ' ').split('.')[0])
       }
 
-      let chartStatus = Chart.getChart('graph')
-      if (chartStatus != undefined) {
+      const chartStatus = Chart.getChart('graph')
+      if (chartStatus !== undefined) {
         chartStatus.destroy()
       }
 

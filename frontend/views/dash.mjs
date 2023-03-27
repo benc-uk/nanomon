@@ -53,7 +53,7 @@ export const dashComponent = (api) => ({
     this.loading = false
     this.updateText = new Date().toLocaleTimeString()
 
-    for (let m of monitors) {
+    for (const m of monitors) {
       const results = await api.getResultsForMonitor(m.id, 1)
       m.status = getStatusFields(results[0]?.status)
       m.icon = monitorIcon(m)

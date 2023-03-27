@@ -35,6 +35,8 @@ WORKDIR /app
 
 # Copy the Go server binary
 COPY --from=go-build /build/frontend . 
+
+# Copy the HTML/JS/CSS files for the frontend app into same directory
 COPY frontend/ .
 
 ENV PORT=8001

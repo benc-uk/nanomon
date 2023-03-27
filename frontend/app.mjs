@@ -10,12 +10,8 @@ import { dashComponent } from './views/dash.mjs'
 import { resultsComponent } from './views/results.mjs'
 import { aboutComponent } from './views/about.mjs'
 
-export let VERSION = '0.0.1'
-export let BUILD_INFO = 'None'
-export let API_ENDPOINT = 'http://localhost:8000/api'
-export let AUTH_CLIENT_ID = ''
-
 let msalApp = null
+export let config = {}
 
 Alpine.data('app', () => ({
   view: '#home',
@@ -24,12 +20,11 @@ Alpine.data('app', () => ({
 
   async init() {
     console.log('### Starting Monitr frontend')
-    console.log(`### API: ${API_ENDPOINT} clientId: ${AUTH_CLIENT_ID || 'None'}`)
 
-    if (AUTH_CLIENT_ID) {
+    if (config.AUTH_CLIENT_ID) {
       msalApp = new msal.PublicClientApplication({
         auth: {
-          clientId: AUTH_CLIENT_ID,
+          clientId: config.AUTH_CLIENT_ID,
           redirectUri: window.location.origin,
         },
         cache: {
@@ -53,7 +48,7 @@ Alpine.data('app', () => ({
       this.userAccount = 'AUTH_DISABLED'
     }
 
-    this.api = new APIClient(API_ENDPOINT, [`api://${AUTH_CLIENT_ID}/system.admin`], msalApp)
+    this.api = new APIClient(config.API_ENDPOINT, [`api://${config.AUTH_CLIENT_ID}/system.admin`], msalApp)
 
     // Support linking to specific views
     if (window.location.hash) {
@@ -118,16 +113,20 @@ async function startApp() {
   try {
     const configResp = await fetch('config')
     if (configResp.ok) {
-      const config = await configResp.json()
-      API_ENDPOINT = config.API_ENDPOINT || 'http://localhost:8000/api'
-      AUTH_CLIENT_ID = config.AUTH_CLIENT_ID || ''
-      VERSION = config.VERSION || '0.0.1'
-      BUILD_INFO = config.BUILD_INFO || 'None'
-      console.log('### Config loaded:', config)
+      config = await configResp.json()
+    } else {
+      throw new Error('Unable to fetch config')
     }
   } catch (err) {
     console.warn('### Unable to fetch from /config. Defaults will be used')
+    config = {
+      API_ENDPOINT: 'http://localhost:8000/api',
+      AUTH_CLIENT_ID: '',
+      VERSION: '__DEFUALT__',
+      BUILD_INFO: '__DEFUALT__',
+    }
   }
+  console.log(`### Config: ${JSON.stringify(config)}`)
 
   Alpine.start()
 }

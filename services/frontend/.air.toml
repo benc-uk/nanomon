@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 [build]
 include_ext = [ "go" ]
 include_dir = [ "services/frontend" ]
-cmd = "go build -o ./tmp/main monitr/services/frontend"
+cmd = "go build -o ./tmp/main nanomon/services/frontend"
 
 [misc]
 clean_on_exit = true

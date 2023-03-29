@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
-	"monitr/services/common/types"
+	"nanomon/services/common/types"
 	"net/http"
 	"strconv"
 	"strings"

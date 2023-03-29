@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monitr-runner
+  name: nanomon-runner
 spec:
   selector:
     matchLabels:
-      app: monitr-runner
+      app: nanomon-runner
   template:
     metadata:
       labels:
-        app: monitr-runner
+        app: nanomon-runner
     spec:
       containers:
-      - name: monitr-runner
-        image: ghcr.io/benc-uk/monitr-runner:latest
+      - name: nanomon-runner
+        image: ghcr.io/benc-uk/nanomon-runner:latest
         imagePullPolicy: Always
         resources:
           limits:

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monitr-api
+  name: nanomon-api
 spec:
   selector:
     matchLabels:
-      app: monitr-api
+      app: nanomon-api
   template:
     metadata:
       labels:
-        app: monitr-api
+        app: nanomon-api
     spec:
       containers:
-      - name: monitr-api
-        image: ghcr.io/benc-uk/monitr-api:latest
+      - name: nanomon-api
+        image: ghcr.io/benc-uk/nanomon-api:latest
         imagePullPolicy: Always
         resources:
           limits:
@@ -28,11 +28,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: monitr-api
+  name: nanomon-api
 spec:
   type: LoadBalancer
   selector:
-    app: monitr-api
+    app: nanomon-api
   ports:
     - protocol: TCP
       port: 80

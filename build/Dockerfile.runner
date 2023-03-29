@@ -29,7 +29,7 @@ COPY services/common/ ./services/common/
 RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
   go build \
   -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
-  -o runner monitr/services/runner
+  -o runner nanomon/services/runner
 
 # ================================================================================================
 # === Stage 2: Get binary into a lightweight container ===========================================

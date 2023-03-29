@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monitr-front
+  name: nanomon-front
 spec:
   selector:
     matchLabels:
-      app: monitr-front
+      app: nanomon-front
   template:
     metadata:
       labels:
-        app: monitr-front
+        app: nanomon-front
     spec:
       containers:
-      - name: monitr-front
-        image: ghcr.io/benc-uk/monitr-frontend:latest
+      - name: nanomon-front
+        image: ghcr.io/benc-uk/nanomon-frontend:latest
         imagePullPolicy: Always
         resources:
           limits:
@@ -22,16 +22,18 @@ spec:
         env:
           - name: API_ENDPOINT
             value: /api
+          - name: AUTH_CLIENT_ID
+            value: 1751320d-d880-4d1c-92d5-d41eacef87bc
         ports:
           - containerPort: 8001
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: monitr-front
+  name: nanomon-front
 spec:
   selector:
-    app: monitr-front
+    app: nanomon-front
   ports:
     - protocol: TCP
       port: 80

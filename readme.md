@@ -1,6 +1,6 @@
-# Monitr - Monitoring tool & microservices reference app
+# NanoMon - Monitoring tool & microservices reference app
 
-Monitr is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components
 
 ## Architecture
 
@@ -8,7 +8,7 @@ Some picture here
 
 ## Concepts
 
-Monitr executes monitoring calls remotely over the network using standard protocols, it does this periodically per monitor, and validates the results of the execution to determine the status or success. There are currently three statuses: **OK, Error** & **Failed**
+NanoMon executes monitoring calls remotely over the network using standard protocols, it does this periodically per monitor, and validates the results of the execution to determine the status or success. There are currently three statuses: **OK, Error** & **Failed**
 
 ### Monitor
 
@@ -45,14 +45,14 @@ Env vars used by both API service and runner:
 | _Name_        | _Description_                                | _Default_                 |
 | ------------- | -------------------------------------------- | ------------------------- |
 | MONGO_URI     | Connection string for MongoDB                | mongodb://localhost:27017 |
-| MONGO_DB      | Database name to use                         | monitr                    |
+| MONGO_DB      | Database name to use                         | nanomon                   |
 | MONGO_TIMEOUT | Timeout for connecting to & querying MongoDB | 10s                       |
 
 Env vars used by the API and frontend host:
 
 | _Name_         | _Description_                 | _Default_   |
 | -------------- | ----------------------------- | ----------- |
-| PORT           | Port for service to listen on | 8001 & 8001 |
+| PORT           | TCP port for service to listen on | 8000 & 8001 |
 | AUTH_CLIENT_ID | Used to enable authentication | _blank_     |
 
 Env vars used only by the frontend host:

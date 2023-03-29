@@ -2,7 +2,7 @@
 // Copyright (c) Ben Coleman, 2020
 // Licensed under the MIT License.
 //
-// Monitr API server
+// NanoMon API server
 // ----------------------------------------------------------------------------
 
 package main
@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"time"
 
-	"monitr/services/common/database"
+	"nanomon/services/common/database"
 
 	"github.com/benc-uk/go-rest-api/pkg/auth"
 	"github.com/benc-uk/go-rest-api/pkg/env"
@@ -29,7 +29,7 @@ var (
 	healthy     = true               // Simple health flag
 	version     = "0.0.1"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
 	buildInfo   = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
-	serviceName = "Monitr"
+	serviceName = "NanoMon"
 	defaultPort = 8000
 )
 
@@ -49,7 +49,7 @@ func main() {
 	// Some basic middleware, change as you see fit, see: https://github.com/go-chi/chi#core-middlewares
 	router.Use(middleware.RealIP)
 	// Filtered request logger, exclude /metrics & /health endpoints
-	router.Use(logging.NewFilteredRequestLogger(regexp.MustCompile(`(^/metrics)|(^/health)`)))
+	router.Use(logging.NewFilteredRequestLogger(regexp.MustCompile(`(^/api/metrics)|(^/api/health)`)))
 	router.Use(middleware.Recoverer)
 
 	// Some custom middleware for CORS

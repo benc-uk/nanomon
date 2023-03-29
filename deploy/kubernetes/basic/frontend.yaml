@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monitr-front
+  name: nanomon-front
 spec:
   selector:
     matchLabels:
-      app: monitr-front
+      app: nanomon-front
   template:
     metadata:
       labels:
-        app: monitr-front
+        app: nanomon-front
     spec:
       containers:
-      - name: monitr-front
-        image: ghcr.io/benc-uk/monitr-frontend:latest
+      - name: nanomon-front
+        image: ghcr.io/benc-uk/nanomon-frontend:latest
         imagePullPolicy: Always
         resources:
           limits:
@@ -28,11 +28,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: monitr-front
+  name: nanomon-front
 spec:
   type: LoadBalancer
   selector:
-    app: monitr-front
+    app: nanomon-front
   ports:
     - protocol: TCP
       port: 80

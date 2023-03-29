@@ -11,6 +11,8 @@ WORKDIR /build
 
 # Install system dependencies, if CGO_ENABLED=1
 RUN if [[ $CGO_ENABLED -eq 1 ]]; then apk update && apk add gcc musl-dev; fi
+# Without the root certs the runner can't make really make HTTPS calls
+RUN apk add --no-cache ca-certificates
 
 # Fetch and cache Go modules
 COPY go.mod .
@@ -26,7 +28,7 @@ COPY services/common/ ./services/common/
 RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
   go build \
   -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
-  -o api monitr/services/api
+  -o api nanomon/services/api
 
 # ================================================================================================
 # === Stage 2: Get binary into a lightweight container ===========================================
@@ -36,6 +38,7 @@ WORKDIR /app
 
 # Copy the Go server binary
 COPY --from=go-build /build/api . 
+COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENV PORT=8000
 

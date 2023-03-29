@@ -1,4 +1,4 @@
-module monitr
+module nanomon
 
 go 1.20
 

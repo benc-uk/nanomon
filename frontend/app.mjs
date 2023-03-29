@@ -19,7 +19,7 @@ Alpine.data('app', () => ({
   userAccount: null,
 
   async init() {
-    console.log('### Starting Monitr frontend')
+    console.log('### Starting NanoMon frontend')
 
     if (config.AUTH_CLIENT_ID) {
       msalApp = new msal.PublicClientApplication({

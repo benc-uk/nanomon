@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"monitr/services/common/database"
-	"monitr/services/runner/monitor"
+	"nanomon/services/common/database"
+	"nanomon/services/runner/monitor"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,7 +36,7 @@ func main() {
 
 	changeInterval, _ := time.ParseDuration(changeIntervalEnv)
 
-	log.Println("### 🏃 Monitr runner is starting...")
+	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
 	log.Println("### Checking for monitor changes every", changeIntervalEnv)
 

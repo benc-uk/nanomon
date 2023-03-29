@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"monitr/services/common/database"
-	"monitr/services/common/types"
+	"nanomon/services/common/database"
+	"nanomon/services/common/types"
 	"os"
 	"time"
 

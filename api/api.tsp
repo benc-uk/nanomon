@@ -1,13 +1,13 @@
 // ===============================================================
-// TypeSpec definitions for Monitr API
+// TypeSpec definitions for NanoMon API
 // ===============================================================
 import "@typespec/http";
 
 using TypeSpec.Http;
 
-@doc("This is the Monitr REST API")
+@doc("This is the NanoMon REST API")
 @service({
-  title: "Monitr API Service",
+  title: "NanoMon API Service",
   version: "2023-03-12",
 })
 @server("http://localhost:8000", "Local dev server endpoint")

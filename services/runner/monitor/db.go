@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"monitr/services/common/database"
-	"monitr/services/common/types"
+	"nanomon/services/common/database"
+	"nanomon/services/common/types"
 	"os"
 	"strconv"
 	"time"
@@ -72,7 +72,7 @@ Configuration:
   - Rule: %s
   - Properties: %+v`, m.Name, m.FailCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
 			m.Target, m.Type, m.Interval, m.Rule, m.Properties)
-		sendEmail(body, fmt.Sprintf("⚠️ Monitr alert for: %s", m.Name))
+		sendEmail(body, fmt.Sprintf("⚠️ NanoMon alert for: %s", m.Name))
 
 		m.FailedState = true
 	}

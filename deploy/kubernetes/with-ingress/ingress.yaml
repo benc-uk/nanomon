@@ -1,26 +1,30 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: monitr
+  name: nanomon
   labels:
-    name: monitr
+    name: nanomon
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts: 
+    - nanomon.kube.benco.io
+    secretName: benco-io-cert
   rules:
-  - host: monitr.kube.benco.io
+  - host: nanomon.kube.benco.io
     http:
       paths:
       - pathType: Prefix
         path: "/"
         backend:
           service:
-            name: monitr-front
+            name: nanomon-front
             port: 
               number: 8001
       - pathType: Prefix
         path: "/api/"
         backend:
           service:
-            name: monitr-api
+            name: nanomon-api
             port: 
               number: 8000              

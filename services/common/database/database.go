@@ -38,7 +38,7 @@ func ConnectToDB() *DB {
 
 	mongoDB := os.Getenv("MONGO_DB")
 	if mongoDB == "" {
-		mongoDB = "monitr"
+		mongoDB = "nanomon"
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)

@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"monitr/services/common/types"
+	"nanomon/services/common/types"
 	"strconv"
 	"time"
 

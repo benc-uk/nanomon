@@ -1,6 +1,6 @@
 apiVersion: v2
-name: monitr
-description: Deploy Monitr, a HTTP and network monitoring tool
+name: nanomon
+description: Deploy NanoMon, a HTTP and network monitoring tool
 
 # A chart can be either an 'application' or a 'library' chart.
 #

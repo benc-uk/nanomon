@@ -22,3 +22,11 @@ jobs:
 
     - name: Linting of Go code
       uses: golangci/golangci-lint-action@v3
+
+    - name: Build images
+      if: github.ref == 'refs/heads/main'
+      env:
+        IMAGE_TAG: dev-ci
+        VERSION: dev-ci
+        BUILD_INFO: 'CI build, SHA:${{ github.sha }}'
+      run: make images

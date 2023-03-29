@@ -2,7 +2,7 @@
 // Copyright (c) Ben Coleman, 2020
 // Licensed under the MIT License.
 //
-// Implementation of the Monitr API routes
+// Implementation of the NanoMon API routes
 // ----------------------------------------------------------------------------
 
 package main
@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"monitr/services/common/types"
+	"nanomon/services/common/types"
 	"net/http"
 	"strconv"
 	"time"

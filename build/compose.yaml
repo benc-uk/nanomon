@@ -16,7 +16,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      API_ENDPOINT: http://xxxxxxlocalhost:8000
+      API_ENDPOINT: http://localhost:8000
     networks:
       - front
 

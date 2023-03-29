@@ -11,7 +11,7 @@ API_ENDPOINT ?= http://localhost:8000/api
 
 # Override these if building your own images
 IMAGE_REG ?= ghcr.io
-IMAGE_NAME ?= benc-uk/monitr
+IMAGE_NAME ?= benc-uk/nanomon
 IMAGE_TAG ?= latest
 
 # Things you don't want to change
@@ -54,7 +54,7 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 build: ## 🔨 Build all binaries into ./bin/ directory
 	@figlet $@ || true
 	@mkdir -p bin
-	@go build -o bin -ldflags "-X main.version=$(VERSION) -X 'main.buildInfo=$(BUILD_INFO)'" monitr/services/...
+	@go build -o bin -ldflags "-X main.version=$(VERSION) -X 'main.buildInfo=$(BUILD_INFO)'" nanomon/services/...
 
 images: ## 📦 Build all container images
 	@figlet $@ || true

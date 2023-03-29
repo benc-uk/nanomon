@@ -2,13 +2,13 @@
 // Copyright (c) Ben Coleman, 2020
 // Licensed under the MIT License.
 //
-// RESTful API for the Monitr service
+// RESTful API for the NanoMon service
 // ----------------------------------------------------------------------------
 
 package main
 
 import (
-	"monitr/services/common/database"
+	"nanomon/services/common/database"
 
 	"github.com/benc-uk/go-rest-api/pkg/api"
 	"github.com/go-chi/chi/v5"

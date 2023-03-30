@@ -15,7 +15,7 @@ env:
   # Use the release tag
   IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
   VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
-  BUILD_INFO: "Stable build '${{ github.event.release.published_at }}'"
+  BUILD_INFO: "Stable build ${{ github.event.created_at }}"
 
 permissions:
   packages: write
@@ -27,10 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build images
-        run: make images
+      - run: echo VERSION |$VERSION| and IMAGE_TAG |$IMAGE_TAG| and BUILD_INFO |$BUILD_INFO|
+      # - name: Build images
+      #   run: make images
 
-      - name: Push images
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
-          make push
+      # - name: Push images
+      #   run: |
+      #     echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+      #     make push

@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: ["main"]
 
-env:
-  IMAGE_TAG: dev
-  VERSION: dev
-  BUILD_INFO: "CI build, SHA:${{ github.sha }}"
-
 jobs:
   ci-build:
     runs-on: ubuntu-latest
@@ -29,8 +24,15 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           working-directory: ./services
-
+  images:
+    runs-on: ubuntu-latest
+    needs: ci-build
+    steps:
       - name: Build images
+        env:
+          IMAGE_TAG: dev
+          VERSION: dev
+          BUILD_INFO: "CI build, SHA:${{ github.sha }}"
         if: github.ref == 'refs/heads/main'
         run: make images
 

@@ -1,0 +1,48 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  regRepo: ghcr.io/benc-uk
+  pullPolicy: Always
+  tag: latest
+  pullSecrets: []
+
+api:
+  replicaCount: 1
+  serviceType: ClusterIP
+  
+runner:
+  replicaCount: 1
+  monitorChangeInterval: 120s
+
+frontend:
+  replicaCount: 1
+  serviceType: ClusterIP
+  apiEndpoint:
+
+mongodb:
+  externalURI: 
+  enabled: true
+  architecture: standalone
+  useStatefulSet: true
+  persistence:
+    enabled: false
+    size: 1Gi
+    storageClass: default
+  auth:
+    enabled: false
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  host: 
+  tlsSecret: 
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

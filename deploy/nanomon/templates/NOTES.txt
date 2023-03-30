@@ -1,0 +1,27 @@
+{{- $scheme := ternary "http" "https" (eq .Values.ingress.tlsSecret "") -}}
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  🚦  NanoMon Was Deployed!  🚀   ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+ 
+{{- if not .Values.ingress.enabled }}
+NanoMon has been deployed, but no ingress was configured. To get the IP addresses run this command:
+kubectl get svc {{ include "nanomon.fullname" . }}-api {{ include "nanomon.fullname" . }}-frontend
+
+NOTE: Additional configuration e.g. frontend.apiEndpoint will most likely be required
+{{- else }}
+{{- if and .Values.ingress.host }}
+NanoMon frontend is accessible at {{ $scheme }}://{{ .Values.ingress.host }}/
+{{- else }}
+No host was provided for the ingress, this is generally a pretty bad idea :)
+But you can use the external IP of your ingress controller to access the app
+
+Run these two commands:
+INGRESS_IP=$(kubectl get ingress {{ include "nanomon.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo -e "\n\nNanoMon frontend is accessible at {{ $scheme }}://$INGRESS_IP/\n\n"
+{{- end }}
+{{- end }}
+{{- if .Values.mongodb.persistence.enabled }}
+
+NOTE: There might be a delay while MongoDB starts and is assigned a persistent volume 
+{{- end }}

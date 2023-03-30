@@ -1,0 +1,11 @@
+apiVersion: v2
+name: nanomon
+description: Deploy NanoMon, a HTTP and network monitoring tool
+type: application
+version: "0.0.1"
+appVersion: "0.0.1"
+dependencies:
+  - name: mongodb
+    repository: https://charts.bitnami.com/bitnami
+    condition: mongodb.enabled
+    version: 13.x.x

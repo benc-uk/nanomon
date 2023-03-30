@@ -6,8 +6,12 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  packages: write
+
 jobs:
-  ci-build:
+  lint-test:
+    name: Lint and run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,27 +19,33 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20
+          go-version: "^1.20.2"
 
-      - name: Build
+      - name: Install tools
+        run: make install-tools
+
+      - name: Run build
         run: make build
 
-      - name: Linting of Go code
-        uses: golangci/golangci-lint-action@v3
-        with:
-          working-directory: ./services
-  images:
+      - name: Run linting
+        run: make lint
+
+  image-build:
+    name: Build and push images
+    if: github.ref == 'refs/heads/main'
+    env:
+      IMAGE_TAG: dev
+      VERSION: dev
+      BUILD_INFO: "CI build, SHA:${{ github.sha }}"
     runs-on: ubuntu-latest
-    needs: ci-build
+    needs: lint-test
     steps:
+      - uses: actions/checkout@v3
+
       - name: Build images
-        env:
-          IMAGE_TAG: dev
-          VERSION: dev
-          BUILD_INFO: "CI build, SHA:${{ github.sha }}"
-        if: github.ref == 'refs/heads/main'
         run: make images
 
       - name: Push images
-        if: github.ref == 'refs/heads/main'
-        run: make push
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+          make push

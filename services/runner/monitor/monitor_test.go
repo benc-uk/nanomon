@@ -78,7 +78,7 @@ func TestMonitorRuleEval(t *testing.T) {
 	m.Enabled = true
 	m.Target = "http://example.net"
 	m.Type = typeHTTP
-	m.Rule = "blah > 6"
+	m.Rule = "ozzy > 6"
 
 	ok, _ := m.run()
 	if ok {

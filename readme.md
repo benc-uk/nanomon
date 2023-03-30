@@ -70,3 +70,9 @@ Env vars used only by the runner:
 | ALERT_SMTP_FROM         | Username and from address for alerts                               | _blank_   |
 | ALERT_SMTP_TO           | Address alert emails are sent to                                   | _blank_   |
 | ALERT_FAIL_COUNT        | How many time a monitor needs to fail in a row to trigger an alert | 3         |
+
+## Scratch Notes Area
+
+Using Cosmos DB
+Add index for the `date` field to the results collection
+`az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`

@@ -15,6 +15,8 @@ func sendEmail(body, subject string) {
 		return
 	}
 
+	log.Printf("###   Sending email alert")
+
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
 		"Subject: " + subject + "\n\n" +

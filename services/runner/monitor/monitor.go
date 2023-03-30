@@ -46,6 +46,12 @@ func (m *Monitor) Start() {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
 	} else {
 		log.Printf("### Monitor '%s' is disabled, will not be run", m.Name)
+		return
+	}
+
+	if m.IntervalDuration == 0 {
+		log.Printf("### Monitor '%s' has no interval, it can not be started", m.Name)
+		return
 	}
 
 	// This offsets the start by random amount preventing monitors from running at the same time
@@ -59,13 +65,18 @@ func (m *Monitor) Start() {
 	// This will block, so Start() should always be called with a goroutine
 	for {
 		<-m.ticker.C
-		m.run()
+		_, _ = m.run()
 	}
 }
 
-func (m *Monitor) run() {
+func (m *Monitor) run() (bool, *types.Result) {
 	if !m.Enabled {
-		return
+		return false, nil
+	}
+
+	if m.Target == "" {
+		log.Printf("### Monitor '%s' has no target, will be skipped", m.Name)
+		return false, nil
 	}
 
 	var result *types.Result
@@ -86,7 +97,7 @@ func (m *Monitor) run() {
 
 	default:
 		log.Printf("### Unknown monitor type '%s', will be skipped", m.Type)
-		return
+		return false, nil
 	}
 
 	if os.Getenv("DEBUG") == "true" {
@@ -94,20 +105,21 @@ func (m *Monitor) run() {
 	}
 
 	if m.Rule != "" && outputs != nil {
+		//log.Printf("### Running rule '%s' for monitor '%s'", m.Rule, m.Name)
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule expression error: "+err.Error()))
 			_ = storeResult(m, *result)
 
-			return
+			return false, result
 		}
 
 		res, err := ruleExp.Evaluate(outputs)
 		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule error: "+err.Error()))
+			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule eval error: "+err.Error()))
 			_ = storeResult(m, *result)
 
-			return
+			return false, result
 		}
 
 		ruleResult, isBool := res.(bool)
@@ -115,7 +127,7 @@ func (m *Monitor) run() {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
 			_ = storeResult(m, *result)
 
-			return
+			return false, result
 		}
 
 		if !ruleResult {
@@ -127,7 +139,14 @@ func (m *Monitor) run() {
 	err := storeResult(m, *result)
 	if err != nil {
 		log.Printf("### Error storing result: %s", err.Error())
+		return false, result
 	}
+
+	if result.Status > 0 {
+		return false, result
+	}
+
+	return true, result
 }
 
 func (m *Monitor) Stop() {

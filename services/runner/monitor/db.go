@@ -59,8 +59,6 @@ func storeResult(m *Monitor, r types.Result) error {
 	}
 
 	if m.FailCount >= maxFailCount && !m.FailedState {
-		log.Printf("###   Sending email alert")
-
 		body := fmt.Sprintf(`Monitor '%s' has failed %d times!
   - Reason:%s
   - When: %s
@@ -75,6 +73,11 @@ Configuration:
 		sendEmail(body, fmt.Sprintf("⚠️ NanoMon alert for: %s", m.Name))
 
 		m.FailedState = true
+	}
+
+	// For unit tests
+	if m.db == nil {
+		return nil
 	}
 
 	log.Printf("###   Storing result: %d %s", r.Status, r.Message)

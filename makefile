@@ -83,3 +83,7 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
 	@docker rm -f mongo || true
 	@docker run --rm -it --network host -v ./_data:/data/db --name mongo mongo:6-jammy 
+
+test: ## 🧪 Run all tests
+	@figlet $@ || true
+	@go test -v ./... 

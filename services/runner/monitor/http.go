@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
-	"log"
 	"nanomon/services/common/types"
 	"net/http"
 	"strconv"
@@ -100,8 +99,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 		cert := resp.TLS.PeerCertificates[0]
 		if cert != nil {
 			expires := cert.NotAfter
-			days := int(expires.Sub(time.Now()).Hours() / 24)
-			log.Printf("Certificate expires in %d days", days)
+			days := int(time.Until(expires).Hours() / 24)
 			outputs["certExpiryDays"] = days
 		}
 	}

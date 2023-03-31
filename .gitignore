@@ -4,5 +4,6 @@ _data/
 bin/
 tmp/
 frontend/config
+notes.md
 
 # Binaries from `go build`

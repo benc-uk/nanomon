@@ -14,7 +14,6 @@ on:
 env:
   IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
   VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
-  BUILD_INFO: "Stable build ${{ github.event.release.created_at || github.event.repository.updated_at }}"
 
 permissions:
   packages: write
@@ -25,6 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set BUILD_INFO with date
+        run: |
+          echo BUILD_INFO="Stable build $(date --rfc-3339=seconds)" >> ${GITHUB_ENV}
 
       - run: |
           echo ===== RELEASE ======

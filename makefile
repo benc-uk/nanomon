@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.1
+VERSION ?= 0.0.2
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 API_ENDPOINT ?= http://localhost:8000/api
@@ -27,7 +27,7 @@ BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
 ESLINT_PATH := $(REPO_DIR)/bin/node_modules/.bin/eslint
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build
+.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)

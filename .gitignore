@@ -5,5 +5,6 @@ bin/
 tmp/
 frontend/config
 notes.md
+my-*.yaml
 
 # Binaries from `go build`

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint", 
+    "esbenp.prettier-vscode",
+    "golang.go",
+    "Microsoft.typespec-vscode",
+    "ms-azuretools.vscode-bicep"
+  ]
+}

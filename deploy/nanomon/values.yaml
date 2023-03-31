@@ -7,6 +7,8 @@ image:
   tag: latest
   pullSecrets: []
 
+authClientId:
+
 api:
   replicaCount: 1
   serviceType: ClusterIP

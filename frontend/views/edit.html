@@ -73,7 +73,7 @@
               <a class="btn btn-secondary ms-4" @click="rulePop = !rulePop">
                 <i class="fas fa-fw fa-gears"></i>
               </a>
-              <div class="popup" x-show="rulePop" x-html="ruleHints[monitor.type]"></div>
+              <div class="popup" x-show="rulePop" x-html="def[monitor.type].ruleHint"></div>
             </div>
           </div>
         </div>
@@ -84,15 +84,13 @@
         </div>
       </form>
 
-      <!-- props -->
-
       <div class="d-flex align-items-baseline">
         <h4 class="mt-4">Properties</h4>
         <div class="dropdown ms-auto">
           <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add Property</button>
           <ul class="dropdown-menu">
-            <template x-for="prop of allowedProps[monitor.type]">
-              <li><a class="dropdown-item" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
+            <template x-for="prop of def[monitor.type].allowedProps">
+              <li><a class="dropdown-item" style="text-transform: none" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
             </template>
           </ul>
         </div>

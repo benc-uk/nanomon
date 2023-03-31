@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/benc-uk/go-rest-api v1.0.5
+	github.com/benc-uk/go-rest-api v1.0.6
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/joho/godotenv v1.5.1

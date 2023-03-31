@@ -1,19 +1,12 @@
+import { definitions } from '../definitions.mjs'
+
 export const editComponent = (api) => ({
   error: '',
   monitor: null,
   types: ['http', 'ping', 'tcp'],
   monId: null,
   rulePop: false,
-  ruleHints: {
-    http: 'Outputs: <b>respTime, status, body, bodyLen</b>',
-    ping: 'Outputs: <b>minRtt, avgRtt, maxRtt, packetsRecv, packetLoss, ipAddress</b>',
-    tcp: 'Outputs: <b>respTime, ipAddress</b>',
-  },
-  allowedProps: {
-    http: ['method', 'timeout', 'validateTLS', 'body', 'headers'],
-    ping: ['timeout', 'count', 'interval'],
-    tcp: ['timeout'],
-  },
+  def: definitions,
 
   async init() {
     this.shown = false
@@ -57,46 +50,15 @@ export const editComponent = (api) => ({
   },
 
   newHTTP() {
-    this.monitor = {
-      name: 'New HTTP Monitor',
-      type: 'http',
-      interval: '30s',
-      enabled: true,
-      target: 'http://example.net',
-      rule: 'status == 200 && respTime < 1200',
-      properties: {
-        method: 'GET',
-        timeout: '15s',
-      },
-    }
+    this.monitor = definitions.http.template
   },
 
   newPing() {
-    this.monitor = {
-      name: 'New Ping Monitor',
-      type: 'ping',
-      interval: '30s',
-      enabled: true,
-      target: 'localhost',
-      rule: 'packetLoss == 0 && avgRtt < 10',
-      properties: {
-        timeout: '2s',
-      },
-    }
+    this.monitor = definitions.ping.template
   },
 
   newTCP() {
-    this.monitor = {
-      name: 'New TCP Monitor',
-      type: 'tcp',
-      interval: '30s',
-      enabled: true,
-      target: 'database:3306',
-      rule: 'respTime < 10',
-      properties: {
-        timeout: '5s',
-      },
-    }
+    this.monitor = definitions.tcp.template
   },
 
   async save() {

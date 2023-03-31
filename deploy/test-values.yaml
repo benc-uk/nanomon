@@ -1,9 +1,0 @@
-image:
-  regRepo: ghcr.io/benc-uk
-  tag: dev
-ingress:
-  enabled: true
-  host: nanomon.kube.benco.io
-  tlsSecret: benco-io-cert
-  annotations: 
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"

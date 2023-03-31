@@ -110,20 +110,23 @@ Alpine.data('results', resultsComponent)
 Alpine.data('about', aboutComponent)
 
 async function startApp() {
+  // Attempt to fetch the config from the server
+  // NOTE 1: When running in dev mode, the local config file will be found and used
+  // NOTE 2: The frontend gets it's version and build info from the backend
   try {
-    const configResp = await fetch('config')
+    const configResp = await fetch('/config')
     if (configResp.ok) {
       config = await configResp.json()
     } else {
       throw new Error('Unable to fetch config')
     }
   } catch (err) {
-    console.warn('### Unable to fetch from /config. Defaults will be used')
+    console.warn('### Unable to fetch from /config. Internal defaults will be used')
     config = {
       API_ENDPOINT: 'http://localhost:8000/api',
       AUTH_CLIENT_ID: '',
-      VERSION: '__DEFUALT__',
-      BUILD_INFO: '__DEFUALT__',
+      VERSION: '__DEFAULT__',
+      BUILD_INFO: '__DEFAULT__',
     }
   }
   console.log(`### Config: ${JSON.stringify(config)}`)

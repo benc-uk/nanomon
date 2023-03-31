@@ -3,7 +3,8 @@
 # ===================================================================================
 FROM golang:1.20-alpine as go-build
 
-ARG VERSION="0.0.1"
+# Note these are ALWAYS passed in, so the values here are never used
+ARG VERSION="0.0.0"
 ARG BUILD_INFO="Not provided"
 ARG CGO_ENABLED=0
 

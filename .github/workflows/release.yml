@@ -8,7 +8,7 @@ on:
       version:
         description: "Version to release"
         required: true
-        default: "0.0.1"
+        default: "change-me"
         type: string
 
 env:

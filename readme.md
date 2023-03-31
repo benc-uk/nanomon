@@ -4,7 +4,7 @@ NanoMon is a lightweight network and HTTP monitoring system, designed to be self
 
 ## Architecture
 
-Some picture here
+![architecture diagram](./etc/architecture.drawio.png)
 
 ## Concepts
 

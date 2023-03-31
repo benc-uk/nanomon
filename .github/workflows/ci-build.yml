@@ -3,6 +3,13 @@ name: CI Pipeline
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - "etc/**"
+      - "api/**"
+      - "deploy/**"
+      - "scripts/**"
+      - "tests/**"
+      - "readme.md"
   pull_request:
     branches: ["main"]
 

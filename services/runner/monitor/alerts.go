@@ -16,6 +16,7 @@ func sendEmail(body, subject string) {
 	if host == "" {
 		host = "smtp.gmail.com"
 	}
+
 	if port == "" {
 		port = "587"
 	}

@@ -1,6 +1,3 @@
-nameOverride: ""
-fullnameOverride: ""
-
 image:
   regRepo: ghcr.io/benc-uk
   pullPolicy: Always
@@ -12,18 +9,21 @@ authClientId:
 api:
   replicaCount: 1
   serviceType: ClusterIP
+  extraEnvs: {}
   
 runner:
   replicaCount: 1
+  extraEnvs: {}
   monitorChangeInterval: 120s
 
 frontend:
   replicaCount: 1
   serviceType: ClusterIP
+  extraEnvs: {}
   apiEndpoint:
 
 mongodb:
-  externalURI: 
+  connectionURI: 
   enabled: true
   architecture: standalone
   useStatefulSet: true
@@ -48,3 +48,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+nameOverride: ""
+fullnameOverride: ""

@@ -1,14 +1,24 @@
-# NanoMon - Monitoring tool & microservices reference app
+# NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components. 
+
+It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
+
+In a hurry? - Jump to the sections [running locally quick start](#) or [deploying with Helm](#)
 
 ## Architecture
+
+The archiecture is very simple 
 
 ![architecture diagram](./etc/architecture.drawio.png)
 
 ## Concepts
 
-NanoMon executes monitoring calls remotely over the network using standard protocols, it does this periodically per monitor, and validates the results of the execution to determine the status or success. There are currently three statuses: **OK, Error** & **Failed**
+NanoMon executes monitoring calls remotely over the network using standard protocols, it does this periodically on a set interval per monitor. The results & execution of a "run" is validated  to determine the status or success. There are currently three statuses:
+
+- **OK** &ndash; Indicates no problems, e.g. got a HTTP valid response.
+- **Error** &ndash; Partial success as one or more rules failed, e.g. HTTP status code wasn't the expected value. See rules below.
+- **Failed** &ndash; The monitor failed to run entirely e.g. connection, network or DNS failure.
 
 ### Monitor
 
@@ -76,3 +86,6 @@ Env vars used only by the runner:
 Using Cosmos DB
 Add index for the `date` field to the results collection
 `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
+
+HELM REPO
+helm repo add nanomon 'https://raw.githubusercontent.com/benc-uk/nanomon/main/deploy/helm'

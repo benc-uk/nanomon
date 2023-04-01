@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nanomon.fullname" . }}-runner
+  name: {{ include "nanomon.fullname" . }}-api
   labels:
     {{- include "nanomon.labels" . | nindent 4 }}
-    component: runner
+    component: api
 spec:
   replicas: {{ .Values.api.replicaCount }}
   selector:
     matchLabels:
       {{- include "nanomon.selectorLabels" . | nindent 6 }}
-      component: runner
+      component: api
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
       {{- end }}
       labels:
         {{- include "nanomon.selectorLabels" . | nindent 8 }}
-        component: runner
+        component: api
     spec:
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
@@ -27,19 +27,33 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.regRepo }}/nanomon-runner:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.regRepo }}/nanomon-api:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
           env:
           - name: MONGO_URI
-            {{ if .Values.mongodb.externalURI }}
-            value: {{ .Values.mongodb.externalURI }}       
-            {{ else }}
+            {{- if .Values.mongodb.connectionURI }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nanomon.fullname" . }}-mongodb
+                key: connectionURI
+            {{- else }}
             value: "mongodb://{{ .Release.Name }}-mongodb"
-            {{ end }}
-          {{- if .Values.runner.monitorChangeInterval }}
-          - name: MONITOR_CHANGE_INTERVAL
-            value: {{ .Values.runner.monitorChangeInterval | quote }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.authClientId }}
+          - name: AUTH_CLIENT_ID
+            value: {{ .Values.authClientId }}
+            {{- end }}     
+          {{- range $key, $value := .Values.api.extraEnvs }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}                   
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

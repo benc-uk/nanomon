@@ -34,18 +34,42 @@ spec:
             {{- if .Values.mongodb.connectionURI }}
             valueFrom:
               secretKeyRef:
-                name: {{ include "nanomon.fullname" . }}-mongodb
-                key: connectionURI
+                name: {{ include "nanomon.fullname" . }}
+                key: mongoURI
             {{- else }}
             value: "mongodb://{{ .Release.Name }}-mongodb"
             {{- end }}
           {{- if .Values.runner.monitorChangeInterval }}
           - name: MONITOR_CHANGE_INTERVAL
-            value: {{ .Values.runner.monitorChangeInterval | quote }}
+            value: {{ .Values.runner.monitorChangeInterval }}
           {{- end }}
-          {{- range $key, $value := .Values.runner.extraEnvs }}
-          - name: {{ $key }}
-            value: {{ $value | quote }}
+          # Alert settings
+          {{- if .Values.runner.alerting.failCount }}
+          - name: ALERT_FAIL_COUNT
+            value: {{ .Values.runner.alerting.failCount }}
+          {{- end }}
+          {{- if .Values.runner.alerting.smtpHost }}
+          - name: ALERT_SMTP_HOST
+            value: {{ .Values.runner.alerting.smtpHost }}
+          {{- end }}
+          {{- if .Values.runner.alerting.smtpPort }}
+          - name: ALERT_SMTP_PORT
+            value: {{ .Values.runner.alerting.smtpPort }}
+          {{- end }}
+          {{- if .Values.runner.alerting.password }}
+          - name: ALERT_SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nanomon.fullname" . }}
+                key: smtpPassword
+          {{- end }}
+          {{- if .Values.runner.alerting.smtpFrom }}
+          - name: ALERT_SMTP_FROM
+            value: {{ .Values.runner.alerting.from }}
+          {{- end }}
+          {{- if .Values.runner.alerting.smtpTo }}
+          - name: ALERT_SMTP_TO
+            value: {{ .Values.runner.alerting.to }}
           {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

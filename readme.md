@@ -1,6 +1,6 @@
 # NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components. 
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components.
 
 It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
 
@@ -8,13 +8,13 @@ In a hurry? - Jump to the sections [running locally quick start](#) or [deployin
 
 ## Architecture
 
-The archiecture is very simple 
+The archiecture is very simple
 
 ![architecture diagram](./etc/architecture.drawio.png)
 
 ## Concepts
 
-NanoMon executes monitoring calls remotely over the network using standard protocols, it does this periodically on a set interval per monitor. The results & execution of a "run" is validated  to determine the status or success. There are currently three statuses:
+NanoMon executes monitoring calls remotely over the network using standard protocols, it does this periodically on a set interval per monitor. The results & execution of a "run" is validated to determine the status or success. There are currently three statuses:
 
 - **OK** &ndash; Indicates no problems, e.g. got a HTTP valid response.
 - **Error** &ndash; Partial success as one or more rules failed, e.g. HTTP status code wasn't the expected value. See rules below.
@@ -60,10 +60,10 @@ Env vars used by both API service and runner:
 
 Env vars used by the API and frontend host:
 
-| _Name_         | _Description_                 | _Default_   |
-| -------------- | ----------------------------- | ----------- |
+| _Name_         | _Description_                     | _Default_   |
+| -------------- | --------------------------------- | ----------- |
 | PORT           | TCP port for service to listen on | 8000 & 8001 |
-| AUTH_CLIENT_ID | Used to enable authentication | _blank_     |
+| AUTH_CLIENT_ID | Used to enable authentication     | _blank_     |
 
 Env vars used only by the frontend host:
 
@@ -73,13 +73,15 @@ Env vars used only by the frontend host:
 
 Env vars used only by the runner:
 
-| _Name_                  | _Description_                                                      | _Default_ |
-| ----------------------- | ------------------------------------------------------------------ | --------- |
-| MONITOR_CHANGE_INTERVAL | How frequently to check for configuration changes                  | 120s      |
-| ALERT_SMTP_PASSWORD     | For alerting, the password for mail server                         | _blank_   |
-| ALERT_SMTP_FROM         | Username and from address for alerts                               | _blank_   |
-| ALERT_SMTP_TO           | Address alert emails are sent to                                   | _blank_   |
-| ALERT_FAIL_COUNT        | How many time a monitor needs to fail in a row to trigger an alert | 3         |
+| _Name_                  | _Description_                                                      | _Default_      |
+| ----------------------- | ------------------------------------------------------------------ | -------------- |
+| MONITOR_CHANGE_INTERVAL | How frequently to check for configuration changes                  | 120s           |
+| ALERT_SMTP_PASSWORD     | For alerting, the password for mail server                         | _blank_        |
+| ALERT_SMTP_FROM         | From address for alerts, also used as the username                 | _blank_        |
+| ALERT_SMTP_TO           | Address alert emails are sent to                                   | _blank_        |
+| ALERT_SMTP_HOST         | SMTP hostname                                                      | smtp.gmail.com |
+| ALERT_SMTP_PORT         | SMTP port                                                          | 587            |
+| ALERT_FAIL_COUNT        | How many time a monitor needs to fail in a row to trigger an alert | 3              |
 
 ## Scratch Notes Area
 

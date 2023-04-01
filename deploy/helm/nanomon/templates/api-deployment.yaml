@@ -41,19 +41,15 @@ spec:
             {{- if .Values.mongodb.connectionURI }}
             valueFrom:
               secretKeyRef:
-                name: {{ include "nanomon.fullname" . }}-mongodb
-                key: connectionURI
+                name: {{ include "nanomon.fullname" . }}
+                key: mongoURI
             {{- else }}
             value: "mongodb://{{ .Release.Name }}-mongodb"
             {{- end }}
             {{- if .Values.authClientId }}
           - name: AUTH_CLIENT_ID
             value: {{ .Values.authClientId }}
-            {{- end }}     
-          {{- range $key, $value := .Values.api.extraEnvs }}
-          - name: {{ $key }}
-            value: {{ $value | quote }}
-          {{- end }}                   
+            {{- end }}                       
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

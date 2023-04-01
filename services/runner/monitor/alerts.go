@@ -10,8 +10,18 @@ func sendEmail(body, subject string) {
 	from := os.Getenv("ALERT_SMTP_FROM")
 	pass := os.Getenv("ALERT_SMTP_PASSWORD")
 	to := os.Getenv("ALERT_SMTP_TO")
+	host := os.Getenv("ALERT_SMTP_HOST")
+	port := os.Getenv("ALERT_SMTP_PORT")
+
+	if host == "" {
+		host = "smtp.gmail.com"
+	}
+	if port == "" {
+		port = "587"
+	}
 
 	if from == "" || pass == "" || to == "" {
+		// Alerting is not configured and disabled
 		return
 	}
 
@@ -22,7 +32,7 @@ func sendEmail(body, subject string) {
 		"Subject: " + subject + "\n\n" +
 		body
 
-	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+	err := smtp.SendMail(host+":"+port, smtp.PlainAuth("", from, pass, host),
 		from, []string{to}, []byte(msg))
 	if err != nil {
 		log.Printf("### Alert SMTP error: %s", err)

@@ -22,6 +22,12 @@ export function getStatusFields(statusCode) {
       status.icon = 'fas fa-bomb'
       break
 
+    case -1:
+      status.text = 'Disabled'
+      status.class = 'bg-dark text-light'
+      status.icon = 'fas fa-ban'
+      break
+
     default:
       status.text = 'Unknown'
       status.class = 'bg-secondary text-light'

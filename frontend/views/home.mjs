@@ -66,7 +66,7 @@ export const homeComponent = (api) => ({
       const last = new Date(results[0]?.date)
       m.message = results[0]?.message
       m.lastRan = results[0]?.date ? last.toLocaleString() : 'Never'
-      m.status = getStatusFields(results[0]?.status)
+      m.status = getStatusFields(m.enabled ? results[0]?.status : -1)
       m.icon = monitorIcon(m)
     }
 

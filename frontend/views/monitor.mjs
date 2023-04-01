@@ -49,7 +49,7 @@ export const monitorComponent = (api, userAccount) => ({
       this.icon = monitorIcon(this.monitor)
 
       if (this.results.length > 0) {
-        this.status = getStatusFields(this.results[0]?.status)
+        this.status = getStatusFields(this.monitor.enabled ? this.results[0].status : -1)
         this.lastResultDate = niceDate(this.results[0]?.date)
       }
 

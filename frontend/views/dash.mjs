@@ -55,7 +55,7 @@ export const dashComponent = (api) => ({
 
     for (const m of monitors) {
       const results = await api.getResultsForMonitor(m.id, 1)
-      m.status = getStatusFields(results[0]?.status)
+      m.status = getStatusFields(m.enabled ? results[0].status : -1)
       m.icon = monitorIcon(m)
     }
 

@@ -1,6 +1,6 @@
 # nanomon
 
-![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.2](https://img.shields.io/badge/AppVersion-0.0.2-informational?style=flat-square)
+![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.3](https://img.shields.io/badge/AppVersion-0.0.3-informational?style=flat-square)
 
 Deploy NanoMon, a HTTP and network monitoring tool
 
@@ -40,11 +40,11 @@ Deploy NanoMon, a HTTP and network monitoring tool
 | nodeSelector | object | `{}` | Node selector for all pods |
 | podAnnotations | object | `{}` | Annotations applied to all pods |
 | runner.alerting.failCount | int | `3` | How many times a monitor can fail before sending an alert |
-| runner.alerting.from | string | `nil` | The email address to send alerts from, must be set to enable alerting |
-| runner.alerting.password | string | `nil` | SMTP password for sending alerts, must be set to enable alerting |
+| runner.alerting.from | string | `nil` | The email address to send alerts from, set to enable alerting |
+| runner.alerting.password | string | `nil` | SMTP password for sending alerts, set to enable alerting |
 | runner.alerting.smtpHost | string | `"smtp.gmail.com"` | SMTP host for sending alerts |
 | runner.alerting.smtpPort | int | `587` | SMTP port for sending alerts |
-| runner.alerting.to | string | `nil` | The email address to send alerts to, must be set to enable alerting |
+| runner.alerting.to | string | `nil` | The email address to send alerts to, set to enable alerting |
 | runner.monitorChangeInterval | string | `"120s"` | How often to check for new & changed monitors in the database |
 | runner.replicaCount | int | `1` | Number of pod replicas for the runner, best left as 1 |
 | tolerations | list | `[]` | Tolerations used by all pods |

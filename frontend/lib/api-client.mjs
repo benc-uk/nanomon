@@ -1,11 +1,11 @@
 export class APIClient {
-  apiEndpoint = 'http://localhost:8000'
-  apiScopes = []
+  endpoint = 'http://localhost:8000'
+  scopes = []
   msalApp = null
 
-  constructor(apiEndpoint, apiScopes, msalApp) {
-    this.apiEndpoint = apiEndpoint.replace(/\/$/, '')
-    this.apiScopes = apiScopes
+  constructor(endpoint, scopes, msalApp) {
+    this.endpoint = endpoint.replace(/\/$/, '')
+    this.scopes = scopes
     this.msalApp = msalApp
   }
 
@@ -40,17 +40,19 @@ export class APIClient {
   async baseRequest(path, method = 'GET', body, authRequest = false) {
     let tokenRes = null
     if (authRequest && this.msalApp) {
-      console.log('### Getting access token with scopes', this.apiScopes)
+      console.log('### Getting access token with scopes', this.scopes)
       try {
         tokenRes = await this.msalApp.acquireTokenSilent({
-          scopes: this.apiScopes,
+          scopes: this.scopes,
         })
       } catch (e) {
         tokenRes = await this.msalApp.acquireTokenPopup({
-          scopes: this.apiScopes,
+          scopes: this.scopes,
         })
       }
-      if (!tokenRes) {throw new Error('Failed to get auth token')}
+      if (!tokenRes) {
+        throw new Error('Failed to get auth token')
+      }
     }
 
     const headers = new Headers({ 'Content-Type': 'application/json' })
@@ -58,7 +60,7 @@ export class APIClient {
       headers.append('Authorization', `Bearer ${tokenRes.accessToken}`)
     }
 
-    const response = await fetch(`${this.apiEndpoint}/${path}`, {
+    const response = await fetch(`${this.endpoint}/${path}`, {
       method,
       body: body ? JSON.stringify(body) : undefined,
       headers,

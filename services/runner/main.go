@@ -121,7 +121,6 @@ func shutdown() {
 	db.Close()
 
 	for _, m := range monitors {
-		log.Println("### Stopping monitor:", m.Name)
 		go m.Stop()
 	}
 }

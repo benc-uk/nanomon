@@ -10,8 +10,9 @@ import { dashComponent } from './views/dash.mjs'
 import { resultsComponent } from './views/results.mjs'
 import { aboutComponent } from './views/about.mjs'
 
-let msalApp = null
 export let config = {}
+let msalApp = null
+const appScope = 'system.admin'
 
 Alpine.data('app', () => ({
   view: '#home',
@@ -21,6 +22,7 @@ Alpine.data('app', () => ({
   async init() {
     console.log('### Starting NanoMon frontend')
 
+    // Set up the auth client using MSAL
     if (config.AUTH_CLIENT_ID) {
       msalApp = new msal.PublicClientApplication({
         auth: {
@@ -30,16 +32,9 @@ Alpine.data('app', () => ({
         cache: {
           cacheLocation: 'localStorage',
         },
-        system: {
-          loggerOptions: {
-            loggerCallback: (level, message) => {
-              console.log(`🔑 (${level}): ${message}`)
-            },
-            logLevel: 'verbose',
-          },
-        },
       })
 
+      // Load any cached user
       this.userAccount = msalApp.getActiveAccount()
       if (this.userAccount) {
         showToast(`Welcome ${this.userAccount.name}!`)
@@ -48,9 +43,10 @@ Alpine.data('app', () => ({
       this.userAccount = 'AUTH_DISABLED'
     }
 
-    this.api = new APIClient(config.API_ENDPOINT, [`api://${config.AUTH_CLIENT_ID}/system.admin`], msalApp)
+    // Create the API client
+    this.api = new APIClient(config.API_ENDPOINT, [`api://${config.AUTH_CLIENT_ID}/${appScope}`], msalApp)
 
-    // Support linking to specific views
+    // Support direct linking to specific views
     if (window.location.hash) {
       this.view = window.location.hash
       this.$nextTick(() => {
@@ -70,13 +66,14 @@ Alpine.data('app', () => ({
   async login() {
     try {
       const loginResp = await msalApp.loginPopup()
-      console.log('### Logged in', loginResp)
+      console.log(`### User '${loginResp.account.username}' logged in`)
 
       const allAccts = await msalApp.getAllAccounts()
       if (allAccts.length > 0) {
         const acct = allAccts[0]
-        console.log('### Will activate account:', acct)
+
         await msalApp.setActiveAccount(acct)
+
         showToast(`Logged in!<br>Welcome ${acct.name}`)
         this.updateUser(acct)
       }
@@ -88,7 +85,7 @@ Alpine.data('app', () => ({
 
   logout() {
     for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('msal') || key.includes('login') || key.startsWith('fake')) {
+      if (key.startsWith('msal') || key.includes('login')) {
         localStorage.removeItem(key)
       }
     }

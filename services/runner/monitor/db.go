@@ -80,7 +80,7 @@ Configuration:
 		return nil
 	}
 
-	log.Printf("###   Storing result: %d %s", r.Status, r.Message)
+	log.Printf("###   Storing result, status:%d msg:%s", r.Status, r.Message)
 
 	ctx, cancel := context.WithTimeout(context.Background(), m.db.Timeout)
 	defer cancel()

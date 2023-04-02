@@ -96,7 +96,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 		}
 
 		match := re.FindStringSubmatch(bodyStr)
-		if match != nil && len(match) > 1 {
+		if len(match) > 1 {
 			regexMatch = match[1]
 		}
 	}

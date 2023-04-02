@@ -151,5 +151,8 @@ func (m *Monitor) run() (bool, *types.Result) {
 
 func (m *Monitor) Stop() {
 	log.Println("### Stopping monitor", m.Name)
-	m.ticker.Stop()
+
+	if m.ticker != nil {
+		m.ticker.Stop()
+	}
 }

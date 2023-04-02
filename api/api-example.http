@@ -5,9 +5,11 @@
 ##########################################
 GET {{endpoint}}/monitors
 
+
 ##########################################
 ### Create a monitor
 ##########################################
+# @name create
 POST {{endpoint}}/monitors
 Content-Type: application/json
 
@@ -15,39 +17,50 @@ Content-Type: application/json
   "name": "Test {{$randomInt 1 1000}}",
   "type": "http",
   "interval": "10s",
-  "target": "http://192.168.0.100/",
+  "target": "http://localhost:8000",
   "enabled": true
+  "properties": {
+
+      "method": "GET",
+
+      "body": "{\"test\": \"test\"}"
+    
+  }
 }
+
 
 ##########################################
 ### Get single monitor
 ##########################################
-GET {{endpoint}}/monitors/641f75c9062e612df8596c70
+GET {{endpoint}}/monitors/{{ create.response.body.id }}
+
 
 ##########################################
 ### Delete single monitor
 ##########################################
-DELETE {{endpoint}}/monitors/641fdbfb1717fb28657215ad
+DELETE {{endpoint}}/monitors/{{ create.response.body.id }}
+
 
 ##########################################
 ### Get results
 ##########################################
-GET {{endpoint}}/monitors/641f6415bcb6e797bdabdade/results?max=200
+GET {{endpoint}}/monitors/{{ create.response.body.id }}/results?max=5
+
 
 ##########################################
 ### Update a monitor
 ##########################################
-PUT {{endpoint}}/monitors/641f7415062e612df8596c6f
+PUT {{endpoint}}/monitors/{{ create.response.body.id }}
 Content-Type: application/json
 
 {
-  "name": "Check Router",
-  "type": "tcp",
+  "name": "Test {{$randomInt 1 1000}}",
+  "type": "http",
   "interval": "10s",
-  "enabled": true,
-  "target": "192.168.0.1:802",
-  "rule": "respTime < 1"
+  "target": "http://localhost:8000",
+  "enabled": true
 }
+
 
 ##########################################
 ### Get results for ALL monitors

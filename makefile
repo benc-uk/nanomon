@@ -87,3 +87,9 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
 	@go test -v ./... 
+
+generate: ## 🤖 Generate OpenAPI spec using TypeSpec
+	@figlet $@ || true
+	@cd api; npm install; ./node_modules/.bin/tsp compile ./nanomon.tsp --emit @typespec/openapi3
+	@mv api/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
+	@rm -rf api/tsp-output

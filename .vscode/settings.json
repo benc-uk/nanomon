@@ -2,4 +2,9 @@
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  // hide package.json from the explorer
+  "files.exclude": {
+    "**/package*.json": true,
+    "**/node_modules": true,
+  },
 }

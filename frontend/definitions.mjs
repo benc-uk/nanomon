@@ -4,8 +4,8 @@
 
 export const definitions = {
   http: {
-    ruleHint: 'Outputs: <b>respTime, status, body, bodyLen, certExpiryDays</b>',
-    allowedProps: ['method', 'timeout', 'validateTLS', 'body', 'headers'],
+    ruleHint: 'Outputs: <b>respTime, status, body, bodyLen, certExpiryDays, regexMatch</b>',
+    allowedProps: ['method', 'timeout', 'validateTLS', 'body', 'headers', 'bodyRegex'],
     template: {
       name: 'New HTTP Monitor',
       type: 'http',

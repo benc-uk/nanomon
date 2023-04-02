@@ -6,6 +6,7 @@ import (
 	"io"
 	"nanomon/services/common/types"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -86,12 +87,33 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	}
 
 	bodyStr := string(body)
+	regexMatch := ""
+
+	if m.Properties["bodyRegex"] != "" {
+		re, err := regexp.Compile(m.Properties["bodyRegex"])
+		if err != nil {
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		}
+
+		match := re.FindStringSubmatch(bodyStr)
+		if match != nil && len(match) > 1 {
+			regexMatch = match[1]
+		}
+	}
 
 	outputs := map[string]any{
 		"body":     bodyStr,
 		"bodyLen":  len(body),
 		"status":   resp.StatusCode,
 		"respTime": r.Value,
+	}
+
+	// If the regex match is a number, convert it to a float
+	regexMatchFloat, err := strconv.ParseFloat(regexMatch, 64)
+	if err == nil {
+		outputs["regexMatch"] = regexMatchFloat
+	} else {
+		outputs["regexMatch"] = regexMatch
 	}
 
 	// Get cert expiry if it is a TLS connection and the cert exists

@@ -14,4 +14,4 @@ if [[ -z "$PREV_VERSION" ]]; then
   exit 1
 fi
 
-gh release create "$VERSION" --title "v$VERSION" --notes-start-tag "$PREV_VERSION" --generate-notes -F "$DIR"/../notes.md
+gh release create "$VERSION" --title "v$VERSION" --notes-start-tag "$PREV_VERSION" --generate-notes -F "$DIR"/release-notes.md

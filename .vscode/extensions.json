@@ -1,8 +1,9 @@
 {
   "recommendations": [
-    "dbaeumer.vscode-eslint", 
+    "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "golang.go",
-    "ms-azuretools.vscode-bicep"
+    "ms-azuretools.vscode-bicep",
+    "mikestead.dotenv"
   ]
 }

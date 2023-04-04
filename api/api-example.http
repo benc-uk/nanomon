@@ -19,13 +19,6 @@ Content-Type: application/json
   "interval": "10s",
   "target": "http://localhost:8000",
   "enabled": true
-  "properties": {
-
-      "method": "GET",
-
-      "body": "{\"test\": \"test\"}"
-    
-  }
 }
 
 

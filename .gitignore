@@ -4,7 +4,7 @@ _data/
 bin/
 tmp/
 frontend/config
-notes.md
+release-notes.md
 my-*.yaml
 
 # Binaries from `go build`

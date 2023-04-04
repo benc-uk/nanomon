@@ -1,4 +1,5 @@
 <div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
+<div class="alert alert-light" role="alert" x-show="monitors && !error && monitors.length <= 0">Create a new monitor to get started 😀</div>
 
 <div class="d-flex flex-wrap">
   <template x-for="m of monitors">

@@ -71,9 +71,6 @@ export const homeComponent = (api) => ({
     }
 
     this.monitors = monitors
-    if (this.monitors.length === 0) {
-      this.error = 'No monitors found! Create one to get started'
-    }
 
     await this.updateCharts()
   },

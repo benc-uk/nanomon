@@ -57,7 +57,10 @@ export const monitorComponent = (api, userAccount) => ({
       const resultLabels = []
       for (let i = this.results.length - 1; i >= 0; i--) {
         const r = this.results[i]
-        this.results[i].dateNice = r.date.replace('T', ' ').split('.')[0]
+
+        this.results[i].dateNice = new Date(r.date).toLocaleString()
+        this.results[i].statusDetails = getStatusFields(r.status)
+
         resultValues.push(r.value)
         resultLabels.push(r.date.replace('T', ' ').split('.')[0])
       }

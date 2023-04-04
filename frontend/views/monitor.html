@@ -105,7 +105,7 @@
           <template x-for="r in results">
             <tr :class="getStatusFields(r.status).class">
               <td x-text="r.dateNice"></td>
-              <td x-text="r.status"></td>
+              <td x-text="r.statusDetails.text"></td>
               <td x-text="r.value"></td>
               <td x-text="r.message" style="font-size: 0.8rem"></td>
             </tr>

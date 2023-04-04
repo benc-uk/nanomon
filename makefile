@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.3
+VERSION ?= 0.0.4
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 API_ENDPOINT ?= http://localhost:8000/api
@@ -25,6 +25,7 @@ GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint
 AIR_PATH := $(REPO_DIR)/bin/air
 BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
 ESLINT_PATH := $(REPO_DIR)/bin/node_modules/.bin/eslint
+PRETTIER_PATH := $(REPO_DIR)/bin/node_modules/.bin/prettier
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
@@ -40,15 +41,18 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 	@$(AIR_PATH) -v > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh
 	@$(BS_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin browser-sync
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin eslint
+	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin prettier
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
 	@$(ESLINT_PATH) -c frontend/eslint.config.mjs ./frontend/
+	@$(PRETTIER_PATH) ./frontend --check
 	$(GOLINT_PATH) run
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	@$(ESLINT_PATH) -c frontend/eslint.config.mjs ./frontend/ --fix
+	@$(PRETTIER_PATH) ./frontend --write
 	$(GOLINT_PATH) run --fix
 
 build: ## 🔨 Build all binaries into ./bin/ directory
@@ -60,6 +64,10 @@ images: ## 📦 Build all container images
 	@figlet $@ || true
 	docker compose -f build/compose.yaml build
 	
+image-api: ## 📦 Build all container images
+	@figlet $@ || true
+	docker compose -f build/compose.yaml build api
+
 push: ## 📤 Push all container images
 	@figlet $@ || true
 	docker compose -f build/compose.yaml push
@@ -82,7 +90,11 @@ run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
 	@docker rm -f mongo || true
-	@docker run --rm -it --network host -v ./_data:/data/db --name mongo mongo:6-jammy 
+	@docker run --rm -it -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
+	-e MONGODB_REPLICA_SET_MODE=primary \
+	-e MONGODB_ADVERTISED_HOSTNAME=localhost \
+	-e ALLOW_EMPTY_PASSWORD=yes \
+	--name mongo bitnami/mongodb:6.0
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
@@ -93,3 +105,10 @@ generate: ## 🤖 Generate OpenAPI spec using TypeSpec
 	@cd api; npm install; ./node_modules/.bin/tsp compile ./nanomon.tsp --emit @typespec/openapi3
 	@mv api/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
 	@rm -rf api/tsp-output
+
+clean: ## 🧹 Clean up, remove dev data and files
+	@figlet $@ || true
+	@rm -rf bin
+	@rm -rf frontend/config
+	@rm -rf api/node_modules
+	@docker volume rm mongo-data || true

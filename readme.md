@@ -8,9 +8,15 @@ In a hurry? - Jump to the sections [running locally quick start](#) or [deployin
 
 ## Architecture
 
-The archiecture is very simple
+The architecture is fairly simple consisting of four application components and a database.
 
 ![architecture diagram](./etc/architecture.drawio.png)
+
+- **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the MongoDB database.
+- **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
+- **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API.
+- **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
+- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB v4. External services which provide MongoDB compatibility (e.g. Azure Cosmos DB) will also work
 
 ## Concepts
 
@@ -34,14 +40,6 @@ When a _monitor_ runs it generates a _result_. The _result_ as the name implies,
 - Ping
 - TCP
 
-## Components
-
-- **API** - REST API acting as interface for the frontend
-- **Runner** - Monitors execute from here
-- **Frontend** - The web interface, i.e. the HTML and JS
-- **Frontend Host** - The server host for the frontend
-- **MongoDB** - Backend data store
-
 ## Repo Index
 
 ## Getting Started
@@ -52,11 +50,11 @@ All configuration should be provided in the form of environmental variables
 
 Env vars used by both API service and runner:
 
-| _Name_        | _Description_                                | _Default_                 |
-| ------------- | -------------------------------------------- | ------------------------- |
-| MONGO_URI     | Connection string for MongoDB                | mongodb://localhost:27017 |
-| MONGO_DB      | Database name to use                         | nanomon                   |
-| MONGO_TIMEOUT | Timeout for connecting to & querying MongoDB | 10s                       |
+| _Name_        | _Description_                     | _Default_                 |
+| ------------- | --------------------------------- | ------------------------- |
+| MONGO_URI     | Connection string for MongoDB     | mongodb://localhost:27017 |
+| MONGO_DB      | Database name to use              | nanomon                   |
+| MONGO_TIMEOUT | Timeout for connecting to MongoDB | 30s                       |
 
 Env vars used by the API and frontend host:
 
@@ -73,15 +71,16 @@ Env vars used only by the frontend host:
 
 Env vars used only by the runner:
 
-| _Name_                  | _Description_                                                      | _Default_      |
-| ----------------------- | ------------------------------------------------------------------ | -------------- |
-| MONITOR_CHANGE_INTERVAL | How frequently to check for configuration changes                  | 120s           |
-| ALERT_SMTP_PASSWORD     | For alerting, the password for mail server                         | _blank_        |
-| ALERT_SMTP_FROM         | From address for alerts, also used as the username                 | _blank_        |
-| ALERT_SMTP_TO           | Address alert emails are sent to                                   | _blank_        |
-| ALERT_SMTP_HOST         | SMTP hostname                                                      | smtp.gmail.com |
-| ALERT_SMTP_PORT         | SMTP port                                                          | 587            |
-| ALERT_FAIL_COUNT        | How many time a monitor needs to fail in a row to trigger an alert | 3              |
+| _Name_              | _Description_                                                      | _Default_      |
+| ------------------- | ------------------------------------------------------------------ | -------------- |
+| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                         | _blank_        |
+| ALERT_SMTP_FROM     | From address for alerts, also used as the username                 | _blank_        |
+| ALERT_SMTP_TO       | Address alert emails are sent to                                   | _blank_        |
+| ALERT_SMTP_HOST     | SMTP hostname                                                      | smtp.gmail.com |
+| ALERT_SMTP_PORT     | SMTP port                                                          | 587            |
+| ALERT_FAIL_COUNT    | How many time a monitor needs to fail in a row to trigger an alert | 3              |
+| POLLING_INTERVAL    | Only used when in polling mode                                     | 10s            |
+| USE_POLLING         | Force polling mode, by default MongoDB change streams will be used | false          |
 
 ## Scratch Notes Area
 

@@ -20,8 +20,10 @@ api:
 runner:
   # -- Number of pod replicas for the runner, best left as 1
   replicaCount: 1
-  # -- How often to check for new & changed monitors in the database
-  monitorChangeInterval: 120s
+  # -- Set to "true" to using DB polling instead of MongoDB change streams
+  usePolling: 
+  # -- Only set when using polling, use a duration string, e.g. "5s"
+  pollingInterval: 
   alerting:
     # -- SMTP password for sending alerts, set to enable alerting
     password:
@@ -50,9 +52,14 @@ mongodb:
   # -- Enable deploying MongoDB, leave connectionURI blank if true
   enabled: true
   #@ignored
-  architecture: standalone
+  architecture: replicaset
+  replicaCount: 2
+  arbiter:
+    enabled: false
   #@ignored
   useStatefulSet: true
+  service:
+    type: ClusterIP
   persistence:
     # -- Enable persistence for MongoDB
     enabled: false

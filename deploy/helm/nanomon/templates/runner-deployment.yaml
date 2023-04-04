@@ -37,7 +37,7 @@ spec:
                 name: {{ include "nanomon.fullname" . }}
                 key: mongoURI
             {{- else }}
-            value: "mongodb://{{ .Release.Name }}-mongodb"
+            value: "mongodb://{{ .Release.Name }}-mongodb-headless"
             {{- end }}
           {{- if .Values.runner.monitorChangeInterval }}
           - name: MONITOR_CHANGE_INTERVAL

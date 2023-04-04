@@ -50,7 +50,7 @@ spec:
           {{- range $key, $value := .Values.frontend.extraEnvs }}
           - name: {{ $key }}
             value: {{ $value | quote }}
-          {{- end }}            
+          {{- end }}                       
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

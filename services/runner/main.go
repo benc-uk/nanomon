@@ -8,8 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"golang.org/x/exp/slices"
 )
 
 var (
@@ -29,16 +27,15 @@ func main() {
 		os.Exit(1)
 	}()
 
-	changeIntervalEnv := os.Getenv("MONITOR_CHANGE_INTERVAL")
+	changeIntervalEnv := os.Getenv("CHANGE_POLLING")
 	if changeIntervalEnv == "" {
-		changeIntervalEnv = "120s"
+		changeIntervalEnv = "10s"
 	}
 
 	changeInterval, _ := time.ParseDuration(changeIntervalEnv)
 
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
-	log.Println("### Checking for monitor changes every", changeIntervalEnv)
 
 	db = database.ConnectToDB()
 	defer db.Close()
@@ -52,9 +49,28 @@ func main() {
 
 	// Start the monitors loaded from the database
 	for _, m := range monitors {
-		go m.Start()
+		go m.Start(true)
 	}
 
+	if db.WatchSupported {
+		// Note. This is a blocking call so main will never exit
+		monitor.WatchMonitors(db, monitors)
+	} else {
+		log.Println("### Mongo change stream not supported, falling back to polling every", changeIntervalEnv)
+		pollMonitors(changeInterval)
+	}
+}
+
+func shutdown() {
+	log.Println("### Runner shuting down, attempting clean exit")
+	db.Close()
+
+	for _, m := range monitors {
+		go m.Stop()
+	}
+}
+
+func pollMonitors(changeInterval time.Duration) {
 	// Infinite loop to watch monitor changes in the database
 	for {
 		time.Sleep(changeInterval)
@@ -64,6 +80,10 @@ func main() {
 		if err != nil {
 			log.Println("### Error loading monitors:", err)
 			continue
+		}
+
+		if os.Getenv("DEBUG") == "true" {
+			log.Printf("### Checking for changes old len:%d, new len %d", len(monitors), len(updatedMonitors))
 		}
 
 		// First pass to find new & updated monitors
@@ -76,10 +96,10 @@ func main() {
 
 					// Use the timestamp to determine if the monitor has been updated
 					if newMon.Updated.After(oldMon.Updated) {
-						log.Println("### Updating monitor:", oldMon.Name)
+						log.Println("### Detected change, updating monitor:", oldMon.Name)
 						oldMon.Stop()
 
-						go newMon.Start()
+						go newMon.Start(false)
 						monitors[oi] = newMon
 					}
 
@@ -89,8 +109,8 @@ func main() {
 
 			// If the monitor wasn't found, it's new
 			if !found {
-				log.Println("### Starting new monitor:", newMon.Name)
-				go newMon.Start()
+				log.Println("### Detected change, new monitor:", newMon.Name)
+				go newMon.Start(false)
 				monitors = append(monitors, newMon)
 			}
 		}
@@ -108,19 +128,11 @@ func main() {
 
 			// If the monitor wasn't in newMonitors, it's been deleted
 			if !found {
-				log.Println("### Stopping deleted monitor:", oldMon.Name)
+				log.Println("### Detected change, deleted monitor:", oldMon.Name)
 				oldMon.Stop()
-				slices.Delete(monitors, oi, oi+1)
+
+				monitors = append(monitors[:oi], monitors[oi+1:]...)
 			}
 		}
-	}
-}
-
-func shutdown() {
-	log.Println("### Runner shuting down, attempting clean exit")
-	db.Close()
-
-	for _, m := range monitors {
-		go m.Stop()
 	}
 }

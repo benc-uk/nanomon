@@ -41,7 +41,7 @@ func NewMonitor(db *database.DB) *Monitor {
 }
 
 // Use a timer.Ticker to run this monitor in the background
-func (m *Monitor) Start() {
+func (m *Monitor) Start(withDelay bool) {
 	if m.Enabled {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
 	} else {
@@ -55,8 +55,10 @@ func (m *Monitor) Start() {
 	}
 
 	// This offsets the start by random amount preventing monitors from running at the same time
-	delaySecs := rand.Intn(int(m.IntervalDuration.Seconds()))
-	time.Sleep(time.Duration(delaySecs) * time.Second)
+	if withDelay {
+		delaySecs := rand.Intn(int(m.IntervalDuration.Seconds()))
+		time.Sleep(time.Duration(delaySecs) * time.Second)
+	}
 
 	m.run()
 

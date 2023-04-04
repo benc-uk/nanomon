@@ -1,10 +1,41 @@
 package monitor
 
 import (
+	"fmt"
 	"log"
+	"nanomon/services/common/types"
 	"net/smtp"
 	"os"
+	"strconv"
 )
+
+func checkForAlerts(m *Monitor, r types.Result) {
+	maxFailCount := 3
+	maxFailCountEnv := os.Getenv("ALERT_FAIL_COUNT")
+
+	if maxFailCountEnv != "" {
+		maxFailCount, _ = strconv.Atoi(maxFailCountEnv)
+	}
+
+	if m.FailCount >= maxFailCount && !m.FailedState {
+		// Email body
+		body := fmt.Sprintf(`Monitor '%s' has failed %d times!
+  - Reason:%s
+  - When: %s
+
+Configuration:
+  - Target: %s
+  - Type: %s
+  - Interval: %s
+  - Rule: %s
+  - Properties: %+v`, m.Name, m.FailCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
+			m.Target, m.Type, m.Interval, m.Rule, m.Properties)
+
+		sendEmail(body, fmt.Sprintf("⚠️ NanoMon alert for: %s", m.Name))
+
+		m.FailedState = true
+	}
+}
 
 func sendEmail(body, subject string) {
 	from := os.Getenv("ALERT_SMTP_FROM")

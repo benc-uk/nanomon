@@ -18,7 +18,7 @@ func TestMonitorDisabledStart(t *testing.T) {
 	m.Enabled = false
 	m.IntervalDuration = 10 * time.Second
 
-	go m.Start()
+	go m.Start(false)
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {
@@ -31,7 +31,7 @@ func TestMonitorNoIntervalStart(t *testing.T) {
 	m.Name = "unit test no interval start"
 	m.Enabled = true
 
-	go m.Start()
+	go m.Start(false)
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {

@@ -26,7 +26,6 @@ import (
 )
 
 var (
-	healthy     = true               // Simple health flag
 	version     = "0.0.0"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
 	buildInfo   = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
 	serviceName = "NanoMon"
@@ -85,6 +84,19 @@ func main() {
 
 		api.addAnonymousRoutes(publicRouter)
 	})
+
+	// Start ticker to check the DB connection, and set the health status
+	go func() {
+		ticker := time.Tick(5 * time.Second)
+
+		for range ticker {
+			if err := db.Ping(); err != nil {
+				api.Healthy = false
+			} else {
+				api.Healthy = true
+			}
+		}
+	}()
 
 	// Start the API server, this function will block until the server is stopped
 	api.StartServer(serverPort, router, 10*time.Second)

@@ -36,7 +36,7 @@ func (api API) addProtectedRoutes(r chi.Router) {
 
 func NewAPI(db *database.DB) API {
 	return API{
-		api.NewBase(serviceName, version, buildInfo, healthy),
+		api.NewBase(serviceName, version, buildInfo, true),
 		db,
 	}
 }

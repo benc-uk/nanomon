@@ -111,4 +111,4 @@ clean: ## 🧹 Clean up, remove dev data and files
 	@rm -rf bin
 	@rm -rf frontend/config
 	@rm -rf api/node_modules
-	@docker volume rm mongo-data || true
+	@docker volume rm nm-mongo-data || true

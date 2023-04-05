@@ -19,6 +19,8 @@ type Result struct {
 	MonitorID     primitive.ObjectID `bson:"monitor_id" json:"monitor_id"`
 	MonitorName   string             `bson:"monitor_name" json:"monitor_name"`
 	MonitorTarget string             `bson:"monitor_target" json:"monitor_target"`
+
+	Outputs map[string]any `bson:"outputs" json:"outputs"`
 }
 
 func NewResult(monName, monTarget, monID string) *Result {

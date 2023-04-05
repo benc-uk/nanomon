@@ -8,6 +8,7 @@
       <th scope="col">Status</th>
       <th scope="col">Value</th>
       <th scope="col">Message</th>
+      <th scope="col">Output</th>
     </tr>
   </thead>
   <tbody>
@@ -18,6 +19,17 @@
         <td x-text="r.statusDetails.text"></td>
         <td x-text="r.value"></td>
         <td x-text="r.message || '-'" style="font-size: 0.8rem"></td>
+        <td>
+          <button
+            x-show="r.outputs"
+            class="btn btn-sm btn-outline-light"
+            @click="output = r.outputs"
+            data-bs-toggle="modal"
+            data-bs-target="#outModal"
+          >
+            More
+          </button>
+        </td>
       </tr>
     </template>
   </tbody>
@@ -31,4 +43,31 @@
 
   &mdash; Auto update every <span x-text="autoUpdate"> </span> seconds &mdash;
   <a class="badge rounded-pill text-bg-light" type="button" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
+</div>
+
+<!-- Output modal -->
+<div class="modal fade" id="outModal" tabindex="-1" aria-labelledby="outputModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h1 class="modal-title fs-5" id="outputModalLabel">Output Details</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <template x-if="output">
+          <ul>
+            <template x-for="[k, v] in Object.entries(output)">
+              <li x-text="`${k} = ${v}`" x-show="v != ''"></li>
+            </template>
+          </ul>
+        </template>
+        <template x-if="!output">
+          <div>No output for this result</div>
+        </template>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
 </div>

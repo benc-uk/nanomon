@@ -9,6 +9,7 @@ export const resultsComponent = (api) => ({
   loading: true,
   updateText: 'Never updated',
   paused: false,
+  output: '',
 
   async init() {
     window.addEventListener('view-changed', async (e) => {

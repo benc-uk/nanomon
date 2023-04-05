@@ -126,5 +126,9 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 		}
 	}
 
+	// Save all outputs to the result but omit the body
+	r.Outputs = outputs
+	r.Outputs["body"] = "<OMITTED>"
+
 	return r, outputs
 }

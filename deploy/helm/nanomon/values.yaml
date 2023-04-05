@@ -53,13 +53,14 @@ mongodb:
   enabled: true
   #@ignored
   architecture: replicaset
+  #@ignored
   replicaCount: 2
+  #@ignored
   arbiter:
+    #@ignored
     enabled: false
   #@ignored
   useStatefulSet: true
-  service:
-    type: ClusterIP
   persistence:
     # -- Enable persistence for MongoDB
     enabled: false

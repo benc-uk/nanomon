@@ -39,5 +39,7 @@ func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 
 	defer conn.Close()
 
+	r.Outputs = outputs
+
 	return r, outputs
 }

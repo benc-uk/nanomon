@@ -67,6 +67,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	}
 
 	r.Value = int(stats.AvgRtt.Milliseconds())
+	r.Outputs = outputs
 
 	return r, outputs
 }

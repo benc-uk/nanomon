@@ -11,6 +11,7 @@ export const monitorComponent = (api, userAccount) => ({
   icon: '',
   getStatusFields: getStatusFields,
   userAccount: userAccount,
+  output: '',
 
   async init() {
     this.shown = false
@@ -115,4 +116,10 @@ export const monitorComponent = (api, userAccount) => ({
       this.error = e
     }
   },
+
+  // showOutput(output) {
+  //   const modal = new bootstrap.Modal('#outMOdal', {})
+  //   modal.show()
+  //   //alert(output)
+  // },
 })

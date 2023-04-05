@@ -12,7 +12,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus-community/pro-bing v0.1.0
 	go.mongodb.org/mongo-driver v1.11.3
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
 require (

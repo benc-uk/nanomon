@@ -34,13 +34,18 @@ type Monitor struct {
 	db     *database.DB
 }
 
+// ========================================================================
+// Create a new monitor
+// ========================================================================
 func NewMonitor(db *database.DB) *Monitor {
 	return &Monitor{
 		db: db,
 	}
 }
 
-// Use a timer.Ticker to run this monitor in the background
+// ========================================================================
+// Start the monitor ticker
+// ========================================================================
 func (m *Monitor) Start(withDelay bool) {
 	if m.Enabled {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
@@ -71,6 +76,9 @@ func (m *Monitor) Start(withDelay bool) {
 	}
 }
 
+// ========================================================================
+// Internal function to run the monitor each time the ticker ticks
+// ========================================================================
 func (m *Monitor) run() (bool, *types.Result) {
 	if !m.Enabled {
 		return false, nil
@@ -151,6 +159,9 @@ func (m *Monitor) run() (bool, *types.Result) {
 	return true, result
 }
 
+// ========================================================================
+// Stop the monitor
+// ========================================================================
 func (m *Monitor) Stop() {
 	log.Println("### Stopping monitor", m.Name)
 

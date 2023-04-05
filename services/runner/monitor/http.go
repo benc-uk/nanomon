@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
+func (m *Monitor) runHTTP() *types.Result {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
@@ -30,7 +30,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -38,13 +38,13 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	if validateTLSProp != "" {
 		validateTLS, err = strconv.ParseBool(validateTLSProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
 	req, err := http.NewRequest(method, m.Target, nil)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	if m.Properties["body"] != "" {
@@ -56,7 +56,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 
 		err = json.Unmarshal([]byte(m.Properties["headers"]), &headers)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		for k, v := range headers {
@@ -74,7 +74,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 	defer resp.Body.Close()
 
@@ -83,7 +83,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	bodyStr := string(body)
@@ -92,7 +92,7 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 	if m.Properties["bodyRegex"] != "" {
 		re, err := regexp.Compile(m.Properties["bodyRegex"])
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		match := re.FindStringSubmatch(bodyStr)
@@ -126,9 +126,8 @@ func (m *Monitor) runHTTP() (*types.Result, map[string]any) {
 		}
 	}
 
-	// Save all outputs to the result but omit the body
+	// Save all outputs
 	r.Outputs = outputs
-	r.Outputs["body"] = "<OMITTED>"
 
-	return r, outputs
+	return r
 }

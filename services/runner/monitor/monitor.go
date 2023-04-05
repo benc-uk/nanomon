@@ -91,19 +91,17 @@ func (m *Monitor) run() (bool, *types.Result) {
 
 	var result *types.Result
 
-	var outputs map[string]interface{}
-
 	log.Printf("### Running monitor '%s' at '%s'", m.Name, m.Target)
 
 	switch m.Type {
 	case typeHTTP:
-		result, outputs = m.runHTTP()
+		result = m.runHTTP()
 
 	case typePing:
-		result, outputs = m.runPing()
+		result = m.runPing()
 
 	case typeTCP:
-		result, outputs = m.runTCP()
+		result = m.runTCP()
 
 	default:
 		log.Printf("### Unknown monitor type '%s', will be skipped", m.Type)
@@ -111,10 +109,10 @@ func (m *Monitor) run() (bool, *types.Result) {
 	}
 
 	if os.Getenv("DEBUG") == "true" {
-		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, outputs)
+		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, result.Outputs)
 	}
 
-	if m.Rule != "" && outputs != nil {
+	if m.Rule != "" && result.Outputs != nil {
 		//log.Printf("### Running rule '%s' for monitor '%s'", m.Rule, m.Name)
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
@@ -124,7 +122,7 @@ func (m *Monitor) run() (bool, *types.Result) {
 			return false, result
 		}
 
-		res, err := ruleExp.Evaluate(outputs)
+		res, err := ruleExp.Evaluate(result.Outputs)
 		if err != nil {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule eval error: "+err.Error()))
 			_ = storeResult(m, *result)
@@ -144,6 +142,12 @@ func (m *Monitor) run() (bool, *types.Result) {
 			result.Status = types.StatusError
 			result.Message = fmt.Sprintf("Rule failed: %s", m.Rule)
 		}
+	}
+
+	// Remove the body from the outputs after rules are checked
+	// TODO: Horrible leakiness from HTTP monitor here, should be fixed
+	if result.Outputs["body"] != nil {
+		result.Outputs["body"] = "*** Removed ***"
 	}
 
 	err := storeResult(m, *result)

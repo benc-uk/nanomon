@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (m *Monitor) runTCP() (*types.Result, map[string]any) {
+func (m *Monitor) runTCP() *types.Result {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
@@ -18,7 +18,7 @@ func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -27,7 +27,7 @@ func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 
 	conn, err := dialer.Dial("tcp", m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	r.Value = int(time.Since(start).Milliseconds())
@@ -41,5 +41,5 @@ func (m *Monitor) runTCP() (*types.Result, map[string]any) {
 
 	r.Outputs = outputs
 
-	return r, outputs
+	return r
 }

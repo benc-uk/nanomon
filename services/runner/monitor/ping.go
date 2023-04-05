@@ -8,7 +8,7 @@ import (
 	ping "github.com/prometheus-community/pro-bing"
 )
 
-func (m *Monitor) runPing() (*types.Result, map[string]any) {
+func (m *Monitor) runPing() *types.Result {
 	r := types.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
@@ -21,7 +21,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if countProp != "" {
 		count, err = strconv.Atoi(countProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -29,7 +29,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if intervalProp != "" {
 		interval, err = time.ParseDuration(intervalProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -37,13 +37,13 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
 	pinger, err := ping.NewPinger(m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	pinger.SetPrivileged(true)
@@ -53,7 +53,7 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 
 	err = pinger.Run() // NOTE: Blocks
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err), nil
+		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	stats := pinger.Statistics()
@@ -69,5 +69,5 @@ func (m *Monitor) runPing() (*types.Result, map[string]any) {
 	r.Value = int(stats.AvgRtt.Milliseconds())
 	r.Outputs = outputs
 
-	return r, outputs
+	return r
 }

@@ -1,15 +1,13 @@
 package monitor
 
 import (
-	"io"
-	"log"
 	"testing"
 	"time"
 )
 
 func init() {
 	// Comment out this line to see debug output
-	log.SetOutput(io.Discard)
+	//log.SetOutput(io.Discard)
 }
 
 func TestMonitorDisabledStart(t *testing.T) {

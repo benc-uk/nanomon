@@ -27,12 +27,12 @@ func main() {
 		os.Exit(1)
 	}()
 
-	changeIntervalEnv := os.Getenv("CHANGE_POLLING")
-	if changeIntervalEnv == "" {
-		changeIntervalEnv = "10s"
+	pollIntervalEnv := os.Getenv("POLLING_INTERVAL")
+	if pollIntervalEnv == "" {
+		pollIntervalEnv = "10s"
 	}
 
-	changeInterval, _ := time.ParseDuration(changeIntervalEnv)
+	pollInterval, _ := time.ParseDuration(pollIntervalEnv)
 
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
@@ -52,12 +52,10 @@ func main() {
 		go m.Start(true)
 	}
 
-	if db.WatchSupported {
-		// Note. This is a blocking call so main will never exit
-		monitor.WatchMonitors(db, monitors)
-	} else {
-		log.Println("### Mongo change stream not supported, falling back to polling every", changeIntervalEnv)
-		pollMonitors(changeInterval)
+	err = monitor.WatchMonitors(db, monitors)
+	if err != nil {
+		log.Println("### Mongo change stream not supported, falling back to polling every", pollIntervalEnv)
+		pollMonitors(pollInterval)
 	}
 }
 
@@ -70,10 +68,14 @@ func shutdown() {
 	}
 }
 
-func pollMonitors(changeInterval time.Duration) {
+// ==============================================================
+// Used to poll the database for changes
+// ==============================================================
+func pollMonitors(interval time.Duration) {
 	// Infinite loop to watch monitor changes in the database
 	for {
-		time.Sleep(changeInterval)
+		// Blocks for the specified interval
+		time.Sleep(interval)
 
 		// Fetch fresh set from database
 		updatedMonitors, err := monitor.FetchMonitors(db)

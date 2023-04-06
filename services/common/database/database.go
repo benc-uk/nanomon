@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,10 +18,9 @@ type DB struct {
 	Monitors *mongo.Collection
 	Results  *mongo.Collection
 	client   *mongo.Client
-
-	WatchSupported bool
 }
 
+// Open and connect to the database based on env vars
 func ConnectToDB() *DB {
 	db := &DB{}
 
@@ -71,21 +69,10 @@ func ConnectToDB() *DB {
 	db.Monitors = db.client.Database(mongoDB).Collection("monitors")
 	db.Results = db.client.Database(mongoDB).Collection("results")
 
-	// Check if change streams are supported, by default we assume they are
-	// There's no real way to check this, so we'll just check if we're using CosmosDB
-	db.WatchSupported = true
-	if strings.Contains(mongoURI, "cosmos.azure.com") {
-		db.WatchSupported = false
-	}
-
-	// Allow override with env var
-	if os.Getenv("USE_POLLING") == "true" {
-		db.WatchSupported = false
-	}
-
 	return db
 }
 
+// Check the database is alive
 func (db DB) Ping() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
@@ -98,6 +85,7 @@ func (db DB) Ping() error {
 	return nil
 }
 
+// Close the database connection
 func (db DB) Close() {
 	if db.client == nil {
 		return

@@ -11,6 +11,7 @@ type httpTestCase struct {
 	expectedStatus int
 	expectedRunOK  bool
 	rule           string
+	props          map[string]string
 }
 
 var cases = []httpTestCase{
@@ -53,6 +54,36 @@ var cases = []httpTestCase{
 		expectedRunOK:  true,
 		rule:           "respTime > 0 && respTime < 20000",
 	},
+	{
+		name:           "Rule Regex match string",
+		target:         "https://example.net",
+		expectedStatus: types.StatusOK,
+		expectedRunOK:  true,
+		rule:           "regexMatch == 'Example Domain'",
+		props: map[string]string{
+			"bodyRegex": "<title>(.*?)</title>",
+		},
+	},
+	{
+		name:           "Rule Regex match number",
+		target:         "https://example.net",
+		expectedStatus: types.StatusOK,
+		expectedRunOK:  true,
+		rule:           "regexMatch >= 700",
+		props: map[string]string{
+			"bodyRegex": "media \\(max-width: (.*?)px\\)",
+		},
+	},
+	{
+		name:           "Rule Regex bad",
+		target:         "https://example.net",
+		expectedStatus: types.StatusFailed,
+		expectedRunOK:  false,
+		rule:           "regexMatch == 'whatever'",
+		props: map[string]string{
+			"bodyRegex": "*hello",
+		},
+	},
 }
 
 func TestHTTPMonitor(t *testing.T) {
@@ -65,6 +96,8 @@ func TestHTTPMonitor(t *testing.T) {
 			m.Type = typeHTTP
 			m.Target = tc.target
 			m.Rule = tc.rule
+
+			m.Properties = tc.props
 
 			ok, res := m.run()
 

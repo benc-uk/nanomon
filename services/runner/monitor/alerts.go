@@ -17,7 +17,7 @@ func checkForAlerts(m *Monitor, r types.Result) {
 		maxFailCount, _ = strconv.Atoi(maxFailCountEnv)
 	}
 
-	if m.FailCount >= maxFailCount && !m.FailedState {
+	if m.ErrorCount >= maxFailCount && !m.InErrorState {
 		// Email body
 		body := fmt.Sprintf(`Monitor '%s' has failed %d times!
   - Reason:%s
@@ -28,12 +28,12 @@ Configuration:
   - Type: %s
   - Interval: %s
   - Rule: %s
-  - Properties: %+v`, m.Name, m.FailCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
+  - Properties: %+v`, m.Name, m.ErrorCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
 			m.Target, m.Type, m.Interval, m.Rule, m.Properties)
 
 		sendEmail(body, fmt.Sprintf("⚠️ NanoMon alert for: %s", m.Name))
 
-		m.FailedState = true
+		m.InErrorState = true
 	}
 }
 
@@ -52,8 +52,8 @@ func sendEmail(body, subject string) {
 		port = "587"
 	}
 
+	// Alerting is not configured and disabled
 	if from == "" || pass == "" || to == "" {
-		// Alerting is not configured and disabled
 		return
 	}
 

@@ -27,8 +27,8 @@ type Monitor struct {
 	Rule             string
 	Target           string
 	Properties       map[string]string
-	FailCount        int
-	FailedState      bool
+	ErrorCount       int
+	InErrorState     bool
 
 	ticker *time.Ticker
 	db     *database.DB
@@ -113,52 +113,51 @@ func (m *Monitor) run() (bool, *types.Result) {
 	}
 
 	if m.Rule != "" && result.Outputs != nil {
-		//log.Printf("### Running rule '%s' for monitor '%s'", m.Rule, m.Name)
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
 			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule expression error: "+err.Error()))
-			_ = storeResult(m, *result)
-
-			return false, result
 		}
 
-		res, err := ruleExp.Evaluate(result.Outputs)
-		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule eval error: "+err.Error()))
-			_ = storeResult(m, *result)
+		if ruleExp != nil {
+			ruleResult, err := ruleExp.Evaluate(result.Outputs)
+			if err != nil {
+				result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule eval error: "+err.Error()))
+			}
 
-			return false, result
-		}
+			ruleResultBool, isBool := ruleResult.(bool)
+			if !isBool {
+				result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
+			}
 
-		ruleResult, isBool := res.(bool)
-		if !isBool {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
-			_ = storeResult(m, *result)
-
-			return false, result
-		}
-
-		if !ruleResult {
-			result.Status = types.StatusError
-			result.Message = fmt.Sprintf("Rule failed: %s", m.Rule)
+			if !ruleResultBool && result.Status != types.StatusError {
+				result.Status = types.StatusError
+				result.Message = fmt.Sprintf("Rule failed: %s", m.Rule)
+			}
 		}
 	}
 
 	// Remove the body from the outputs after rules are checked
-	// TODO: Horrible leakiness from HTTP monitor here, should be fixed
+	// TODO: Serious leakiness from HTTP monitor here
 	if result.Outputs["body"] != nil {
 		result.Outputs["body"] = "*** Removed ***"
 	}
 
-	err := storeResult(m, *result)
+	checkForAlerts(m, *result)
+
+	// Finally store the result to the database
+	err := storeResult(m.db, *result)
 	if err != nil {
 		log.Printf("### Error storing result: %s", err.Error())
 		return false, result
 	}
 
-	if result.Status > 0 {
+	if result.Status > types.StatusOK {
+		m.ErrorCount++
 		return false, result
 	}
+
+	m.ErrorCount = 0
+	m.InErrorState = false
 
 	return true, result
 }

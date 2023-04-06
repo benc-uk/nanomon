@@ -2,9 +2,11 @@ package monitor
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"nanomon/services/common/database"
 	"nanomon/services/common/types"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +36,9 @@ type namespace struct {
 	Coll string `bson:"coll"`
 }
 
+// ========================================================================
+// Fetch all monitors from the database
+// ========================================================================
 func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
@@ -58,27 +63,19 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	return monitors, nil
 }
 
-func storeResult(m *Monitor, r types.Result) error {
-	if r.Status > 0 {
-		m.FailCount++
-	} else {
-		m.FailCount = 0
-		m.FailedState = false
-	}
-
-	checkForAlerts(m, r)
-
+// Store a result in the database
+func storeResult(db *database.DB, r types.Result) error {
 	// For unit tests
-	if m.db == nil {
+	if db == nil {
 		return nil
 	}
 
 	log.Printf("###   Storing result, status:%d msg:%s", r.Status, r.Message)
 
-	ctx, cancel := context.WithTimeout(context.Background(), m.db.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
 
-	_, err := m.db.Results.InsertOne(ctx, r)
+	_, err := db.Results.InsertOne(ctx, r)
 
 	return err
 }
@@ -86,10 +83,14 @@ func storeResult(m *Monitor, r types.Result) error {
 // =================================================================================================
 // Watches the monitors collection for changes and updates accordingly
 // =================================================================================================
-func WatchMonitors(db *database.DB, monitors []*Monitor) {
+func WatchMonitors(db *database.DB, monitors []*Monitor) error {
+	if os.Getenv("USE_POLLING") == "true" {
+		return fmt.Errorf("forcing polling mode as USE_POLLING is set")
+	}
+
 	monitorStream, err := db.Monitors.Watch(context.TODO(), mongo.Pipeline{})
 	if err != nil {
-		log.Fatalln("### Error watching monitors collection:", err)
+		return err
 	}
 
 	log.Println("### Change stream now watching monitors collection")
@@ -141,4 +142,6 @@ func WatchMonitors(db *database.DB, monitors []*Monitor) {
 			}
 		}
 	}
+
+	return nil
 }

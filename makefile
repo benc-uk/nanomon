@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.4
+VERSION ?= 0.0.5
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 API_ENDPOINT ?= http://localhost:8000/api

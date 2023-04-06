@@ -80,7 +80,7 @@ Env vars used only by the runner:
 | ALERT_SMTP_PORT     | SMTP port                                                          | 587            |
 | ALERT_FAIL_COUNT    | How many time a monitor needs to fail in a row to trigger an alert | 3              |
 | POLLING_INTERVAL    | Only used when in polling mode                                     | 10s            |
-| USE_POLLING         | Force polling mode, by default MongoDB change streams will be used | false          |
+| USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false          |
 
 ## Scratch Notes Area
 

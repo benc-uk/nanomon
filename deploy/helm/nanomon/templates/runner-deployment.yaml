@@ -29,6 +29,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.regRepo }}/nanomon-runner:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 50Mi
           env:
           - name: MONGO_URI
             {{- if .Values.mongodb.connectionURI }}

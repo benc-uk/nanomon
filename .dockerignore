@@ -1,2 +1,8 @@
-# Important not to copy over any dev files
-frontend/config
+node_modules/
+scripts/
+deploy/
+build/
+!build/standalone.sh
+.vscode/
+.gitignore
+.github/

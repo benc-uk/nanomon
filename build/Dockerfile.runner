@@ -1,5 +1,5 @@
 # ===================================================================================
-# === Stage 1: Build the API service ================================================
+# === Stage 1: Build the runner service =============================================
 # ===================================================================================
 FROM golang:1.20-alpine as go-build
 
@@ -13,7 +13,7 @@ WORKDIR /build
 # Install system dependencies, if CGO_ENABLED=1
 RUN if [[ $CGO_ENABLED -eq 1 ]]; then apk update && apk add gcc musl-dev; fi
 
-# Without the root certs the runner can't make really make HTTPS calls
+# We need root certs to make HTTPS calls
 RUN apk add --no-cache ca-certificates
 
 # Fetch and cache Go modules
@@ -40,6 +40,8 @@ WORKDIR /app
 
 # Copy the Go server binary
 COPY --from=go-build /build/runner . 
+
+# And root certs too
 COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # That's it! Just run the server 

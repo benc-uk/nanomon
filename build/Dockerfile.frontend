@@ -41,6 +41,7 @@ COPY --from=go-build /build/frontend .
 COPY frontend/ .
 
 ENV PORT=8001
+EXPOSE 8001
 
 # That's it! Just run the server 
 CMD [ "./frontend"]

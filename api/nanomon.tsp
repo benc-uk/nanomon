@@ -75,6 +75,12 @@ interface MonitorAPI {
     @statusCode code: 400; @body _: Problem
   };
 
+  update(@path id: string, @body monitor: Monitor): Monitor | {
+    @statusCode code: 400; @body _: Problem
+  } | {
+    @statusCode code: 404; @body _: Problem
+  };
+
   @delete delete(@path id: string): void | {
     @statusCode code: 400; @body _: Problem
   } | {

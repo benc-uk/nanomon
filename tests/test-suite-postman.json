@@ -1,0 +1,358 @@
+{
+	"info": {
+		"_postman_id": "5584da5d-9308-4e9f-8181-f342ef280942",
+		"name": "NanoMon API Service",
+		"description": "This is the NanoMon REST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8920"
+	},
+	"item": [
+		{
+			"name": "Monitor API create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is OK and JSON\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"monitor is returned\", function () {\r",
+							"    var mon = pm.response.json();\r",
+							"\r",
+							"    pm.expect(mon.id).to.have.lengthOf.at.least(24);\r",
+							"    pm.expect(mon.updated).to.be.string\r",
+							"\r",
+							"    pm.environment.set(\"monId\", mon.id);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test {{$randomDomainWord}}\",\n  \"type\": \"http\",\n  \"target\": \"http://example.com\",\n  \"interval\": \"5m\",\n  \"rule\": \"status == 200\",\n  \"enabled\": true\n}",
+					"options": {
+						"raw": {
+							"headerFamily": "json",
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/monitors",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"monitors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Monitor API list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is OK and JSON\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"monitor array is returned\", function () {\r",
+							"    var mons = pm.response.json();\r",
+							"\r",
+							"    pm.expect(mons).to.be.an('array')\r",
+							"    pm.expect(mons).to.have.length.gt(0);\r",
+							"\r",
+							"    const m = mons.find(m => m.id === pm.environment.get(\"monId\"));\r",
+							"    pm.expect(m).to.be.an(\"object\", \"Could not find the setting\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"monitor array contains new mon\", function () {\r",
+							"    var mons = pm.response.json();\r",
+							"\r",
+							"    const m = mons.find(m => m.id === pm.environment.get(\"monId\"));\r",
+							"    pm.expect(m).to.be.an(\"object\", \"Could not find the monitor\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/monitors",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"monitors"
+					]
+				},
+				"description": "List all monitors"
+			},
+			"response": []
+		},
+		{
+			"name": "Monitor API get",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is OK and JSON\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"monitor is correct\", function () {\r",
+							"    var mon = pm.response.json();\r",
+							"\r",
+							"    pm.expect(mon).to.be.an('object');\r",
+							"    pm.expect(mon.id).to.eq(pm.environment.get(\"monId\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/monitors/{{monId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"monitors",
+						"{{monId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Monitor API update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is OK and JSON\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"monitor is updated\", function () {\r",
+							"    var mon = pm.response.json();\r",
+							"\r",
+							"    pm.expect(mon).to.be.an('object');\r",
+							"    pm.expect(mon.id).to.eq(pm.environment.get(\"monId\"));\r",
+							"    pm.expect(mon.enabled).to.eq(false);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test {{$randomDomainWord}}\",\n  \"type\": \"http\",\n  \"target\": \"http://example.com\",\n  \"interval\": \"5m\",\n  \"rule\": \"status == 200\",\n  \"enabled\": false\n}",
+					"options": {
+						"raw": {
+							"headerFamily": "json",
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/monitors/{{monId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"monitors",
+						"{{monId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Monitor API delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/monitors/{{monId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"monitors",
+						"{{monId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Results API get results",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"result is OK and JSON\", function () {\r",
+							"    pm.response.to.be.ok;\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"results array is valid\", function () {\r",
+							"    var results = pm.response.json();\r",
+							"\r",
+							"    pm.expect(results).to.be.an('array');\r",
+							"    pm.expect(results).to.have.length.gt(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/results?max=5",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"results"
+					],
+					"query": [
+						{
+							"key": "max",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{bearerToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api"
+		}
+	]
+}

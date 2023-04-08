@@ -77,3 +77,15 @@ a {
 .dropdown-item {
   cursor: pointer;
 }
+
+@media screen and (max-width: 800px) {
+  .target {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 1400px) {
+  .target {
+    font-size: 1rem;
+  }
+}

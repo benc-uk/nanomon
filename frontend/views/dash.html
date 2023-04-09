@@ -21,6 +21,6 @@
   </div>
   <span x-text="updateText"></span>
 
-  &mdash; Auto update every <span x-text="autoUpdate"></span> seconds &mdash;
+  &mdash; <span x-text="paused ? 'Auto update paused': 'Auto update every '+autoUpdate+' seconds '"> </span> &mdash;
   <a class="badge rounded-pill text-bg-light" type="button" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
 </div>

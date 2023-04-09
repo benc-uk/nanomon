@@ -46,11 +46,11 @@ export const homeComponent = (api) => ({
       return
     }
 
-    let monitors = []
+    let monitorsNew = []
     this.loading = true
 
     try {
-      monitors = await api.getMonitors()
+      monitorsNew = await api.getMonitors()
       this.error = ''
     } catch (err) {
       this.error = err.message
@@ -61,16 +61,22 @@ export const homeComponent = (api) => ({
     this.loading = false
     this.updateText = new Date().toLocaleTimeString()
 
-    for (const m of monitors) {
+    for (const m of monitorsNew) {
       const results = await api.getResultsForMonitor(m.id, 1)
       const last = new Date(results[0]?.date)
       m.message = results[0]?.message
       m.lastRan = results[0]?.date ? last.toLocaleString() : 'Never'
       m.status = getStatusFields(m.enabled ? results[0]?.status : -1)
       m.icon = monitorIcon(m)
+
+      // if (!m.group || m.group == '') {
+      //   m.group = 'default'
+      // }
+
+      // monitorsGrouped[m.group] = m
     }
 
-    this.monitors = monitors
+    this.monitors = monitorsNew
 
     await this.updateCharts()
   },

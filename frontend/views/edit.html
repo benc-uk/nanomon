@@ -2,17 +2,20 @@
 
 <div x-show="monId == 'new'" class="mb-3">
   Templates:
-  <button class="btn btn-primary" @click="newHTTP">HTTP</button>
-  <button class="btn btn-primary" @click="newTCP">TCP</button>
-  <button class="btn btn-primary" @click="newPing">PING</button>
+  <button class="btn btn-primary" @click="newFromTemplate('http')">HTTP</button>
+  <button class="btn btn-primary" @click="newFromTemplate('tcp')">TCP</button>
+  <button class="btn btn-primary" @click="newFromTemplate('ping')">PING</button>
 </div>
 
 <template x-if="monitor">
   <div class="card shadow mb-4">
-    <div class="card-header fs-3 bg-info text-light" x-text="monId !== 'new' ? 'Edit Monitor' : 'Create Monitor'"></div>
+    <div
+      class="card-header fs-3 bg-info text-light"
+      x-html="`<i class='fa fa-fw fa-edit'></i> `+(monId !== 'new' ? 'Edit Monitor' : 'Create Monitor')"
+    ></div>
     <div class="card-body">
       <form>
-        <div class="form-group">
+        <div class="form-group mb-2">
           <label for="name">Name</label>
           <input
             type="text"
@@ -24,35 +27,49 @@
           />
         </div>
 
-        <div class="form-group">
-          <label for="type">Type</label>
-          <select class="form-control" id="type" x-model="monitor.type">
-            <template x-for="type of types">
-              <option x-text="type" :value="type" :selected="monitor.type === type"></option>
-            </template>
-          </select>
+        <div class="d-flex w-100 mb-2">
+          <div class="form-group me-3">
+            <label for="type">Type</label>
+            <select class="form-control me-4" id="type" x-model="monitor.type">
+              <template x-for="type of types">
+                <option x-text="type" :value="type" :selected="monitor.type === type"></option>
+              </template>
+            </select>
+          </div>
+
+          <div class="form-group me-3">
+            <label for="interval">Interval</label>
+            <input
+              type="text"
+              x-model="monitor.interval"
+              class="form-control"
+              id="interval"
+              placeholder="Interval, e.g. 20s or 5m or 1.5h"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="form-group flex-grow-1">
+            <label for="group">Group</label>
+            <input
+              type="text"
+              x-model="monitor.group"
+              class="form-control"
+              id="group"
+              placeholder="Optional group name"
+              autocomplete="new-password"
+            />
+          </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-2">
           <label for="interval">Target</label>
           <input
             type="text"
             x-model="monitor.target"
             class="form-control"
             id="interval"
-            placeholder="Status rule expression"
-            autocomplete="new-password"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="interval">Interval</label>
-          <input
-            type="text"
-            x-model="monitor.interval"
-            class="form-control"
-            id="interval"
-            placeholder="Interval, e.g. 20s or 5m or 1.5h"
+            :placeholder="monitor.type == 'http' ? 'Target URL to be monitored' : 'Target hostname, or IP address (add :port for TCP)'"
             autocomplete="new-password"
           />
         </div>

@@ -4,7 +4,7 @@
 
 export const definitions = {
   http: {
-    ruleHint: 'Outputs: <b>respTime, status, body, bodyLen, certExpiryDays, regexMatch</b>',
+    ruleHint: 'Properties: <b>respTime, status, body, bodyLen, certExpiryDays, regexMatch</b>',
     allowedProps: ['method', 'timeout', 'validateTLS', 'body', 'headers', 'bodyRegex'],
     template: {
       name: 'New HTTP Monitor',
@@ -13,15 +13,12 @@ export const definitions = {
       enabled: true,
       target: 'http://example.net',
       rule: 'status == 200 && respTime < 1200',
-      properties: {
-        method: 'GET',
-        timeout: '5s',
-      },
+      properties: {},
     },
   },
 
   ping: {
-    ruleHint: 'Outputs: <b>minRtt, avgRtt, maxRtt, packetsRecv, packetLoss, ipAddress</b>',
+    ruleHint: 'Properties: <b>minRtt, avgRtt, maxRtt, packetsRecv, packetLoss, ipAddress</b>',
     allowedProps: ['timeout', 'count', 'interval'],
     template: {
       name: 'New Ping Monitor',
@@ -37,7 +34,7 @@ export const definitions = {
   },
 
   tcp: {
-    ruleHint: 'Outputs: <b>respTime, ipAddress</b>',
+    ruleHint: 'Properties: <b>respTime, ipAddress</b>',
     allowedProps: ['timeout'],
     template: {
       name: 'New TCP Monitor',

@@ -18,6 +18,7 @@ export const editComponent = (api) => ({
         return
       }
 
+      this.error = ''
       this.monId = view.split('#edit/')[1]
       if (this.monId === 'new') {
         this.newMonitor()
@@ -49,18 +50,11 @@ export const editComponent = (api) => ({
     }
   },
 
-  newHTTP() {
-    this.monitor = definitions.http.template
+  newFromTemplate(monType) {
+    this.monitor = definitions[monType].template
   },
 
-  newPing() {
-    this.monitor = definitions.ping.template
-  },
-
-  newTCP() {
-    this.monitor = definitions.tcp.template
-  },
-
+  // Save or create monitor using API
   async save() {
     try {
       if (this.monId === 'new') {
@@ -75,6 +69,7 @@ export const editComponent = (api) => ({
     }
   },
 
+  // Simple form validator
   canSave() {
     let ok = this.monitor.name !== '' && this.monitor.type !== '' && this.monitor.interval !== '' && this.monitor.target !== ''
 
@@ -85,5 +80,10 @@ export const editComponent = (api) => ({
     }
 
     return ok
+  },
+
+  // Not used
+  appendRule(propName) {
+    this.monitor.rule += ` && ${propName} == 'some value'`
   },
 })

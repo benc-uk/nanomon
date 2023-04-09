@@ -79,20 +79,20 @@ export const monitorComponent = (api, userAccount) => ({
             labels: resultLabels,
             datasets: [
               {
-                label: 'Response time',
+                label: 'Result Value',
                 data: resultValues,
               },
             ],
           },
           options: {
             plugins: {
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    return `${context.parsed.y} ms`
-                  },
-                },
-              },
+              // tooltip: {
+              //   callbacks: {
+              //     label: function (context) {
+              //       return `${context.parsed.y} ms`
+              //     },
+              //   },
+              // },
             },
             scales: {
               y: {

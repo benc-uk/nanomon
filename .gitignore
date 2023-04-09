@@ -6,5 +6,6 @@ tmp/
 frontend/config
 release-notes.md
 my-*.yaml
+my-*.bicepparam
 
 # Binaries from `go build`

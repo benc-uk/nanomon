@@ -1,0 +1,59 @@
+use("nanomon");
+
+// db.monitors.drop();
+// db.results.drop();
+
+db.monitors.insertOne({
+  name: "HS Explorer: Juno",
+  target:
+    "https://www.juno.co.uk/products/asm-hydrasynth-explorer-8-voice-polyphonic-wave/846319-01/",
+  interval: "30m",
+  type: "http",
+  updated: new Date(),
+  enabled: true,
+  rule: "status == 200 && regexMatch > 499",
+  properties: {
+    bodyRegex: 'price" content="(.*?)"',
+  },
+});
+
+db.monitors.insertOne({
+  name: "HS Explorer: MM",
+  target: "https://www.musicmatter.co.uk/asm-hydrasynth-explorer",
+  interval: "30m",
+  type: "http",
+  updated: new Date(),
+  enabled: true,
+  rule: "status == 200 && regexMatch > 499",
+  properties: {
+    bodyRegex: 'price" content="(.*?)"',
+  },
+});
+
+db.monitors.insertOne({
+  name: "HS Explorer: Scan",
+  target:
+    "https://www.scan.co.uk/products/asm-hydrasynth-explorer-8-voice-polyphonic-wave-morphing-synthesizer",
+  interval: "30m",
+  type: "http",
+  updated: new Date(),
+  enabled: true,
+  rule: "status == 200 && regexMatch > 499",
+  properties: {
+    bodyRegex: 'price" content="(.*?)"',
+  },
+});
+
+db.monitors.insertOne({
+  name: "HS Explorer: Andertons",
+  target:
+    "https://www.andertons.co.uk/keyboards-pianos/synths-workstations/semi-modular-and-desktop-synths/asm-hydrasynth-explorer",
+  interval: "30m",
+  type: "http",
+  updated: new Date(),
+  enabled: true,
+  rule: "status == 200 && regexMatch > 499",
+  properties: {
+    bodyRegex: 'price">£(.*?)</span>',
+  },
+});

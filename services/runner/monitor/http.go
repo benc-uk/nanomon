@@ -112,6 +112,10 @@ func (m *Monitor) runHTTP() *types.Result {
 	regexMatchFloat, err := strconv.ParseFloat(regexMatch, 64)
 	if err == nil {
 		outputs["regexMatch"] = regexMatchFloat
+
+		// SPECIAL: When the regex match is a number,
+		// - set the result value to the number, this is a special case
+		r.Value = int(regexMatchFloat)
 	} else {
 		outputs["regexMatch"] = regexMatch
 	}

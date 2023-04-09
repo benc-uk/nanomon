@@ -181,10 +181,13 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		ID:         oid.Hex(),
 		Name:       m.Name,
 		Type:       m.Type,
+		Target:     m.Target,
+		Rule:       m.Rule,
 		Interval:   m.Interval,
 		Updated:    m.Updated,
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
+		Group:      m.Group,
 	}
 
 	api.ReturnJSON(resp, respMonitor)

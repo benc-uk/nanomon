@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/Knetic/govaluate"
+)
 
 type MonitorResp struct {
 	ID         string            `bson:"_id" json:"id"`
@@ -12,6 +16,7 @@ type MonitorResp struct {
 	Updated    time.Time         `json:"updated"`
 	Enabled    bool              `json:"enabled"`
 	Properties map[string]string `json:"properties"`
+	Group      string            `json:"group"`
 }
 
 type MonitorReq struct {
@@ -23,18 +28,7 @@ type MonitorReq struct {
 	Enabled    bool
 	Properties map[string]string
 	Updated    time.Time
-}
-
-type ResultWithMonitor struct {
-	Date    time.Time `bson:"date" json:"date"`
-	Status  int       `bson:"status" json:"status"`
-	Value   int       `bson:"value" json:"value"`
-	Message string    `bson:"message" json:"message"`
-	Monitor []struct {
-		Name   string `bson:"name" json:"name"`
-		Type   string `bson:"type" json:"type"`
-		Target string `bson:"target" json:"target"`
-	} `bson:"monitor" json:"monitor"`
+	Group      string
 }
 
 func (m MonitorReq) validate() (string, bool) {
@@ -52,6 +46,18 @@ func (m MonitorReq) validate() (string, bool) {
 
 	if m.Target == "" {
 		return "missing target", false
+	}
+
+	_, err := time.ParseDuration(m.Interval)
+	if err != nil {
+		return "invalid interval", false
+	}
+
+	if m.Rule != "" {
+		_, err = govaluate.NewEvaluableExpression(m.Rule)
+		if err != nil {
+			return "rule invalid: " + err.Error(), false
+		}
 	}
 
 	return "", true

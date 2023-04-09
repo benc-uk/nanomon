@@ -7,6 +7,7 @@ endif
 VERSION ?= 0.0.5
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
+AUTH_TENANT ?= common
 API_ENDPOINT ?= http://localhost:8000/api
 
 # Override these if building your own images
@@ -26,6 +27,7 @@ AIR_PATH := $(REPO_DIR)/bin/air
 BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
 ESLINT_PATH := $(REPO_DIR)/bin/node_modules/.bin/eslint
 PRETTIER_PATH := $(REPO_DIR)/bin/node_modules/.bin/prettier
+NEWMAN_PATH := $(REPO_DIR)/bin/node_modules/.bin/newman
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
@@ -42,6 +44,7 @@ install-tools: ## 🔮 Install dev tools into project bin directory
 	@$(BS_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin browser-sync
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin eslint
 	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin prettier
+	@$(NEWMAN_PATH) -v > /dev/null 2>&1 || npm install --prefix ./bin newman
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
@@ -83,7 +86,7 @@ run-runner: ## 🏃 Run monitor runner locally with hot-reload
 run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 	@figlet $@ || true
 	# Creating JSON config file for frontend
-	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO}' > frontend/config
+	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config
 	# Starting Browsersync
 	@$(BS_PATH) start -s frontend --no-ui --watch --no-notify
 
@@ -99,6 +102,10 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
 	@go test -v ./... 
+
+test-api: ## 🧪 Run API integration tests
+	@figlet $@ || true
+	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
 
 generate: ## 🤖 Generate OpenAPI spec using TypeSpec
 	@figlet $@ || true

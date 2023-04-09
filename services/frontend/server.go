@@ -56,6 +56,11 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 		apiEndpoint = "/"
 	}
 
+	authTenant := os.Getenv("AUTH_TENANT")
+	if authTenant == "" {
+		authTenant = "common"
+	}
+
 	authClientID := os.Getenv("AUTH_CLIENT_ID")
 
 	config := map[string]string{
@@ -63,6 +68,7 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 		"AUTH_CLIENT_ID": authClientID,
 		"VERSION":        version,
 		"BUILD_INFO":     buildInfo,
+		"AUTH_TENANT":    authTenant,
 	}
 
 	configJSON, _ := json.Marshal(config)

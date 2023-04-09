@@ -28,6 +28,7 @@ Alpine.data('app', () => ({
         auth: {
           clientId: config.AUTH_CLIENT_ID,
           redirectUri: window.location.origin,
+          authority: `https://login.microsoftonline.com/${config.AUTH_TENANT}`,
         },
         cache: {
           cacheLocation: 'localStorage',
@@ -78,7 +79,8 @@ Alpine.data('app', () => ({
         this.updateUser(acct)
       }
     } catch (err) {
-      console.log('### Login failed', err)
+      console.dir(err)
+      showToast(`Login Failed 😵<br>` + err, 15000)
       this.updateUser(null)
     }
   },

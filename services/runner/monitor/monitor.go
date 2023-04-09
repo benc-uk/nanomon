@@ -17,35 +17,31 @@ const typePing = "ping"
 const typeTCP = "tcp"
 
 type Monitor struct {
-	ID               string `bson:"_id"`
-	Name             string
-	Type             string
-	Interval         string
-	IntervalDuration time.Duration
-	Updated          time.Time
-	Enabled          bool
-	Rule             string
-	Target           string
-	Properties       map[string]string
-	ErrorCount       int
-	InErrorState     bool
+	Name         string            // Name
+	Type         string            // Type of monitor, ping, http, tcp
+	Interval     string            // Interval between runs
+	Updated      time.Time         // Last time the monitor was updated
+	Enabled      bool              // Enable or disable the monitor
+	Rule         string            // Rules are run against the monitor result
+	Target       string            // Target is the host to ping, or URL to check
+	Properties   map[string]string // Set of properties varies per monitor type
+	ErrorCount   int               // For alerting, keeping track of non-OK count
+	InErrorState bool              // For alerting, has triggered an alert
+
+	ID string `bson:"_id"`
 
 	ticker *time.Ticker
 	db     *database.DB
 }
 
-// ========================================================================
 // Create a new monitor
-// ========================================================================
 func NewMonitor(db *database.DB) *Monitor {
 	return &Monitor{
 		db: db,
 	}
 }
 
-// ========================================================================
 // Start the monitor ticker
-// ========================================================================
 func (m *Monitor) Start(withDelay bool) {
 	if m.Enabled {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
@@ -54,20 +50,26 @@ func (m *Monitor) Start(withDelay bool) {
 		return
 	}
 
-	if m.IntervalDuration == 0 {
-		log.Printf("### Monitor '%s' has no interval, it can not be started", m.Name)
+	intervalDuration, err := time.ParseDuration(m.Interval)
+	if err != nil {
+		log.Printf("### Monitor '%s' has invalid interval", m.Name)
 		return
 	}
 
 	// This offsets the start by random amount preventing monitors from running at the same time
 	if withDelay {
-		delaySecs := rand.Intn(int(m.IntervalDuration.Seconds()))
+		delaySecMax := int(intervalDuration.Seconds())
+		if delaySecMax > 20 {
+			delaySecMax = 20
+		}
+
+		delaySecs := rand.Intn(delaySecMax)
 		time.Sleep(time.Duration(delaySecs) * time.Second)
 	}
 
 	m.run()
 
-	m.ticker = time.NewTicker(m.IntervalDuration)
+	m.ticker = time.NewTicker(intervalDuration)
 
 	// This will block, so Start() should always be called with a goroutine
 	for {
@@ -76,9 +78,7 @@ func (m *Monitor) Start(withDelay bool) {
 	}
 }
 
-// ========================================================================
 // Internal function to run the monitor each time the ticker ticks
-// ========================================================================
 func (m *Monitor) run() (bool, *types.Result) {
 	if !m.Enabled {
 		return false, nil
@@ -112,26 +112,32 @@ func (m *Monitor) run() (bool, *types.Result) {
 		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, result.Outputs)
 	}
 
+	// Logic block to evaluate the rule and set status & message accordingly
+	// At this stage a result will either be StatusOK or StatusFailed
 	if m.Rule != "" && result.Outputs != nil {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
-			result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule expression error: "+err.Error()))
+			result.Message = fmt.Sprintf("rule expression error: " + err.Error())
+			result.Status = types.StatusFailed
 		}
 
 		if ruleExp != nil {
 			ruleResult, err := ruleExp.Evaluate(result.Outputs)
 			if err != nil {
-				result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule eval error: "+err.Error()))
+				result.Message = fmt.Sprintf("rule eval error: " + err.Error())
+				result.Status = types.StatusFailed
 			}
 
 			ruleResultBool, isBool := ruleResult.(bool)
-			if !isBool {
-				result = types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("rule didn't return a bool"))
+			if !isBool && result.Status != types.StatusFailed {
+				result.Message = "rule didn't return a bool"
+				result.Status = types.StatusFailed
 			}
 
-			if !ruleResultBool && result.Status != types.StatusError {
+			// Rule can put the result into error status
+			if !ruleResultBool && isBool && result.Status != types.StatusFailed {
 				result.Status = types.StatusError
-				result.Message = fmt.Sprintf("Rule failed: %s", m.Rule)
+				result.Message = fmt.Sprintf("Rule violated: %s", m.Rule)
 			}
 		}
 	}

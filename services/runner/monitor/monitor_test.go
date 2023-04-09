@@ -1,20 +1,21 @@
 package monitor
 
 import (
+	"io"
+	"log"
 	"testing"
 	"time"
 )
 
 func init() {
 	// Comment out this line to see debug output
-	//log.SetOutput(io.Discard)
+	log.SetOutput(io.Discard)
 }
 
 func TestMonitorDisabledStart(t *testing.T) {
 	m := NewMonitor(nil)
 	m.Name = "unit test disabled start"
 	m.Enabled = false
-	m.IntervalDuration = 10 * time.Second
 
 	go m.Start(false)
 	time.Sleep(10 * time.Millisecond)
@@ -109,5 +110,21 @@ func TestMonitorRuleNotBool(t *testing.T) {
 	ok, _ := m.run()
 	if ok {
 		t.Errorf("Monitor should return false with non-bool rule")
+	}
+}
+
+func TestMonitorIntervalBad(t *testing.T) {
+	m := NewMonitor(nil)
+	m.Target = "http://dummy"
+	m.Type = "http"
+	m.Name = "unit test interval bad"
+	m.Enabled = true
+	m.Interval = "goat"
+
+	go m.Start(false)
+	time.Sleep(10 * time.Millisecond)
+
+	if m.ticker != nil {
+		t.Errorf("Ticker should be nil when monitor has no interval")
 	}
 }

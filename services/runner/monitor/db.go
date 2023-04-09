@@ -7,7 +7,6 @@ import (
 	"nanomon/services/common/database"
 	"nanomon/services/common/types"
 	"os"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -56,7 +55,6 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 			return nil, err
 		}
 
-		m.IntervalDuration, _ = time.ParseDuration(m.Interval)
 		monitors = append(monitors, m)
 	}
 
@@ -108,7 +106,6 @@ func WatchMonitors(db *database.DB, monitors []*Monitor) error {
 		monitor := event.FullDocument
 		// NOTE: We have to mutate the monitor to set the db and interval duration
 		monitor.db = db
-		monitor.IntervalDuration, _ = time.ParseDuration(monitor.Interval)
 
 		if opType == "insert" {
 			log.Printf("### Monitor '%s' created and started", monitor.Name)

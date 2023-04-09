@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright (c) Ben Coleman, 2020
+// Copyright (c) Ben Coleman, 2023
 // Licensed under the MIT License.
 //
 // NanoMon API server
@@ -80,7 +80,6 @@ func main() {
 		api.AddHealthEndpoint(publicRouter, "api/health")
 		api.AddStatusEndpoint(publicRouter, "api/status")
 		api.AddOKEndpoint(publicRouter, "api/")
-		api.AddOKEndpoint(publicRouter, "")
 
 		api.addAnonymousRoutes(publicRouter)
 	})

@@ -68,12 +68,6 @@ export const homeComponent = (api) => ({
       m.lastRan = results[0]?.date ? last.toLocaleString() : 'Never'
       m.status = getStatusFields(m.enabled ? results[0]?.status : -1)
       m.icon = monitorIcon(m)
-
-      // if (!m.group || m.group == '') {
-      //   m.group = 'default'
-      // }
-
-      // monitorsGrouped[m.group] = m
     }
 
     this.monitors = monitorsNew

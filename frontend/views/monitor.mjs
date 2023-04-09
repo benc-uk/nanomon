@@ -85,15 +85,7 @@ export const monitorComponent = (api, userAccount) => ({
             ],
           },
           options: {
-            plugins: {
-              // tooltip: {
-              //   callbacks: {
-              //     label: function (context) {
-              //       return `${context.parsed.y} ms`
-              //     },
-              //   },
-              // },
-            },
+            plugins: {},
             scales: {
               y: {
                 beginAtZero: false,

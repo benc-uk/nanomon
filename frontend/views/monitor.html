@@ -40,12 +40,8 @@
           </tr>
           <tr>
             <td>Target:</td>
-            <template x-if="monitor.type == 'http'">
-              <td><a :href="monitor.target" x-text="monitor.target" target="_blank" class="text-primary"></a></td>
-            </template>
-            <template x-if="monitor.type != 'http'">
-              <td x-text="monitor.target"></td>
-            </template>
+            <td x-show="monitor.type == 'http'"><a :href="monitor.target" x-text="monitor.target" target="_blank" class="text-primary"></a></td>
+            <td x-show="monitor.type != 'http'" x-text="monitor.target"></td>
           </tr>
           <tr x-show="results[0]?.message">
             <td>Message:</td>

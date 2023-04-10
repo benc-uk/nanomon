@@ -1,6 +1,13 @@
 # NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, as such it is decomposed into several discreet but interlinked components.
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, decomposed into several discreet but interlinked components. Features include:
+
+- A range of configurable monitor types
+- OAuth2 based user sign-in and authentication
+- Email alerting
+- Range of deployment options
+- Rules for evaluating results and setting monitor status
+- Web frontend for viewing results & configuration of monitors
 
 It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
 
@@ -23,7 +30,7 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
     - [API](#api)
     - [Frontend](#frontend)
     - [Frontend Host](#frontend-host)
-  - [Makefile reference](#makefile-reference)
+  - [Makefile Reference](#makefile-reference)
   - [Configuration Reference](#configuration-reference)
     - [Variables used only by the frontend host:](#variables-used-only-by-the-frontend-host)
     - [Variables used by both API service and runner:](#variables-used-by-both-api-service-and-runner)
@@ -34,7 +41,6 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
   - [Alerting Configuration](#alerting-configuration)
   - [Appendix: Database Notes](#appendix-database-notes)
     - [Azure Cosmos DB](#azure-cosmos-db)
-
 
 ## Architecture
 
@@ -97,11 +103,13 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 ## Getting Started
 
-This section provides options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
+Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
 
 ### Local Dev Quick Start
 
-This runs all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
+When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
+
+To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
 
 - Run `make install-tools`
 - Run `make run-db` (Note. Needs Docker)
@@ -135,11 +143,11 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 - Written in Go, [source code - /services/runner](./services/runner/)
 - The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
-- It will keep in sync with the `monitors` collection in the DB, it does this one of two ways:
+- It keeps in sync with the `monitors` collection in the database, it does this one of two ways:
   - Watching the collection using MongoDB change stream. This mode is prefered as it results in instant updates to changes made in the frontend & UI
   - If change stream isn't supported, then the runner will poll the database and look for changes.
 - If configured the runner will send email alerts, see [alerting section below](#alerting-configuration)
-- The runner doesn't listen for network traffic or bind to any ports.
+- The runner doesn't listen to inbound network connections or bind to any ports.
 
 ### API
 
@@ -148,7 +156,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Listens on port 8000 by default.
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
 - The API is RESTful, see the [API folder](./api/) for specifications and sample .http file.
-- By default no there is no authentication or validation, and all API calls are allowed/anonymous, see [authentication & security](#authentication--security) section for details.
+- By default no there is no authentication or validation, and all API calls are allowed, see [authentication & security](#authentication--security) section for details.
 
 ### Frontend
 
@@ -166,7 +174,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Listens on port 8001 by default.
 - Provides a single special API endpoint served at `/config` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
-## Makefile reference
+## Makefile Reference
 
 ```text
 help                 💬 This help message :)
@@ -207,11 +215,11 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ### Variables used by both the API and frontend host:
 
-| _Name_         | _Description_                                                                     | _Default_   |
-| -------------- | --------------------------------------------------------------------------------- | ----------- |
-| PORT           | TCP port for service to listen on                                                 | 8000 & 8001 |
-| AUTH_CLIENT_ID | Used to enable authentication with given Azure AD app client ID. See auth section | _blank_     |
-| AUTH_TENANT    | Set to Azure AD tenant ID if not using common                                     | common      |
+| _Name_         | _Description_                                                                                                  | _Default_   |
+| -------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |
+| PORT           | TCP port for service to listen on                                                                              | 8000 & 8001 |
+| AUTH_CLIENT_ID | Used to enable authentication with given Azure AD app client ID. See [auth section](#authentication--security) | _blank_     |
+| AUTH_TENANT    | Set to Azure AD tenant ID if not using common                                                                  | common      |
 
 ### Variables used only by the runner:
 
@@ -228,15 +236,29 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ## Monitor Reference
 
-So many words to put here 
+So many words to put here
 
 ## Authentication & Security
 
-Yes words here
+By default there is no authentication, security or sign-in. This is on purpose to make the app easy to deploy, and for use learning and in workshops.
+
+Security is enabled using the Microsoft Identity Platform (Azure AD) and OAuth2 + OIDC. With an app registered in Azure AD, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, changes the behavior as follows:
+
+- The API container - enforces validation on certain API routes, like POST, PUT and DELETE, using JWT bearer tokens.
+- The frontend host - causes the UI to display a login button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Azure AD for the signed-in user and then passed when calling the API.
+
+The basic steps to set this up:
+
+- Register a new app in Azure AD. This needs to have certain custom API scopes defined and also be set with the correct SPA callback URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`
+- Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then start the frontend with `make run-frontend` and test locally
+- For deploying elsewhere:
+  - Get the frontend URL of the deployed running instance
+  - Add this URL to the Redirect URIs for the app registration. Use the Azure Portal, it's probably easiest :)
+  - Update or redeploy app, setting `AUTH_CLIENT_ID` on the both frontend host and API containers.
 
 ## Alerting Configuration
 
-Also many words
+NanoMon has a very basic alerting supprt can send email al
 
 ## Appendix: Database Notes
 

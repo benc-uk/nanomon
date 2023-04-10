@@ -2,6 +2,9 @@
 VERSION=$1
 PREV_VERSION=$2
 
+# **** Used for project maintence only ****
+# Script used to release to GitHub 
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # check if version and previous version are supplied

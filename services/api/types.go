@@ -48,9 +48,13 @@ func (m MonitorReq) validate() (string, bool) {
 		return "missing target", false
 	}
 
-	_, err := time.ParseDuration(m.Interval)
+	dur, err := time.ParseDuration(m.Interval)
 	if err != nil {
 		return "invalid interval", false
+	}
+
+	if dur < time.Second {
+		return "interval must be greater than 1s", false
 	}
 
 	if m.Rule != "" {

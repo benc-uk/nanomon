@@ -7,6 +7,7 @@ export const editComponent = (api) => ({
   monId: null,
   rulePop: false,
   def: definitions,
+  saving: false,
 
   async init() {
     this.shown = false
@@ -19,6 +20,7 @@ export const editComponent = (api) => ({
       }
 
       this.error = ''
+      this.saving = false
       this.monId = view.split('#edit/')[1]
       if (this.monId === 'new') {
         this.newMonitor()
@@ -56,13 +58,21 @@ export const editComponent = (api) => ({
 
   // Save or create monitor using API
   async save() {
+    this.saving = true
+
     try {
       if (this.monId === 'new') {
         await api.createMonitor(this.monitor)
-        window.location.hash = '#home'
+
+        setTimeout(() => {
+          window.location.hash = '#home'
+        }, 500)
       } else {
         await api.updateMonitor(this.monId, this.monitor)
-        window.location.hash = '#monitor/' + this.monId
+
+        setTimeout(() => {
+          window.location.hash = '#monitor/' + this.monId
+        }, 500)
       }
     } catch (e) {
       this.error = e

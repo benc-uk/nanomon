@@ -3,7 +3,6 @@ package monitor
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"nanomon/services/common/database"
 	"nanomon/services/common/types"
 	"os"
@@ -41,8 +40,8 @@ func NewMonitor(db *database.DB) *Monitor {
 	}
 }
 
-// Start the monitor ticker
-func (m *Monitor) Start(withDelay bool) {
+// Start the monitor ticker, to run & execute the monitor on regular interval
+func (m *Monitor) Start(delay int) {
 	if m.Enabled {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
 	} else {
@@ -56,15 +55,15 @@ func (m *Monitor) Start(withDelay bool) {
 		return
 	}
 
-	// This offsets the start by random amount preventing monitors from running at the same time
-	if withDelay {
-		delaySecMax := int(intervalDuration.Seconds())
-		if delaySecMax > 20 {
-			delaySecMax = 20
-		}
+	// Don't allow silly short intervals
+	if intervalDuration < time.Second {
+		log.Printf("### Monitor '%s' has an interval less than 1s", m.Name)
+		return
+	}
 
-		delaySecs := rand.Intn(delaySecMax)
-		time.Sleep(time.Duration(delaySecs) * time.Second)
+	// This offsets the start, preventing monitors from running at the same time
+	if delay > 0 {
+		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
 	m.run()
@@ -148,8 +147,6 @@ func (m *Monitor) run() (bool, *types.Result) {
 		result.Outputs["body"] = "*** Removed ***"
 	}
 
-	checkForAlerts(m, *result)
-
 	// Finally store the result to the database
 	err := storeResult(m.db, *result)
 	if err != nil {
@@ -159,11 +156,14 @@ func (m *Monitor) run() (bool, *types.Result) {
 
 	if result.Status > types.StatusOK {
 		m.ErrorCount++
-		return false, result
-	}
 
-	m.ErrorCount = 0
-	m.InErrorState = false
+		checkForAlerts(m, *result)
+
+		return false, result
+	} else {
+		m.ErrorCount = 0
+		m.InErrorState = false
+	}
 
 	return true, result
 }

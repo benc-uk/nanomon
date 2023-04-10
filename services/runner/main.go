@@ -17,6 +17,7 @@ var (
 	buildInfo = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
 )
 
+// Entrypoint - begin here :)
 func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -37,6 +38,10 @@ func main() {
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
 
+	if monitor.IsAlertingEnabled() {
+		log.Printf("### Alerting is enabled, emails will be sent went monitors fail")
+	}
+
 	db = database.ConnectToDB()
 	defer db.Close()
 
@@ -48,13 +53,17 @@ func main() {
 	}
 
 	// Start the monitors loaded from the database
-	for _, m := range monitors {
-		go m.Start(true)
+	for i, m := range monitors {
+		// Delay each monitor start by 2 seconds for a staggered start
+		go m.Start(i * 2)
 	}
 
+	// Try to watch the database for changes
 	err = monitor.WatchMonitors(db, monitors)
 	if err != nil {
 		log.Println("### Mongo change stream not supported, falling back to polling every", pollIntervalEnv)
+
+		// Fallback to polling
 		pollMonitors(pollInterval)
 	}
 }
@@ -68,9 +77,7 @@ func shutdown() {
 	}
 }
 
-// ==============================================================
-// Used to poll the database for changes
-// ==============================================================
+// Used to poll the database for changes when change stream not supported
 func pollMonitors(interval time.Duration) {
 	// Infinite loop to watch monitor changes in the database
 	for {
@@ -101,7 +108,7 @@ func pollMonitors(interval time.Duration) {
 						log.Println("### Detected change, updating monitor:", oldMon.Name)
 						oldMon.Stop()
 
-						go newMon.Start(false)
+						go newMon.Start(0)
 						monitors[oi] = newMon
 					}
 
@@ -112,7 +119,7 @@ func pollMonitors(interval time.Duration) {
 			// If the monitor wasn't found, it's new
 			if !found {
 				log.Println("### Detected change, new monitor:", newMon.Name)
-				go newMon.Start(false)
+				go newMon.Start(0)
 				monitors = append(monitors, newMon)
 			}
 		}

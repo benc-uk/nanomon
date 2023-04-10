@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.5
+VERSION ?= 0.0.6
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 AUTH_TENANT ?= common
@@ -21,7 +21,7 @@ SVC_DIR := ./services
 SPA_DIR := ./frontend
 ESLINT_USE_FLAT_CONFIG := true
 
-# Tools installed locally into repo
+# Tools installed locally into repo, don't change
 GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint
 AIR_PATH := $(REPO_DIR)/bin/air
 BS_PATH := $(REPO_DIR)/bin/node_modules/.bin/browser-sync
@@ -66,10 +66,10 @@ build: ## 🔨 Build all binaries into ./bin/ directory
 images: ## 📦 Build all container images
 	@figlet $@ || true
 	docker compose -f build/compose.yaml build
-	
-image-api: ## 📦 Build all container images
+
+image-standalone: ## 📦 Build the standalone image
 	@figlet $@ || true
-	docker compose -f build/compose.yaml build api
+	docker compose -f build/compose.yaml build standalone
 
 push: ## 📤 Push all container images
 	@figlet $@ || true
@@ -101,7 +101,7 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true
-	@go test -v ./... 
+	@ALERT_SMTP_TO= go test -v ./... 
 
 test-api: ## 🧪 Run API integration tests
 	@figlet $@ || true

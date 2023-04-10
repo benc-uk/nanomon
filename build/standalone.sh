@@ -5,7 +5,14 @@
 
 echo "==== Standalone NanoMon container script ===="
 
-mongod --dbpath /bitnami/mongodb > /dev/null &
+# if NO_MONGO is set then DONT start the database
+if [[ -z "$NO_MONGO" ]]; then
+    echo "Starting MongoDB..."
+    /opt/bitnami/mongodb/bin/mongod --dbpath /bitnami/mongodb > /dev/null &
+
+else
+    echo "MongoDB will not be started"
+fi
 
 echo "Starting Frontend..."
 ./frontend &

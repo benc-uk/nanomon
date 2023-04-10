@@ -16,9 +16,32 @@ param imageRepo string = 'ghcr.io/benc-uk'
 @description('Tag used for all images')
 param imageTag string = 'latest'
 
-// ===== Variables ============================================================
+@description('Enable optional auth with client ID')
+param authClientId string = ''
 
-var mongoImage = 'mongo:6-jammy'
+@description('The tenant to use with auth, ignored if authClientId is empty')
+param authTenant string = 'common'
+
+// Note: Setting this, will skip the deployment of MongoDB container
+// The VNet will also be skipped, it's only required for the MongoDB TCP ingress
+@description('When set, connect to external existing MongoDB instance')
+@secure()
+param externalMongoDbURI string = ''
+
+@description('Force the runner to switch to database polling mode')
+param usePolling bool = false
+param pollingInterval string = '5m'
+
+@description('Alerting parameters, all optional')
+param alertFrom string = ''
+param alertTo string = ''
+param alertMailHost string = ''
+param alertMailPort string = ''
+@secure()
+param alertPassword string = ''
+param alertFailCount int = 3
+
+// ===== Variables ============================================================
 
 // ===== Modules & Resources ==================================================
 
@@ -36,7 +59,7 @@ module logAnalytics './bicep-iac/modules/monitoring/log-analytics.bicep' = {
   }
 }
 
-module network './bicep-iac/modules/network/network-multi.bicep' = {
+module network './bicep-iac/modules/network/network-multi.bicep' = if (externalMongoDbURI == '') {
   scope: resGroup
   name: 'network'
   params: {
@@ -60,7 +83,7 @@ module containerAppEnv './bicep-iac/modules/containers/app-env.bicep' = {
     name: 'app-environment'
     logAnalyticsName: logAnalytics.outputs.name
     logAnalyticsResGroup: resGroup.name
-    controlPlaneSubnetId: network.outputs.subnets[0].id
+    controlPlaneSubnetId: externalMongoDbURI == '' ? network.outputs.subnets[0].id : ''
   }
 }
 
@@ -85,7 +108,15 @@ module api './bicep-iac/modules/containers/app.bicep' = {
     envs: [
       {
         name: 'MONGO_URI'
-        value: 'mongodb://mongo:27017'
+        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
+      }
+      {
+        name: 'AUTH_CLIENT_ID'
+        value: authClientId
+      }
+      {
+        name: 'AUTH_TENANT'
+        value: authTenant
       }
     ]
   }
@@ -114,6 +145,14 @@ module frontend './bicep-iac/modules/containers/app.bicep' = {
         name: 'API_ENDPOINT'
         value: 'https://${api.outputs.fqdn}/api'
       }
+      {
+        name: 'AUTH_CLIENT_ID'
+        value: authClientId
+      }
+      {
+        name: 'AUTH_TENANT'
+        value: authTenant
+      }
     ]
   }
 }
@@ -133,23 +172,51 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
     envs: [
       {
         name: 'MONGO_URI'
-        value: 'mongodb://mongo:27017'
+        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
       }
       {
-        name: 'MONITOR_CHANGE_INTERVAL'
-        value: '30s'
+        name: 'USE_POLLING'
+        value: toLower(string(usePolling))
+      }
+      {
+        name: 'POLLING_INTERVAL'
+        value: pollingInterval
+      }
+      {
+        name: 'ALERT_SMTP_FROM'
+        value: alertFrom
+      }
+      {
+        name: 'ALERT_SMTP_TO'
+        value: alertTo
+      }
+      {
+        name: 'ALERT_SMTP_HOST'
+        value: alertMailHost
+      }
+      {
+        name: 'ALERT_MAIL_PORT'
+        value: alertMailPort
+      }
+      {
+        name: 'ALERT_SMTP_PASSWORD'
+        value: alertPassword
+      }
+      {
+        name: 'ALERT_FAIL_COUNT'
+        value: '${alertFailCount}'
       }
     ]
   }
 }
 
-module mongodb './bicep-iac/modules/containers/app.bicep' = {
+module mongodb './bicep-iac/modules/containers/app.bicep' = if (externalMongoDbURI == '') {
   scope: resGroup
   name: 'mongodb'
   params: {
     location: location
     name: 'mongo'
-    image: mongoImage
+    image: 'bitnami/mongodb:6.0'
     environmentId: containerAppEnv.outputs.id
 
     ingressPort: 27017
@@ -158,6 +225,23 @@ module mongodb './bicep-iac/modules/containers/app.bicep' = {
 
     cpu: '0.25'
     memory: '0.5Gi'
+
+    // Configure MongoDB as replica set, but a single replica
+    // This means we get change stream support
+    envs: [
+      {
+        name: 'MONGODB_REPLICA_SET_MODE'
+        value: 'primary'
+      }
+      {
+        name: 'MONGODB_ADVERTISED_HOSTNAME'
+        value: 'mongo'
+      }
+      {
+        name: 'ALLOW_EMPTY_PASSWORD'
+        value: 'yes'
+      }
+    ]
   }
 }
 

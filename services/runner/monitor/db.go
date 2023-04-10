@@ -91,7 +91,7 @@ func WatchMonitors(db *database.DB, monitors []*Monitor) error {
 		return err
 	}
 
-	log.Println("### Change stream now watching monitors collection")
+	log.Println("### Change stream watching monitors collection")
 
 	defer monitorStream.Close(context.TODO())
 
@@ -111,7 +111,7 @@ func WatchMonitors(db *database.DB, monitors []*Monitor) error {
 			log.Printf("### Monitor '%s' created and started", monitor.Name)
 			monitors = append(monitors, &monitor)
 
-			go monitor.Start(false)
+			go monitor.Start(0)
 		}
 
 		if opType == "replace" {
@@ -120,7 +120,7 @@ func WatchMonitors(db *database.DB, monitors []*Monitor) error {
 					log.Printf("### Monitor '%s' updated and restarted", m.Name)
 					monitors[i].Stop()
 
-					go monitor.Start(false)
+					go monitor.Start(0)
 
 					monitors[i] = &monitor
 				}

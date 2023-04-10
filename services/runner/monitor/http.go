@@ -64,6 +64,11 @@ func (m *Monitor) runHTTP() *types.Result {
 		}
 	}
 
+	userAgent := m.Properties["userAgent"]
+	if userAgent != "" {
+		req.Header.Add("User-Agent", userAgent)
+	}
+
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !validateTLS}
 
 	client := http.Client{

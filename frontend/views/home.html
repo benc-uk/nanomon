@@ -12,12 +12,8 @@
           <h5 class="card-subtitle mb-2 target" x-text="m.target"></h5>
 
           <span x-html="`${m.icon}&nbsp;&nbsp;`" class="fs-2 valign-middle" :title="m.type"></span>
-          <span
-            class="badge p-2 fs-6"
-            :class="m.status.class"
-            x-html="`<i class='${m.status?.icon}'></i>&nbsp;&nbsp;${m.status?.text || 'None'}`"
-          ></span>
-          <div class="pt-3" x-text="m.message"></div>
+          <span class="badge p-2 fs-6" :class="m.status.class" x-html="`<i class='${m.status?.icon}'></i>&nbsp;&nbsp;${m.status?.text || 'None'}`">
+          </span>
         </div>
         <div class="mini-graph">
           <a :href="'#monitor/'+m.id">
@@ -26,6 +22,7 @@
         </div>
       </div>
     </div>
+
     <div class="card-footer bg-light" x-text="`Last run: ${m.lastRan || 'never'}`"></div>
   </div>
 </template>

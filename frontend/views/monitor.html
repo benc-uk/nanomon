@@ -19,7 +19,10 @@
 
 <template x-if="monitor">
   <div class="card shadow mb-4">
-    <div class="card-header fs-3" :class="status?.class || 'bg-secondary'" x-html="`${icon} ${monitor.name}`"></div>
+    <div class="card-header fs-3 d-flex justify-content-between" :class="status?.class || 'bg-secondary'">
+      <div x-html="`${icon} ${monitor.name}`"></div>
+      <button class="btn btn-light btn-sm" @click="loadMonitor(monitor.id)"><i class="fas fa-refresh fa-fw"></i> REFRESH</button>
+    </div>
     <div class="card-body">
       <div class="float-end" x-show="userAccount">
         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fas fa-trash fa-fw"></i> DELETE</button>
@@ -37,7 +40,12 @@
           </tr>
           <tr>
             <td>Target:</td>
-            <td x-text="monitor.target"></td>
+            <template x-if="monitor.type == 'http'">
+              <td><a :href="monitor.target" x-text="monitor.target" target="_blank" class="text-primary"></a></td>
+            </template>
+            <template x-if="monitor.type != 'http'">
+              <td x-text="monitor.target"></td>
+            </template>
           </tr>
           <tr x-show="results[0]?.message">
             <td>Message:</td>

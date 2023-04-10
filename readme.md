@@ -6,6 +6,36 @@ It also serves as a reference & learning app for microservices and is used by my
 
 In a hurry? - Jump to the sections [running locally quick start](#local-dev-quick-start) or [deploying with Helm](#deploy-to-kubernetes-using-helm)
 
+- [NanoMon - Monitoring Tool](#nanomon---monitoring-tool)
+  - [Architecture](#architecture)
+  - [Concepts](#concepts)
+    - [Monitor](#monitor)
+    - [Result](#result)
+    - [Monitor Types](#monitor-types)
+  - [Repo Index](#repo-index)
+  - [Getting Started](#getting-started)
+    - [Local Dev Quick Start](#local-dev-quick-start)
+    - [Run Standalone Image](#run-standalone-image)
+    - [Deploy to Kubernetes using Helm](#deploy-to-kubernetes-using-helm)
+    - [Deploy to Azure Container Apps with Bicep](#deploy-to-azure-container-apps-with-bicep)
+  - [Components \& Services](#components--services)
+    - [Runner](#runner)
+    - [API](#api)
+    - [Frontend](#frontend)
+    - [Frontend Host](#frontend-host)
+  - [Makefile reference](#makefile-reference)
+  - [Configuration Reference](#configuration-reference)
+    - [Variables used only by the frontend host:](#variables-used-only-by-the-frontend-host)
+    - [Variables used by both API service and runner:](#variables-used-by-both-api-service-and-runner)
+    - [Variables used by both the API and frontend host:](#variables-used-by-both-the-api-and-frontend-host)
+    - [Variables used only by the runner:](#variables-used-only-by-the-runner)
+  - [Monitor Reference](#monitor-reference)
+  - [Authentication \& Security](#authentication--security)
+  - [Alerting Configuration](#alerting-configuration)
+  - [Appendix: Database Notes](#appendix-database-notes)
+    - [Azure Cosmos DB](#azure-cosmos-db)
+
+
 ## Architecture
 
 The architecture is fairly simple consisting of four application components and a database.
@@ -16,7 +46,7 @@ The architecture is fairly simple consisting of four application components and 
 - **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
 - **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is [developed using Alpine.js](https://alpinejs.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
-- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB v4. External services which provide MongoDB compatibility (e.g. Azure Cosmos DB) will also work
+- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB v6. External services which provide MongoDB compatibility (e.g. Azure Cosmos DB) will also work
 
 ## Concepts
 
@@ -42,7 +72,7 @@ There are three types of monitor currently supported:
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
 
-For more details see the complete monitor reference
+For more details see the [complete monitor reference](#monitor-reference)
 
 ## Repo Index
 
@@ -50,7 +80,7 @@ For more details see the complete monitor reference
 📂
 ├── api             - API reference and spec, using TypeSpec
 ├── build           - Dockerfiles and supporting build artifacts
-├── deploy  
+├── deploy
 │   ├── azure       - Deploy to Azure using Bicep
 │   ├── helm        - Helm chart to deploy NanoMon
 │   └── kubernetes  - Example Kubernetes manifests (No Helm)
@@ -91,7 +121,7 @@ docker run --rm -it -p 8000:8000 -p 8001:8001 ghcr.io/benc-uk/nanomon-standalone
 
 Then open the following URL http://localhost:8001/
 
-### Deploy to Kubernetes using Helm 
+### Deploy to Kubernetes using Helm
 
 See [Helm & Helm chart docs](./deploy/helm/)
 
@@ -103,12 +133,38 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ### Runner
 
-- Written in Go, [source code - /services/api](./services/api/)
+- Written in Go, [source code - /services/runner](./services/runner/)
 - The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
 - It will keep in sync with the `monitors` collection in the DB, it does this one of two ways:
-  - Watch the collection using MongoDB change stream.
-  - If change stream isn't supported, then it will poll the database and look for changes.
+  - Watching the collection using MongoDB change stream. This mode is prefered as it results in instant updates to changes made in the frontend & UI
+  - If change stream isn't supported, then the runner will poll the database and look for changes.
+- If configured the runner will send email alerts, see [alerting section below](#alerting-configuration)
 - The runner doesn't listen for network traffic or bind to any ports.
+
+### API
+
+- Written in Go, [source code - /services/api](./services/api/)
+- The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
+- Listens on port 8000 by default.
+- Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
+- The API is RESTful, see the [API folder](./api/) for specifications and sample .http file.
+- By default no there is no authentication or validation, and all API calls are allowed/anonymous, see [authentication & security](#authentication--security) section for details.
+
+### Frontend
+
+- Written in "modern" ES6 JavaScript using Alpine.js for reactivity and as a lightweight SPA framework [source code - /frontend](./frontend)
+- No bundling, webpack or Node is required 😊
+- Configuration is fetched from the URL `/config` at start up.
+  - When hosted by the frontend-host this allows for values to be dynamically passed to the frontend at runtime.
+  - When running locally the makefile target `make run-frontend` builds a config file which is picked up.
+- By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser)
+
+### Frontend Host
+
+- Written in Go, [source code - /services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
+- A simple static HTTP server for hosting & serving the content & files of the frontend app
+- Listens on port 8001 by default.
+- Provides a single special API endpoint served at `/config` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
 ## Makefile reference
 
@@ -151,11 +207,11 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ### Variables used by both the API and frontend host:
 
-| _Name_         | _Description_                                                   | _Default_   |
-| -------------- | --------------------------------------------------------------- | ----------- |
-| PORT           | TCP port for service to listen on                               | 8000 & 8001 |
+| _Name_         | _Description_                                                                     | _Default_   |
+| -------------- | --------------------------------------------------------------------------------- | ----------- |
+| PORT           | TCP port for service to listen on                                                 | 8000 & 8001 |
 | AUTH_CLIENT_ID | Used to enable authentication with given Azure AD app client ID. See auth section | _blank_     |
-| AUTH_TENANT    | Set to Azure AD tenant ID if not using common                   | common      |
+| AUTH_TENANT    | Set to Azure AD tenant ID if not using common                                     | common      |
 
 ### Variables used only by the runner:
 
@@ -166,15 +222,31 @@ All three components (API, runner and frontend host) expect their configuration 
 | ALERT_SMTP_TO       | Address alert emails are sent to                                                                          | _blank_        |
 | ALERT_SMTP_HOST     | SMTP hostname                                                                                             | smtp.gmail.com |
 | ALERT_SMTP_PORT     | SMTP port                                                                                                 | 587            |
-| ALERT_FAIL_COUNT    | How many time a monitor needs to fail in a row to trigger an alert                                        | 3              |
-| POLLING_INTERVAL    | Only used when in polling mode                                                                            | 10s            |
+| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email                               | 3              |
+| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s            |
 | USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false          |
 
-## Scratch Notes Area
+## Monitor Reference
 
-Using Cosmos DB
-Add index for the `date` field to the results collection
-`az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
+So many words to put here 
 
-HELM REPO
-helm repo add nanomon 'https://raw.githubusercontent.com/benc-uk/nanomon/main/deploy/helm'
+## Authentication & Security
+
+Yes words here
+
+## Alerting Configuration
+
+Also many words
+
+## Appendix: Database Notes
+
+- Code will dynamically create the database and collections if they don't exist at startup. By default the database name is `nanomon` but this can be changed with the `MONGO_DB` env var.
+- For change stream support to work MongoDB must be running as a replica set, when running locally this is enabled in the Docker container that is started. Also the Helm chart will deploy MongoDB as a replica set.
+
+### Azure Cosmos DB
+
+Azure Cosmos DB can be used as a database for NanoMon, however there are two things to menton:
+
+- An index must be added for the `date` field to the results collection, this can be done in the Azure Portal or with a single command:  
+  `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
+- Cosmos DB for MongoDB does have support for change streams, however it comes with [several limitations, most notably the lack of support for delete events](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/change-streams?tabs=javascript#current-limitations). Given these limitations NanoMon will fall back to polling when using Cosmos DB

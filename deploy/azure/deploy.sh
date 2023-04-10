@@ -39,4 +39,9 @@ if [[ "${NOPROMPT-0}" != "1" ]]; then
 fi
 
 echo -e "\e[32m🚀 Deploying NanoMon to Azure...\e[0m"
-az deployment sub create --template-file main.bicep --location "${location}" --parameters "${paramFile}"
+az deployment sub create --template-file main.bicep --location "${location}" --parameters "${paramFile}" --name nanomon
+
+appUrl=$(az deployment sub show --name nanomon --query "properties.outputs.appURL.value" -o tsv)
+
+echo -e "\n\e[32m🎉 NanoMon was deployed to Azure!\e[0m"
+echo -e "\e[34m🌐 App URL: \e[33m$appUrl\e[0m\n"

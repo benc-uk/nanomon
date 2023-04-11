@@ -236,7 +236,69 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ## Monitor Reference
 
-So many words to put here
+### Type: HTTP
+
+This makes a single HTTP request to the target URL each time it is run, it will return failed status in the event of network failure e.g. no network connection, unable to resolve name with DNS, invalid URL etc. Otherwise any sort of HTTP response will return an OK status. If you want to check the HTTP response code, use a rule as described above e.g. `status == 200` or `status >= 200 && status < 300`.
+
+- **Target:** A HTTP URL, starting `http://` or `https://`
+- **Value:** Response time to complete the HTTP request in milliseconds.
+- **Properties:**
+  - *method* - Which HTTP method to use (default is "GET")
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 5s)
+  - *validateTLS* - Set to "false" to disable TLS cert validation (default is "true")
+  - *body* - Body string to send with the HTTP request (default is none) 
+  - *headers* - HTTP headers as JSON object, e.g. `{"content-type": "application/json"}` (default is none)
+  - *bodyRegex* - Run this regEx against the body, and sets `regexMatch` output (default is none)
+- **Outputs / Rule Props:** 
+  - *respTime* - Same as monitor value (number)
+  - *status* - HTTP status code (number)
+  - *body* - The response body (string)
+  - *bodyLen* - The number of bytes in the response (number)
+  - *certExpiryDays* - Number of days before the TLS cert of the site expires (number)
+  - *regexMatch* - Match of the bodyRegex if any (number or string)
+
+### Type: TCP
+
+Each time the monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, unable to resolve name with DNS, invalid port etc. Otherwise it will return OK.
+
+- **Target:** A hostname (or IP address) and port tuple, separated by colon
+- **Value:** Time for TCP connection to open in milliseconds.
+- **Properties:**
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 5s)
+- **Outputs / Rule Props:** 
+  - *respTime* - Same as monitor value (number)
+  - *ipAddress* - Resolved IP address of the target (string)
+
+### Type: Ping
+
+Will carry out an ICMP ping to given host (can be hostname or IP), it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK.
+
+- **Target:** A hostname or IP address.
+- **Value:** Average round trip time in milliseconds.
+- **Properties:**
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 1s)
+  - *count* - Number of packets to send (default is 3)
+  - *interval* - Interval between packets (default is 150ms)
+- **Outputs / Rule Props:** 
+  - *minRtt* - Min round trip time of the packets (number)
+  - *avgRtt* - Avg round trip time of the packets (number)
+  - *maxRtt* - Max round trip time of the packets (number)
+  - *packetsRecv* - How many packets were received (number)
+  - *packetLoss* - Percentage of packet that were lost (number)
+  - *ipAddress* - Resolved IP address of the target (string)
+
+### Rules
+
+All monitors have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run. The expression should always return a boolean, a false value will set the result to error status, anything else will leave the status as is (i.e. OK or failed) you can use a [range of logical operators in the rule expression](https://github.com/Knetic/govaluate#what-operators-and-types-does-this-support), such as logical AND, OR NOT plus other advanced operators like =~ for regex searching (e.g string contains).
+
+Some examples:
+
+```text
+status >= 200 && status < 300
+status == 200 && respTime < 5000
+body =~ 'some words'
+regexMatch == 'a value'
+```
 
 ## Authentication & Security
 
@@ -258,15 +320,17 @@ A basic guide to set this up:
 
 ## Alerting Configuration
 
-NanoMon provides basic alerting support, which sends emails when monitors return a non-OK status 1 or more times in a row.
+NanoMon provides basic alerting support, which sends emails when monitors return a non-OK status 1 or more times in a row. By default this alerting feature is not enabled, and failing monitors will not trigger emails.
+
+To enable alerting all of the env vars starting `ALERT_` will need to be set, there are six of these as described above. However as three of these variables have defaults, you only need to set the remaining three `ALERT_SMTP_PASSWORD`, `ALERT_SMTP_FROM` and `ALERT_SMTP_FROM` to switch the feature on, this will be using GMail to send emails. For the password you will need [setup an Google app password](https://support.google.com/accounts/answer/185833?hl=en) this will use your personal Google account to send the emails, so this probably isn't a good option for production (putting it mildly).
 
 Known limitations:
 
 - Only been tested with the GMail SMTP server, I have no idea if it'll work with others!
-- The from address is also used as the login user to the SMTP server
-- Only a single email address can be set to send emails to
-- Restarting the runner will resend alerts for failing monitors
-- No follow up email is sent when a monitor returns to OK
+- The from address is also used as the login user to the SMTP server.
+- Only a single email address can be set to send emails to.
+- Restarting the runner will resend alerts for failing monitors.
+- No follow up email is sent when a monitor returns to OK.
 
 ## Appendix: Database Notes
 

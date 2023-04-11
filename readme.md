@@ -3,11 +3,11 @@
 NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, decomposed into several discreet but interlinked components. Features include:
 
 - A range of configurable monitor types
-- OAuth2 based user sign-in and authentication
+- Web frontend for viewing results & configuration of monitors
 - Email alerting
 - Range of deployment options
 - Rules for evaluating results and setting monitor status
-- Web frontend for viewing results & configuration of monitors
+- OAuth2 based user sign-in and authentication
 
 It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
 
@@ -240,25 +240,33 @@ So many words to put here
 
 ## Authentication & Security
 
-By default there is no authentication, security or sign-in. This is on purpose to make the app easy to deploy, and for use learning and in workshops.
+By default there is no authentication, security or sign-in. This is on purpose to make the app easy to deploy, and for simple use in learning scenarios and workshops.
 
-Security is enabled using the Microsoft Identity Platform (Azure AD) and OAuth2 + OIDC. With an app registered in Azure AD, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, changes the behavior as follows:
+Security is enabled using the Microsoft Identity Platform (Azure AD) and OAuth2 + OIDC. With an app registered in Azure AD, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, this changes the behavior as follows:
 
-- The API container - enforces validation on certain API routes, like POST, PUT and DELETE, using JWT bearer tokens.
-- The frontend host - causes the UI to display a login button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Azure AD for the signed-in user and then passed when calling the API.
+- API container - will enforce validation on certain API routes, like POST, PUT and DELETE, using OAuth 2.0 JWT bearer tokens. The token is checked for validity, a scope matching `system.admin` and audience matching the client id.
+- Frontend host - The UI will show a sign-in button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Azure AD for the signed-in user with the `system.admin` scope, and then passed when calling the API as bearer tokens
 
-The basic steps to set this up:
+A basic guide to set this up:
 
-- Register a new app in Azure AD. This needs to have certain custom API scopes defined and also be set with the correct SPA callback URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`
-- Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then start the frontend with `make run-frontend` and test locally
+- Register a new app in Azure AD. This needs to have the API scope `system.admin` exposed, and also be set with the correct SPA callback URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`
+- Test locally - Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then (re)start the frontend and API with `make run-frontend` and `make run-frontend`. You should see a login button in the page, and no way to create or edit monitors until you sign-in.
 - For deploying elsewhere:
-  - Get the frontend URL of the deployed running instance
-  - Add this URL to the Redirect URIs for the app registration. Use the Azure Portal, it's probably easiest :)
+  - Get the frontend URL of the deployed running instance.
+  - Add this URL to the SPA redirect URIs in the app registration. It's probably easiest doing this in the Azure Portal.
   - Update or redeploy app, setting `AUTH_CLIENT_ID` on the both frontend host and API containers.
 
 ## Alerting Configuration
 
-NanoMon has a very basic alerting supprt can send email al
+NanoMon provides basic alerting support, which sends emails when monitors return a non-OK status 1 or more times in a row.
+
+Known limitations:
+
+- Only been tested with the GMail SMTP server, I have no idea if it'll work with others!
+- The from address is also used as the login user to the SMTP server
+- Only a single email address can be set to send emails to
+- Restarting the runner will resend alerts for failing monitors
+- No follow up email is sent when a monitor returns to OK
 
 ## Appendix: Database Notes
 

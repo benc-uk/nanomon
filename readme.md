@@ -37,6 +37,10 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
     - [Variables used by both the API and frontend host:](#variables-used-by-both-the-api-and-frontend-host)
     - [Variables used only by the runner:](#variables-used-only-by-the-runner)
   - [Monitor Reference](#monitor-reference)
+    - [Type: HTTP](#type-http)
+    - [Type: TCP](#type-tcp)
+    - [Type: Ping](#type-ping)
+    - [Rules](#rules)
   - [Authentication \& Security](#authentication--security)
   - [Alerting Configuration](#alerting-configuration)
   - [Appendix: Database Notes](#appendix-database-notes)
@@ -240,15 +244,15 @@ All three components (API, runner and frontend host) expect their configuration 
 
 This makes a single HTTP request to the target URL each time it is run, it will return failed status in the event of network failure e.g. no network connection, unable to resolve name with DNS, invalid URL etc. Otherwise any sort of HTTP response will return an OK status. If you want to check the HTTP response code, use a rule as described above e.g. `status == 200` or `status >= 200 && status < 300`.
 
-- **Target:** A HTTP URL, starting `http://` or `https://`
-- **Value:** Response time to complete the HTTP request in milliseconds.
+- **Target:** A URL, with HTTP scheme `http://` or `https://`
+- **Value:** Time to complete the HTTP request & read the response in milliseconds.
 - **Properties:**
-  - *method* - Which HTTP method to use (default is "GET")
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 5s)
-  - *validateTLS* - Set to "false" to disable TLS cert validation (default is "true")
-  - *body* - Body string to send with the HTTP request (default is none) 
-  - *headers* - HTTP headers as JSON object, e.g. `{"content-type": "application/json"}` (default is none)
-  - *bodyRegex* - Run this regEx against the body, and sets `regexMatch` output (default is none)
+  - *method* - Which HTTP method to use (default: "GET")
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 5s)
+  - *validateTLS* - Set to "false" to disable TLS cert validation (default: "true")
+  - *body* - Body string to send with the HTTP request (default: none) 
+  - *headers* - HTTP headers as JSON object, e.g. `{"content-type": "application/json"}` (default: none)
+  - *bodyRegex* - Run this regEx against the body, and sets `regexMatch` output (default: none)
 - **Outputs / Rule Props:** 
   - *respTime* - Same as monitor value (number)
   - *status* - HTTP status code (number)
@@ -259,26 +263,28 @@ This makes a single HTTP request to the target URL each time it is run, it will 
 
 ### Type: TCP
 
-Each time the monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, unable to resolve name with DNS, invalid port etc. Otherwise it will return OK.
+Each time a TCP monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, unable to resolve name with DNS, and if the port is not open or blocked some other way etc. Otherwise it will return OK.
 
 - **Target:** A hostname (or IP address) and port tuple, separated by colon
 - **Value:** Time for TCP connection to open in milliseconds.
 - **Properties:**
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 5s)
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 5s)
 - **Outputs / Rule Props:** 
   - *respTime* - Same as monitor value (number)
   - *ipAddress* - Resolved IP address of the target (string)
 
 ### Type: Ping
 
-Will carry out an ICMP ping to given host (can be hostname or IP), it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK.
+This monitor will send one or more ICMP ping packets to the given host or IP address, it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK. 
+
+Note. As this monitor needs to send ICMP packets, the runner process needs certain OS privileges to do that otherwise you will see `socket: operation not permitted` errors. When running inside a container it runs as root so there is no issue. When running locally if you want to use this monitor type, build the runner binary with `make build` then start the runner process with sudo e.g. `sudo ./bin/runner`
 
 - **Target:** A hostname or IP address.
 - **Value:** Average round trip time in milliseconds.
 - **Properties:**
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default is 1s)
-  - *count* - Number of packets to send (default is 3)
-  - *interval* - Interval between packets (default is 150ms)
+  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 1s)
+  - *count* - Number of packets to send (default: 3)
+  - *interval* - Interval between packets (default: 150ms)
 - **Outputs / Rule Props:** 
   - *minRtt* - Min round trip time of the packets (number)
   - *avgRtt* - Avg round trip time of the packets (number)
@@ -287,17 +293,19 @@ Will carry out an ICMP ping to given host (can be hostname or IP), it will retur
   - *packetLoss* - Percentage of packet that were lost (number)
   - *ipAddress* - Resolved IP address of the target (string)
 
-### Rules
+### Monitor Rules
 
-All monitors have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run. The expression should always return a boolean, a false value will set the result to error status, anything else will leave the status as is (i.e. OK or failed) you can use a [range of logical operators in the rule expression](https://github.com/Knetic/govaluate#what-operators-and-types-does-this-support), such as logical AND, OR NOT plus other advanced operators like =~ for regex searching (e.g string contains).
+All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run. 
 
-Some examples:
+The rule expression should always return a boolean, a false value will set the result to error status, anything else will leave the status as is (i.e. OK or failed) you can use a [range of operators in the rule expression](https://github.com/Knetic/govaluate#what-operators-and-types-does-this-support), such as logical `AND`, `OR`, `NOT` etc plus other advanced operators like `=~` for regex searching (e.g string contains).
 
-```text
-status >= 200 && status < 300
-status == 200 && respTime < 5000
-body =~ 'some words'
-regexMatch == 'a value'
+Some rule examples:
+
+```bash
+status >= 200 && status < 300    # Check for OK range of status codes 
+status == 200 && respTime < 5000 # Check status code and response time
+body =~ 'some words'             # Look for a string in the HTTP body
+regexMatch == 'a value'          # Check the of the RegEx
 ```
 
 ## Authentication & Security

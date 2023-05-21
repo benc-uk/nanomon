@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# =================================================================
+# Deployment wrapper script for deploying the Bicep template 
+# =================================================================
+
 set -euo pipefail
 
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi

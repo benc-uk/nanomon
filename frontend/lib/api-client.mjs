@@ -1,10 +1,18 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend - API client for calling the backend NanoMon API
+// ----------------------------------------------------------------------------
+
 export class APIClient {
   endpoint = 'http://localhost:8000'
   scopes = []
   msalApp = null
 
   constructor(endpoint, scopes, msalApp) {
+    // Note we trim any trailing slash from the endpoint
     this.endpoint = endpoint.replace(/\/$/, '')
+
+    // Both these are optional
     this.scopes = scopes
     this.msalApp = msalApp
   }
@@ -33,14 +41,16 @@ export class APIClient {
     return this.baseRequest(`monitors/${monId}`, 'PUT', monitor, true)
   }
 
-  async getResults(max) {
+  async getResults(max = 50) {
     return this.baseRequest(`results?max=${max}`)
   }
 
+  // All requests go through this method, it handles auth if required
   async baseRequest(path, method = 'GET', body, authRequest = false) {
+    // This block handles authentication if enabled and the request requires it
     let tokenRes = null
     if (authRequest && this.msalApp) {
-      console.log('### Getting access token with scopes', this.scopes)
+      console.log(`### Acquiring access token, with scopes: ${this.scopes}`)
       try {
         tokenRes = await this.msalApp.acquireTokenSilent({
           scopes: this.scopes,
@@ -50,12 +60,15 @@ export class APIClient {
           scopes: this.scopes,
         })
       }
+
       if (!tokenRes) {
         throw new Error('Failed to get auth token')
       }
     }
 
     const headers = new Headers({ 'Content-Type': 'application/json' })
+
+    // Append the access token to the request if we have one
     if (tokenRes && tokenRes.accessToken) {
       headers.append('Authorization', `Bearer ${tokenRes.accessToken}`)
     }

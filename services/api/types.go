@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon API server - Monitor types
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
@@ -6,6 +11,7 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
+// Output struct for a monitor result
 type MonitorResp struct {
 	ID         string            `bson:"_id" json:"id"`
 	Name       string            `json:"name"`
@@ -19,6 +25,7 @@ type MonitorResp struct {
 	Group      string            `json:"group"`
 }
 
+// Request struct for creating/updating a monitor
 type MonitorReq struct {
 	Name       string
 	Type       string
@@ -31,6 +38,7 @@ type MonitorReq struct {
 	Group      string
 }
 
+// Validate incoming monitor request
 func (m MonitorReq) validate() (string, bool) {
 	if m.Name == "" {
 		return "missing name", false

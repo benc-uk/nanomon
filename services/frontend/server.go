@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend Host - Static HTTP host for the frontend
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
@@ -8,14 +13,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/benc-uk/go-rest-api/pkg/static"
 	"github.com/go-chi/chi/v5"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 var (
-	version   = "0.0.0"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
-	buildInfo = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
+	version   = "0.0.0"            // App version number, injected at build time
+	buildInfo = "No build details" // Build details, injected at build time
 )
 
 func main() {
@@ -34,7 +40,11 @@ func main() {
 	// The simple config endpoint
 	r.Get("/config", routeConfig)
 
-	FileServer(r, dir)
+	// Serve static SPA content using the spaHandler
+	r.Handle("/*", static.SpaHandler{
+		StaticPath: dir,
+		IndexFile:  "index.html",
+	})
 
 	srv := &http.Server{
 		Handler:      r,
@@ -49,7 +59,8 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-// Simple config endpoint, returns API_ENDPOINT & AUTH_CLIENT_ID vars to front end
+// Simple config endpoint, returns certain env vars to front end
+// With some defaults if envs are missing
 func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	apiEndpoint := os.Getenv("API_ENDPOINT")
 	if apiEndpoint == "" {
@@ -63,6 +74,7 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 
 	authClientID := os.Getenv("AUTH_CLIENT_ID")
 
+	// This is picked up and passed to the frontend at startup
 	config := map[string]string{
 		"API_ENDPOINT":   apiEndpoint,
 		"AUTH_CLIENT_ID": authClientID,
@@ -76,16 +88,4 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	resp.Header().Add("Content-Type", "application/json")
 	_, _ = resp.Write([]byte(configJSON))
-}
-
-func FileServer(router *chi.Mux, root string) {
-	fs := http.FileServer(http.Dir(root))
-
-	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := os.Stat(root + r.RequestURI); os.IsNotExist(err) {
-			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)
-		} else {
-			fs.ServeHTTP(w, r)
-		}
-	})
 }

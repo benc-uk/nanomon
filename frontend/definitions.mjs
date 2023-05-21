@@ -1,6 +1,7 @@
-// =========================================================================
-// Monitor definitions - if you want to add a new monitor type, add it here
-// =========================================================================
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend - Monitor definitions, used by edit.mjs
+// ----------------------------------------------------------------------------
 
 export const definitions = {
   http: {
@@ -28,7 +29,7 @@ export const definitions = {
       target: 'localhost',
       rule: 'packetLoss == 0 && avgRtt < 50',
       properties: {
-        timeout: '2s',
+        timeout: '500ms',
       },
     },
   },
@@ -44,7 +45,7 @@ export const definitions = {
       target: 'host:port',
       rule: 'respTime < 100',
       properties: {
-        timeout: '2s',
+        timeout: '500ms',
       },
     },
   },

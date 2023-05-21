@@ -1,5 +1,6 @@
 // ==============================================================================
-// Deploy all nanomon components to Azure Container Apps 
+// Bicep IaC template
+// Deploy all NanoMon components using Azure Container Apps 
 // ==============================================================================
 
 targetScope = 'subscription'
@@ -105,10 +106,17 @@ module api './bicep-iac/modules/containers/app.bicep' = {
     cpu: '0.25'
     memory: '0.5Gi'
 
+    secrets: [
+      {
+        name: 'mongo-uri'
+        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
+      }
+    ]
+
     envs: [
       {
         name: 'MONGO_URI'
-        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
+        secretRef: 'mongo-uri'
       }
       {
         name: 'AUTH_CLIENT_ID'
@@ -169,10 +177,21 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
     cpu: '0.25'
     memory: '0.5Gi'
 
+    secrets: [
+      {
+        name: 'alert-smtp-password'
+        value: alertPassword
+      }
+      {
+        name: 'mongo-uri'
+        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
+      }
+    ]
+
     envs: [
       {
         name: 'MONGO_URI'
-        value: externalMongoDbURI == '' ? 'mongodb://mongo:27017' : externalMongoDbURI
+        secretRef: 'mongo-uri'
       }
       {
         name: 'USE_POLLING'
@@ -200,7 +219,7 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
       }
       {
         name: 'ALERT_SMTP_PASSWORD'
-        value: alertPassword
+        secretRef: 'alert-smtp-password'
       }
       {
         name: 'ALERT_FAIL_COUNT'

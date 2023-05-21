@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend
+// ----------------------------------------------------------------------------
+
 import { getStatusFields, niceDate, monitorIcon } from '../lib/utils.mjs'
 
 export const monitorComponent = (api, userAccount) => ({

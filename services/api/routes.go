@@ -1,8 +1,6 @@
 // ----------------------------------------------------------------------------
-// Copyright (c) Ben Coleman, 2020
-// Licensed under the MIT License.
-//
-// Implementation of the NanoMon API routes
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon API server - route & API implementation
 // ----------------------------------------------------------------------------
 
 package main

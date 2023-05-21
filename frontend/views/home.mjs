@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend
+// ----------------------------------------------------------------------------
+
 import { getStatusFields, monitorIcon } from '../lib/utils.mjs'
 
 const charts = {}

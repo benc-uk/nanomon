@@ -1,8 +1,6 @@
 // ----------------------------------------------------------------------------
-// Copyright (c) Ben Coleman, 2020
-// Licensed under the MIT License.
-//
-// RESTful API for the NanoMon service
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon API server - API definition and struct
 // ----------------------------------------------------------------------------
 
 package main
@@ -14,13 +12,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// API is a wrap of the common base API with local implementation
+// API is a wrap of the common base API with NanoMon implementation
 type API struct {
 	*api.Base
-	// Add extra fields here: database connections, SDK clients
+
+	// Instance of our DB connection
 	db *database.DB
 }
 
+// These are all GET and can be called without auth
 func (api API) addAnonymousRoutes(r chi.Router) {
 	r.Get("/api/monitors", api.getMonitors)
 	r.Get("/api/monitors/{id}", api.getMonitor)
@@ -28,12 +28,14 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 	r.Get("/api/results", api.getResults)
 }
 
+// These routes might be behind auth if it has been enabled
 func (api API) addProtectedRoutes(r chi.Router) {
 	r.Post("/api/monitors", api.createMonitor)
 	r.Delete("/api/monitors/{id}", api.deleteMonitor)
 	r.Put("/api/monitors/{id}", api.updateMonitor)
 }
 
+// Simply create an API with the given database context
 func NewAPI(db *database.DB) API {
 	return API{
 		api.NewBase(serviceName, version, buildInfo, true),

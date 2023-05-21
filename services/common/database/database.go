@@ -1,8 +1,14 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon - Base database package for wrapping MongoDB client & collections
+// ----------------------------------------------------------------------------
+
 package database
 
 import (
 	"context"
 	"log"
+	"nanomon/services/common/types"
 	"net/url"
 	"os"
 	"time"
@@ -95,4 +101,21 @@ func (db DB) Close() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// Store a result in the database
+func (db *DB) StoreResult(r types.Result) error {
+	// For unit tests
+	if db == nil {
+		return nil
+	}
+
+	log.Printf("###   Storing result, status:%d msg:%s", r.Status, r.Message)
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
+	defer cancel()
+
+	_, err := db.Results.InsertOne(ctx, r)
+
+	return err
 }

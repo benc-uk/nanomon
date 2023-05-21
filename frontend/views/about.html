@@ -2,7 +2,8 @@
 
 <p>
   NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is
-  written in Go and based on the microservices pattern
+  written in Go and based on the microservices pattern. It also serves as a reference & learning app for microservices which can be used in workshops
+  in order to demonstrate Kubernetes & container concepts.
 </p>
 
 <a href="https://github.com/benc-uk/nanomon" target="_blank" class="btn btn-dark fs-5"><i class="fab fa-fw fa-github-alt"></i> GitHub project</a>
@@ -12,7 +13,7 @@
 <h4><i class="fa fa-fw fa-cogs"></i> Config</h4>
 <ul>
   <li>
-    <b>API Endpoint:</b> <a :href="apiEndpoint" class="text-success"><span x-text="apiEndpoint"></span></a>
+    <b>API Endpoint:</b> <a :href="`${apiEndpoint}/status`" class="text-info" target="_blank"><span x-text="apiEndpoint"></span></a>
   </li>
   <li><b>Client ID:</b> <span x-text="clientID || 'None, auth is disabled'"></span></li>
 </ul>
@@ -23,7 +24,7 @@
   <li x-html="`<b>Build Info:</b> ${buildInfo}`"></li>
 </ul>
 
-<template x-if="userAccount.name">
+<template x-if="userAccount?.name">
   <div>
     <h4><i class="fa fa-fw fa-user"></i> Logged In User</h4>
     <ul>

@@ -13,7 +13,6 @@ export const aboutComponent = (userAccount) => ({
   userAccount: userAccount,
 
   async init() {
-    console.log(this.userAccount)
     window.addEventListener('user-changed', (e) => {
       this.userAccount = e.detail
     })

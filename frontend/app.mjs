@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Frontend - Main app entry point
+// ----------------------------------------------------------------------------
+
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { APIClient } from '../lib/api-client.mjs'
@@ -12,18 +17,31 @@ import { aboutComponent } from './views/about.mjs'
 
 export let config = {}
 let msalApp = null
-const appScope = 'system.admin'
 
+// This scope is used to request access to the API
+// The app registration must be configured to allow & expose this scope
+// See services/api/server.go where this is also set
+const appScope = 'system.admin'
+let scopes = []
+
+// Top level Alpine.js component
 Alpine.data('app', () => ({
+  // This is key to our lightweight routing/SPA approach
   view: '#home',
+
+  // API client passed to some views
   api: null,
+
+  // User account object, will be a string if auth is disabled
   userAccount: null,
 
+  // This is called after Alpine.start()
   async init() {
     console.log('### Starting NanoMon frontend')
 
     // Set up the auth client using MSAL
     if (config.AUTH_CLIENT_ID) {
+      // Create the MSAL app, this is our main interface to MSAL and Azure AD
       msalApp = new msal.PublicClientApplication({
         auth: {
           clientId: config.AUTH_CLIENT_ID,
@@ -39,15 +57,20 @@ Alpine.data('app', () => ({
       this.userAccount = msalApp.getActiveAccount()
       if (this.userAccount) {
         showToast(`Welcome ${this.userAccount.name}!`)
+        this.updateUser(this.userAccount)
       }
     } else {
+      // Set a string value as the user account to indicate auth is disabled
       this.userAccount = 'AUTH_DISABLED'
     }
 
-    // Create the API client
-    this.api = new APIClient(config.API_ENDPOINT, [`api://${config.AUTH_CLIENT_ID}/${appScope}`], msalApp)
+    // Save scopes array for further use
+    scopes = [`api://${config.AUTH_CLIENT_ID}/${appScope}`]
 
-    // Support direct linking to specific views
+    // Create the API client, passing in the MSAL app
+    this.api = new APIClient(config.API_ENDPOINT, scopes, msalApp)
+
+    // Support direct linking to specific views, when the page (re)loads
     if (window.location.hash) {
       this.view = window.location.hash
       this.$nextTick(() => {
@@ -77,6 +100,15 @@ Alpine.data('app', () => ({
 
         showToast(`Logged in!<br>Welcome ${acct.name}`)
         this.updateUser(acct)
+
+        // Get an preemptive access token for the API, it will be cached
+        try {
+          const tokenResp = await msalApp.acquireTokenSilent({ scopes })
+          console.log(`### Got a new access token, expires: ${tokenResp.expiresOn}`)
+        } catch (e) {
+          const tokenResp = await msalApp.acquireTokenPopup({ scopes })
+          console.log(`### Got a new access token, expires: ${tokenResp.expiresOn}`)
+        }
       }
     } catch (err) {
       console.dir(err)
@@ -85,22 +117,28 @@ Alpine.data('app', () => ({
     }
   },
 
-  logout() {
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('msal') || key.includes('login')) {
-        localStorage.removeItem(key)
-      }
-    }
+  async logout() {
+    try {
+      await msalApp.logoutPopup({
+        account: this.userAccount,
+        mainWindowRedirectUri: '/',
+      })
 
-    this.updateUser(null)
+      this.updateUser(null)
+    } catch (err) {
+      console.error(err)
+    }
   },
 
   updateUser(account) {
     this.userAccount = account
+
+    // We need to notify any components that care about the user
     window.dispatchEvent(new CustomEvent('user-changed', { detail: this.userAccount }))
   },
 }))
 
+// A sort of fake router, each view is a component
 Alpine.data('home', homeComponent)
 Alpine.data('monitor', monitorComponent)
 Alpine.data('edit', editComponent)
@@ -108,6 +146,7 @@ Alpine.data('dash', dashComponent)
 Alpine.data('results', resultsComponent)
 Alpine.data('about', aboutComponent)
 
+// Async wrapper to fetch config before starting Alpine
 async function startApp() {
   // Attempt to fetch the config from the server
   // NOTE 1: When running in dev mode, the local config file will be found and used
@@ -133,4 +172,5 @@ async function startApp() {
   Alpine.start()
 }
 
+// Begin here!
 startApp()

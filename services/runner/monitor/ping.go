@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Ping monitor implementation
+// ----------------------------------------------------------------------------
+
 package monitor
 
 import (
@@ -13,7 +18,7 @@ func (m *Monitor) runPing() *types.Result {
 
 	var err error
 
-	count := 6
+	count := 3
 	interval := time.Duration(150) * time.Millisecond
 	timeout := time.Duration(1) * time.Second
 
@@ -46,7 +51,9 @@ func (m *Monitor) runPing() *types.Result {
 		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
+	// Means we have to run as root
 	pinger.SetPrivileged(true)
+
 	pinger.Count = count
 	pinger.Timeout = timeout
 	pinger.Interval = interval

@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Tests for HTTP monitor
+// ----------------------------------------------------------------------------
+
 package monitor
 
 import (
@@ -23,7 +28,7 @@ var cases = []httpTestCase{
 	},
 	{
 		name:           "Bad URL",
-		target:         "frogs://jumping",
+		target:         "goat://smelly",
 		expectedStatus: types.StatusFailed,
 		expectedRunOK:  false,
 	},
@@ -35,7 +40,7 @@ var cases = []httpTestCase{
 	},
 	{
 		name:           "Rule Status 404",
-		target:         "http://httpstat.us/404",
+		target:         "https://www.bbc.co.uk/goats",
 		expectedStatus: types.StatusError,
 		expectedRunOK:  false,
 		rule:           "status == 200",

@@ -1,7 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright (c) Ben Coleman, 2023
-// Licensed under the MIT License.
-//
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
 // NanoMon API server
 // ----------------------------------------------------------------------------
 
@@ -26,12 +24,15 @@ import (
 )
 
 var (
-	version     = "0.0.0"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
-	buildInfo   = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
+	version     = "0.0.0"            // App version number, injected at build time
+	buildInfo   = "No build details" // Build details, injected at build time
 	serviceName = "NanoMon"
 	defaultPort = 8000
 )
 
+// This scope is used to validate access to the API
+// The app registration must be configured to allow & expose this scope
+// See frontend/app.mjs where this is also set
 const authScope = "system.admin"
 
 func main() {
@@ -56,18 +57,24 @@ func main() {
 
 	// Protected routes
 	router.Group(func(appRouter chi.Router) {
+		// Authentication can be switched on or off
 		clientID := os.Getenv("AUTH_CLIENT_ID")
 		if clientID == "" {
 			log.Println("### 🚨 No AUTH_CLIENT_ID set, skipping auth validation")
 		} else {
 			log.Println("### 🔐 Auth enabled, validating JWT tokens")
-			jwtValidator := auth.NewJWTValidator(clientID,
+
+			// Validate JWT tokens using the Microsoft common public key endpoint
+			jwtValidator := auth.NewJWTValidator(
+				clientID,
 				"https://login.microsoftonline.com/common/discovery/v2.0/keys",
-				authScope)
+				authScope,
+			)
 
 			appRouter.Use(jwtValidator.Middleware)
 		}
 
+		// These routes do create, update, delete operations
 		api.addProtectedRoutes(appRouter)
 	})
 
@@ -81,6 +88,7 @@ func main() {
 		api.AddStatusEndpoint(publicRouter, "api/status")
 		api.AddOKEndpoint(publicRouter, "api/")
 
+		// Rest of the NanoMon routes
 		api.addAnonymousRoutes(publicRouter)
 	})
 

@@ -158,6 +158,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Written in Go, [source code - /services/api](./services/api/)
 - The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
 - Listens on port 8000 by default.
+- All routes are prefixed `/api` this makes it easier to put a path based HTTP router in front of the API and the SPA frontend
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
 - The API is RESTful, see the [API folder](./api/) for specifications and sample .http file.
 - By default no there is no authentication or validation, and all API calls are allowed, see [authentication & security](#authentication--security) section for details.
@@ -263,7 +264,7 @@ This makes a single HTTP request to the target URL each time it is run, it will 
 
 ### Type: TCP
 
-Each time a TCP monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, unable to resolve name with DNS, and if the port is not open or blocked some other way etc. Otherwise it will return OK.
+Each time a TCP monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, DNS resolution failure, or if the port is closed or blocked. Otherwise it will return OK.
 
 - **Target:** A hostname (or IP address) and port tuple, separated by colon
 - **Value:** Time for TCP connection to open in milliseconds.

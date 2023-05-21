@@ -63,8 +63,9 @@
               </li>
               <li class="nav-item btn btn-warning m-1 float-end" x-show="userAccount && userAccount !== 'AUTH_DISABLED'" x-cloak>
                 <a class="nav-link fs-6 text-light" @click="confirm('Are you sure you want to logout?') ? logout() : null">
-                  <i class="fa fa-fw fa-right-from-bracket"></i> LOGOUT</a
-                >
+                  <i class="fa fa-fw fa-right-from-bracket"></i>
+                  LOGOUT
+                </a>
               </li>
             </ul>
           </div>
@@ -72,6 +73,9 @@
       </nav>
 
       <div class="container pt-3">
+        <!-- Equivalent of our router view injection here -->
+        <!-- The x-show makes sure only one view is shown at any one time -->
+        <!-- The x-html part dynamically loads the view HTML with fetch, so we can keep them in separate files -->
         <div x-cloak x-transition x-data="results(api)" x-html="await (await fetch('views/results.html')).text()" x-show="view === '#results'"></div>
         <div x-cloak x-transition x-data="dash(api)" x-html="await (await fetch('views/dash.html')).text()" x-show="view === '#dash'"></div>
         <div x-cloak x-transition x-data="home(api)" x-html="await (await fetch('views/home.html')).text()" x-show="view === '#home'"></div>
@@ -86,7 +90,7 @@
         <div
           x-cloak
           x-transition
-          x-data="about(api)"
+          x-data="about(userAccount)"
           x-html="await (await fetch('views/about.html')).text()"
           x-show="view.startsWith('#about')"
         ></div>

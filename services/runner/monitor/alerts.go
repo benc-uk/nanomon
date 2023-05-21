@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Alerting and email sending
+// ----------------------------------------------------------------------------
+
 package monitor
 
 import (

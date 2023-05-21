@@ -62,31 +62,36 @@ model Problem {
 @route("/monitors")
 @tag("Monitors")
 interface MonitorAPI {
-  @doc("List all monitors")
+  @doc("List all monitors. Doesn't require authentication")
   list(): Monitor[];
-
+  
+  @doc("Get a monitor by ID. Doesn't require authentication")
   get(@path id: string): Monitor | {
     @statusCode code: 400; @body _: Problem
   } | {
     @statusCode code: 404; @body _: Problem
   };
 
+  @doc("Create a new monitor")
   create(@body monitor: Monitor): Monitor | {
     @statusCode code: 400; @body _: Problem
   };
 
+  @doc("Update a single monitor")
   update(@path id: string, @body monitor: Monitor): Monitor | {
     @statusCode code: 400; @body _: Problem
   } | {
     @statusCode code: 404; @body _: Problem
   };
 
+  @doc("Delete a monitor")
   @delete delete(@path id: string): void | {
     @statusCode code: 400; @body _: Problem
   } | {
     @statusCode code: 404; @body _: Problem
   };
 
+  @doc("List *Results* for a single monitor. Doesn't require authentication")
   @route("/{id}/results")
   @get getResults(@path id: string, @query max?: int32): Result[] | {
     @statusCode code: 400; @body _: Problem
@@ -96,5 +101,6 @@ interface MonitorAPI {
 @route("/results")
 @tag("Results")
 interface ResultsAPI {
+  @doc("List *Results* for ALL monitors. Doesn't require authentication")
   @get getResults(@query max?: int32): Result[];
 }

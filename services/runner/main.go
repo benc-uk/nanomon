@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Runs and executes monitors
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
@@ -13,8 +18,8 @@ import (
 var (
 	db        *database.DB
 	monitors  []*monitor.Monitor
-	version   = "0.0.0"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
-	buildInfo = "No build details" // Build details, set at build time with -ldflags "-X 'main.buildInfo=Foo bar'"
+	version   = "0.0.0"            // App version number, injected at build time
+	buildInfo = "No build details" // Build details, injected at build time
 )
 
 // Entrypoint - begin here :)

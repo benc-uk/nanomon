@@ -11,12 +11,16 @@ First fetch/update the latest sub-modules required for the templates
 git submodule update --init --recursive
 ```
 
-Then deploy
+Then deploy using the bash helper script
 
 ```bash
 cd deploy/azure
 ./deploy.sh example.bicepparam
 ```
+
+### Resources
+
+![Diagram of Azure resources](../../etc/azure-deploy.png)
 
 ## Notes
 

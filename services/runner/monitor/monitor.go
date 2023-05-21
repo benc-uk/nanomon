@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Overall monitor code
+// ----------------------------------------------------------------------------
+
 package monitor
 
 import (
@@ -148,7 +153,7 @@ func (m *Monitor) run() (bool, *types.Result) {
 	}
 
 	// Finally store the result to the database
-	err := storeResult(m.db, *result)
+	err := m.db.StoreResult(*result)
 	if err != nil {
 		log.Printf("### Error storing result: %s", err.Error())
 		return false, result

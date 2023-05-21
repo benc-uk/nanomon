@@ -1,3 +1,8 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
+// NanoMon Runner - Database access for monitors
+// ----------------------------------------------------------------------------
+
 package monitor
 
 import (
@@ -5,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"nanomon/services/common/database"
-	"nanomon/services/common/types"
 	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,9 +39,7 @@ type namespace struct {
 	Coll string `bson:"coll"`
 }
 
-// ========================================================================
 // Fetch all monitors from the database
-// ========================================================================
 func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()
@@ -61,26 +63,7 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	return monitors, nil
 }
 
-// Store a result in the database
-func storeResult(db *database.DB, r types.Result) error {
-	// For unit tests
-	if db == nil {
-		return nil
-	}
-
-	log.Printf("###   Storing result, status:%d msg:%s", r.Status, r.Message)
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	_, err := db.Results.InsertOne(ctx, r)
-
-	return err
-}
-
-// =================================================================================================
 // Watches the monitors collection for changes and updates accordingly
-// =================================================================================================
 func WatchMonitors(db *database.DB, monitors []*Monitor) error {
 	if os.Getenv("USE_POLLING") == "true" {
 		return fmt.Errorf("forcing polling mode as USE_POLLING is set")

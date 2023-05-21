@@ -1,24 +1,38 @@
-<h1 class="bg-info p-2 text-light">NanoMon</h1>
+<h1 class="bg-info p-2 text-light px-3"><i class="fa-solid fa-traffic-light"></i>&nbsp; NanoMon</h1>
 
 <p>
   NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is
   written in Go and based on the microservices pattern
 </p>
 
-<h5 x-text="`Version: ${version}`" class="mb-0"></h5>
-<h5 x-text="`Build: ${buildInfo}`" class="mb-3"></h5>
-
 <a href="https://github.com/benc-uk/nanomon" target="_blank" class="btn btn-dark fs-5"><i class="fab fa-fw fa-github-alt"></i> GitHub project</a>
 
 <hr />
 
+<h4><i class="fa fa-fw fa-cogs"></i> Config</h4>
 <ul>
   <li>
-    API Endpoint: <a :href="apiEndpoint" class="text-success"><span x-text="apiEndpoint"></span></a>
+    <b>API Endpoint:</b> <a :href="apiEndpoint" class="text-success"><span x-text="apiEndpoint"></span></a>
   </li>
-  <li>Client ID: <span x-text="clientID || 'None'" class="text-primary"></span></li>
+  <li><b>Client ID:</b> <span x-text="clientID || 'None, auth is disabled'"></span></li>
 </ul>
 
-<hr />
+<h4><i class="fa fa-fw fa-box"></i> Build Details</h4>
+<ul>
+  <li x-html="`<b>Version:</b> ${version}`"></li>
+  <li x-html="`<b>Build Info:</b> ${buildInfo}`"></li>
+</ul>
+
+<template x-if="userAccount.name">
+  <div>
+    <h4><i class="fa fa-fw fa-user"></i> Logged In User</h4>
+    <ul>
+      <li x-html="`<b>Name:</b> ${userAccount.name}`"></li>
+      <li x-html="`<b>Username:</b> ${userAccount.username}`"></li>
+      <li x-html="`<b>Environment:</b> ${userAccount.environment}`"></li>
+      <li x-html="`<b>Tenant:</b> ${userAccount.tenantId}`"></li>
+    </ul>
+  </div>
+</template>
 
 &copy; Ben Coleman, 2023

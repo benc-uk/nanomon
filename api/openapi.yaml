@@ -12,7 +12,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_list
-      description: List all monitors
+      description: List all monitors. Doesn't require authentication
       parameters: []
       responses:
         '200':
@@ -28,6 +28,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_create
+      description: Create a new monitor
       parameters: []
       responses:
         '200':
@@ -52,6 +53,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_get
+      description: Get a monitor by ID. Doesn't require authentication
       parameters:
         - name: id
           in: path
@@ -81,6 +83,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_update
+      description: Update a single monitor
       parameters:
         - name: id
           in: path
@@ -115,6 +118,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_delete
+      description: Delete a monitor
       parameters:
         - name: id
           in: path
@@ -143,6 +147,7 @@ paths:
       tags:
         - Monitors
       operationId: MonitorAPI_getResults
+      description: List *Results* for a single monitor. Doesn't require authentication
       parameters:
         - name: id
           in: path
@@ -176,6 +181,7 @@ paths:
       tags:
         - Results
       operationId: ResultsAPI_getResults
+      description: List *Results* for ALL monitors. Doesn't require authentication
       parameters:
         - name: max
           in: query

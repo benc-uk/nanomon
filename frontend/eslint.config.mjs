@@ -1,3 +1,8 @@
+//
+// New flat configuration for ESLint
+// Makefile sets ESLINT_USE_FLAT_CONFIG
+//
+
 export default [
   {
     files: ['**/*.mjs'],

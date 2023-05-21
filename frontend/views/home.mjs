@@ -68,7 +68,7 @@ export const homeComponent = (api) => ({
     this.updateText = new Date().toLocaleTimeString()
 
     // Collect all results for all monitors, needed for charts
-    let allResults = {}
+    const allResults = {}
 
     for (const m of monitorsNew) {
       const results = await api.getResultsForMonitor(m.id, CHART_SIZE)

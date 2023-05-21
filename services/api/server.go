@@ -64,6 +64,7 @@ func main() {
 		} else {
 			log.Println("### 🔐 Auth enabled, validating JWT tokens")
 
+			// Validate JWT tokens using the Microsoft common public key endpoint
 			jwtValidator := auth.NewJWTValidator(
 				clientID,
 				"https://login.microsoftonline.com/common/discovery/v2.0/keys",

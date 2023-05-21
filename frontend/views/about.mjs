@@ -5,11 +5,17 @@
 
 import { config } from '../app.mjs'
 
-export const aboutComponent = () => ({
+export const aboutComponent = (userAccount) => ({
   clientID: config.AUTH_CLIENT_ID,
   apiEndpoint: config.API_ENDPOINT,
   version: config.VERSION,
   buildInfo: config.BUILD_INFO,
+  userAccount: userAccount,
 
-  async init() {},
+  async init() {
+    console.log(this.userAccount)
+    window.addEventListener('user-changed', (e) => {
+      this.userAccount = e.detail
+    })
+  },
 })

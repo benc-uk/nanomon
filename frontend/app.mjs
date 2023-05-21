@@ -22,6 +22,7 @@ let msalApp = null
 // The app registration must be configured to allow & expose this scope
 // See services/api/server.go where this is also set
 const appScope = 'system.admin'
+let scopes = []
 
 // Top level Alpine.js component
 Alpine.data('app', () => ({
@@ -40,6 +41,7 @@ Alpine.data('app', () => ({
 
     // Set up the auth client using MSAL
     if (config.AUTH_CLIENT_ID) {
+      // Create the MSAL app, this is our main interface to MSAL and Azure AD
       msalApp = new msal.PublicClientApplication({
         auth: {
           clientId: config.AUTH_CLIENT_ID,
@@ -55,14 +57,18 @@ Alpine.data('app', () => ({
       this.userAccount = msalApp.getActiveAccount()
       if (this.userAccount) {
         showToast(`Welcome ${this.userAccount.name}!`)
+        this.updateUser(this.userAccount)
       }
     } else {
       // Set a string value as the user account to indicate auth is disabled
       this.userAccount = 'AUTH_DISABLED'
     }
 
-    // Create the API client
-    this.api = new APIClient(config.API_ENDPOINT, [`api://${config.AUTH_CLIENT_ID}/${appScope}`], msalApp)
+    // Save scopes array for further use
+    scopes = [`api://${config.AUTH_CLIENT_ID}/${appScope}`]
+
+    // Create the API client, passing in the MSAL app
+    this.api = new APIClient(config.API_ENDPOINT, scopes, msalApp)
 
     // Support direct linking to specific views, when the page (re)loads
     if (window.location.hash) {
@@ -94,6 +100,15 @@ Alpine.data('app', () => ({
 
         showToast(`Logged in!<br>Welcome ${acct.name}`)
         this.updateUser(acct)
+
+        // Get an preemptive access token for the API, it will be cached
+        try {
+          const tokenResp = await msalApp.acquireTokenSilent({ scopes })
+          console.log(`### Got a new access token, expires: ${tokenResp.expiresOn}`)
+        } catch (e) {
+          const tokenResp = await msalApp.acquireTokenPopup({ scopes })
+          console.log(`### Got a new access token, expires: ${tokenResp.expiresOn}`)
+        }
       }
     } catch (err) {
       console.dir(err)
@@ -102,14 +117,17 @@ Alpine.data('app', () => ({
     }
   },
 
-  logout() {
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('msal') || key.includes('login')) {
-        localStorage.removeItem(key)
-      }
-    }
+  async logout() {
+    try {
+      await msalApp.logoutPopup({
+        account: this.userAccount,
+        mainWindowRedirectUri: '/',
+      })
 
-    this.updateUser(null)
+      this.updateUser(null)
+    } catch (err) {
+      console.error(err)
+    }
   },
 
   updateUser(account) {

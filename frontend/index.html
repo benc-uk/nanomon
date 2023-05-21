@@ -87,7 +87,13 @@
           x-show="view.startsWith('#monitor')"
         ></div>
         <div x-cloak x-transition x-data="edit(api)" x-html="await (await fetch('views/edit.html')).text()" x-show="view.startsWith('#edit')"></div>
-        <div x-cloak x-transition x-data="about()" x-html="await (await fetch('views/about.html')).text()" x-show="view.startsWith('#about')"></div>
+        <div
+          x-cloak
+          x-transition
+          x-data="about(userAccount)"
+          x-html="await (await fetch('views/about.html')).text()"
+          x-show="view.startsWith('#about')"
+        ></div>
       </div>
     </div>
   </body>

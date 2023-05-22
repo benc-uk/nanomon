@@ -9,7 +9,9 @@ on:
       - "deploy/**"
       - "scripts/**"
       - "tests/**"
+      - ".vscode/**"
       - "readme.md"
+      - "makefile"
   pull_request:
     branches: ["main"]
 

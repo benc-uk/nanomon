@@ -2,6 +2,7 @@
 node_modules/
 _data/
 bin/
+.tools/
 tmp/
 frontend/config
 release-notes.md

@@ -1,0 +1,29 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: Result.yaml
+type: object
+properties:
+  date:
+    type: string
+    format: date-time
+  value:
+    type: number
+  message:
+    type: string
+  monitor_id:
+    type: string
+  monitor_name:
+    type: string
+  monitor_target:
+    type: string
+  status:
+    type: integer
+    minimum: 0
+    maximum: 2
+required:
+  - date
+  - value
+  - message
+  - monitor_id
+  - monitor_name
+  - monitor_target
+  - status

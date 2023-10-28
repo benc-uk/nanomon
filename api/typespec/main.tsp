@@ -2,10 +2,15 @@
 // TypeSpec definitions for NanoMon API
 // ===============================================================
 import "@typespec/http";
+import "@typespec/json-schema";
+
 using TypeSpec.Http;
+using TypeSpec.JsonSchema;
+
+@jsonSchema
 
 // Core definitions for the whole API
-@doc("This is the NanoMon REST API")
+@doc("The REST API for operating and using NanoMon")
 @service({
   title: "NanoMon API Service",
   version: "2023-03-12",
@@ -93,8 +98,10 @@ model Monitor {
 
   @visibility("read")
   updated: utcDateTime;
+
   /** Name of this monitor */
   name: string;
+
   type: MonitorType;
   target: string;
   interval: duration;

@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: NanoMon API Service
-  version: '2023-03-12'
-  description: This is the NanoMon REST API
+  version: 2023-03-12
+  description: The REST API for operating and using NanoMon
 tags:
   - name: Monitors
   - name: Results
@@ -23,7 +23,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Monitor'
-                x-typespec-name: Monitor[]
     post:
       tags:
         - Monitors
@@ -129,9 +128,7 @@ paths:
             type: string
       responses:
         '204':
-          description: >-
-            There is no content to send for this request, but the headers may be
-            useful. 
+          description: 'There is no content to send for this request, but the headers may be useful. '
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -171,7 +168,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
-                x-typespec-name: Result[]
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -200,13 +196,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
-                x-typespec-name: Result[]
 security:
   - BearerAuth: []
 components:
   schemas:
     Monitor:
       type: object
+      required:
+        - id
+        - updated
+        - name
+        - type
+        - target
+        - interval
+        - rule
+        - enabled
+        - properties
       properties:
         id:
           type: string
@@ -234,17 +239,6 @@ components:
           type: object
           additionalProperties:
             type: string
-          x-typespec-name: Record<string>
-      required:
-        - id
-        - updated
-        - name
-        - type
-        - target
-        - interval
-        - rule
-        - enabled
-        - properties
     MonitorType:
       type: string
       enum:
@@ -253,6 +247,12 @@ components:
         - tcp
     Problem:
       type: object
+      required:
+        - type
+        - title
+        - detail
+        - instance
+        - status
       properties:
         type:
           type: string
@@ -266,14 +266,16 @@ components:
           type: integer
           minimum: 100
           maximum: 599
-      required:
-        - type
-        - title
-        - detail
-        - instance
-        - status
     Result:
       type: object
+      required:
+        - date
+        - value
+        - message
+        - monitor_id
+        - monitor_name
+        - monitor_target
+        - status
       properties:
         date:
           type: string
@@ -294,14 +296,6 @@ components:
           format: int32
           minimum: 0
           maximum: 2
-      required:
-        - date
-        - value
-        - message
-        - monitor_id
-        - monitor_name
-        - monitor_target
-        - status
   securitySchemes:
     BearerAuth:
       type: http

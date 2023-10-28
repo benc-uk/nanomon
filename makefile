@@ -107,11 +107,11 @@ test-api: ## 🧪 Run API integration tests
 	@figlet $@ || true
 	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
 
-generate: ## 🤖 Generate OpenAPI spec using TypeSpec
+generate-specs: ## 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
 	@figlet $@ || true
-	@cd api; npm install; ./node_modules/.bin/tsp compile ./nanomon.tsp --emit @typespec/json-schema
-	@mv api/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
-	@rm -rf api/tsp-output
+	@cd api/typespec; npm install; ./node_modules/.bin/tsp compile .
+	@cp api/typespec/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
+	@cp -r api/typespec/tsp-output/@typespec/json-schema/ api/json-schema
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true

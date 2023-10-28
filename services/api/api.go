@@ -14,6 +14,7 @@ import (
 
 // API is a wrap of the common base API with NanoMon implementation
 type API struct {
+	// Embedding the common API struct
 	*api.Base
 
 	// Instance of our DB connection

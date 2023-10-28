@@ -44,6 +44,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -110,6 +111,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -216,6 +218,7 @@ components:
           readOnly: true
         name:
           type: string
+          description: Name of this monitor
         type:
           $ref: '#/components/schemas/MonitorType'
         target:
@@ -255,30 +258,26 @@ components:
           type: string
         title:
           type: string
-        status:
-          minimum: 100
-          maximum: 599
         detail:
           type: string
         instance:
           type: string
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
       required:
         - type
         - title
-        - status
         - detail
         - instance
+        - status
     Result:
       type: object
       properties:
         date:
           type: string
           format: date-time
-        status:
-          type: integer
-          format: int32
-          minimum: 0
-          maximum: 2
         value:
           type: number
           format: double
@@ -290,14 +289,19 @@ components:
           type: string
         monitor_target:
           type: string
+        status:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2
       required:
         - date
-        - status
         - value
         - message
         - monitor_id
         - monitor_name
         - monitor_target
+        - status
   securitySchemes:
     BearerAuth:
       type: http

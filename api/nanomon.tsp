@@ -23,10 +23,10 @@ namespace NanoMon;
 @route("/monitors")
 @tag("Monitors")
 interface MonitorAPI {
-  @doc("List all monitors. Doesn't require authentication")
+  /** List all monitors. Doesn't require authentication */
   list(): Monitor[];
 
-  @doc("Get a monitor by ID. Doesn't require authentication")
+  /** Get a monitor by ID. Doesn't require authentication */
   get(@path id: string): Monitor | {
     @statusCode code: 400;
     @body _: Problem;
@@ -86,13 +86,14 @@ interface ResultsAPI {
 
 // This holds the configuration for a single monitor
 model Monitor {
-  @visibility("read")
   @key
+  @visibility("read")
   @pattern("[A-Fa-f0-9]{24}")
   id: string;
 
   @visibility("read")
-  updated: zonedDateTime;
+  updated: utcDateTime;
+  /** Name of this monitor */
   name: string;
   type: MonitorType;
   target: string;
@@ -111,13 +112,16 @@ enum MonitorType {
 
 // This holds the result of a single monitor check
 model Result {
-  date: zonedDateTime;
-  @minValue(0) @maxValue(2) status: int32;
+  date: utcDateTime;
   value: float64;
   message: string;
   monitor_id: string;
   monitor_name: string;
   monitor_target: string;
+
+  @minValue(0)
+  @maxValue(2)
+  status: int32;
 }
 
 // A standard RCF 7807 'Problem Details' for HTTP APIs
@@ -125,7 +129,10 @@ model Result {
 model Problem {
   type: string;
   title: string;
-  @minValue(100) @maxValue(599) status: integer;
   detail: string;
   instance: string;
+
+  @minValue(100)
+  @maxValue(599)
+  status: integer;
 }

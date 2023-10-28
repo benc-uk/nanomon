@@ -3,7 +3,7 @@
 // NanoMon Frontend - Main app entry point
 // ----------------------------------------------------------------------------
 
-import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
+import Alpine from 'https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js'
 
 import { APIClient } from '../lib/api-client.mjs'
 import { showToast } from '../lib/toast.mjs'

@@ -40,7 +40,7 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
     - [Type: HTTP](#type-http)
     - [Type: TCP](#type-tcp)
     - [Type: Ping](#type-ping)
-    - [Rules](#rules)
+    - [Monitor Rules](#monitor-rules)
   - [Authentication \& Security](#authentication--security)
   - [Alerting Configuration](#alerting-configuration)
   - [Appendix: Database Notes](#appendix-database-notes)
@@ -167,9 +167,10 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 - Written in "modern" ES6 JavaScript using Alpine.js for reactivity and as a lightweight SPA framework [source code - /frontend](./frontend)
 - No bundling, webpack or Node is required 😊
+- Vite is used but just as a dev-server for serving the site locally
 - Configuration is fetched from the URL `/config` at start up.
   - When hosted by the frontend-host this allows for values to be dynamically passed to the frontend at runtime.
-  - When running locally the makefile target `make run-frontend` builds a config file which is picked up.
+  - When running locally the makefile target `make run-frontend` builds a static config file to "fake" this config API.
 - By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser)
 
 ### Frontend Host

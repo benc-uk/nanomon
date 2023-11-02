@@ -37,7 +37,7 @@ help: ## 💬 This help message :)
 	@figlet $@ || true
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-install-tools: ## 🔮 Install dev tools into project bin directory
+install-tools: ## 🔮 Install dev tools into project tools directory
 	@figlet $@ || true
 	@$(GOLINT_PATH) > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./.tools
 	@$(AIR_PATH) -v > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b ./.tools
@@ -88,7 +88,7 @@ run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 	# Creating JSON config file for frontend
 	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config
 	# Starting Vite to serve
-	@$(VITE_PATH)
+	@$(VITE_PATH) $(SPA_DIR) --open --port 3000 
 
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true

@@ -184,7 +184,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ```text
 help                 💬 This help message :)
-install-tools        🔮 Install dev tools into project bin directory
+install-tools        🔮 Install dev tools into project tools directory
 lint                 🔍 Lint & format check only, sets exit code on error for CI
 lint-fix             📝 Lint & format, attempts to fix errors & modify code
 build                🔨 Build all binaries into project bin directory
@@ -197,7 +197,7 @@ run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
 run-db               🍃 Run MongoDB in container (needs Docker)
 test                 🧪 Run all unit tests
 test-api             🧪 Run API integration tests
-generate             🤖 Generate OpenAPI spec using TypeSpec
+generate-specs       🤖 Generate OpenAPI spec using TypeSpec
 clean                🧹 Clean up, remove dev data and files
 ```
 

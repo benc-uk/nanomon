@@ -5,8 +5,8 @@
 
 import Alpine from 'https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js'
 
-import { APIClient } from '../lib/api-client.mjs'
-import { showToast } from '../lib/toast.mjs'
+import { APIClient } from './lib/api-client.mjs'
+import { showToast } from './lib/toast.mjs'
 
 import { homeComponent } from './views/home.mjs'
 import { monitorComponent } from './views/monitor.mjs'

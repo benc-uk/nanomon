@@ -3,12 +3,9 @@
   "features": {
     "ghcr.io/devcontainers/features/node": {
       "version": "lts"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker": {
-      "moby": true
     }
   },
-  "postCreateCommand": "sudo apt update && sudo apt install -yq figlet",
+  "postCreateCommand": "sudo apt clean && sudo apt update && sudo apt install -yq figlet",
   "customizations": {
     "vscode": {
       "settings": {

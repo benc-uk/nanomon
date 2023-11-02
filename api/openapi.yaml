@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: NanoMon API Service
-  version: '2023-03-12'
-  description: This is the NanoMon REST API
+  version: 2023-03-12
+  description: The REST API for operating and using NanoMon
 tags:
   - name: Monitors
   - name: Results
@@ -23,7 +23,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Monitor'
-                x-typespec-name: Monitor[]
     post:
       tags:
         - Monitors
@@ -44,6 +43,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -110,6 +110,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -127,9 +128,7 @@ paths:
             type: string
       responses:
         '204':
-          description: >-
-            There is no content to send for this request, but the headers may be
-            useful. 
+          description: 'There is no content to send for this request, but the headers may be useful. '
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -169,7 +168,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
-                x-typespec-name: Result[]
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -198,13 +196,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
-                x-typespec-name: Result[]
 security:
   - BearerAuth: []
 components:
   schemas:
     Monitor:
       type: object
+      required:
+        - id
+        - updated
+        - name
+        - type
+        - target
+        - interval
+        - rule
+        - enabled
+        - properties
       properties:
         id:
           type: string
@@ -216,6 +223,7 @@ components:
           readOnly: true
         name:
           type: string
+          description: Name of this monitor
         type:
           $ref: '#/components/schemas/MonitorType'
         target:
@@ -231,17 +239,6 @@ components:
           type: object
           additionalProperties:
             type: string
-          x-typespec-name: Record<string>
-      required:
-        - id
-        - updated
-        - name
-        - type
-        - target
-        - interval
-        - rule
-        - enabled
-        - properties
     MonitorType:
       type: string
       enum:
@@ -250,35 +247,39 @@ components:
         - tcp
     Problem:
       type: object
+      required:
+        - type
+        - title
+        - detail
+        - instance
+        - status
       properties:
         type:
           type: string
         title:
           type: string
-        status:
-          minimum: 100
-          maximum: 599
         detail:
           type: string
         instance:
           type: string
-      required:
-        - type
-        - title
-        - status
-        - detail
-        - instance
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
     Result:
       type: object
+      required:
+        - date
+        - value
+        - message
+        - monitor_id
+        - monitor_name
+        - monitor_target
+        - status
       properties:
         date:
           type: string
           format: date-time
-        status:
-          type: integer
-          format: int32
-          minimum: 0
-          maximum: 2
         value:
           type: number
           format: double
@@ -290,14 +291,11 @@ components:
           type: string
         monitor_target:
           type: string
-      required:
-        - date
-        - status
-        - value
-        - message
-        - monitor_id
-        - monitor_name
-        - monitor_target
+        status:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2
   securitySchemes:
     BearerAuth:
       type: http

@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.7
+VERSION ?= 0.0.8
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 AUTH_TENANT ?= common
@@ -24,7 +24,7 @@ ESLINT_USE_FLAT_CONFIG := true
 # Tools installed locally into repo, don't change
 GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
-BS_PATH := $(REPO_DIR)/.tools/node_modules/.bin/browser-sync
+VITE_PATH := $(REPO_DIR)/.tools/node_modules/.bin/vite
 ESLINT_PATH := $(REPO_DIR)/.tools/node_modules/.bin/eslint
 PRETTIER_PATH := $(REPO_DIR)/.tools/node_modules/.bin/prettier
 NEWMAN_PATH := $(REPO_DIR)/.tools/node_modules/.bin/newman
@@ -37,11 +37,11 @@ help: ## 💬 This help message :)
 	@figlet $@ || true
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-install-tools: ## 🔮 Install dev tools into project bin directory
+install-tools: ## 🔮 Install dev tools into project tools directory
 	@figlet $@ || true
 	@$(GOLINT_PATH) > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./.tools
-	@$(AIR_PATH) -v > /dev/null 2>&1 || ( wget https://github.com/cosmtrek/air/releases/download/v1.42.0/air_1.42.0_linux_amd64 -q -O .tools/air && chmod +x .tools/air )
-	@$(BS_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools browser-sync
+	@$(AIR_PATH) -v > /dev/null 2>&1 || curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b ./.tools
+	@$(VITE_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools vite
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools eslint
 	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools prettier
 	@$(NEWMAN_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools newman
@@ -87,8 +87,8 @@ run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 	@figlet $@ || true
 	# Creating JSON config file for frontend
 	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config
-	# Starting Browsersync
-	@$(BS_PATH) start -s frontend --no-ui --watch --no-notify
+	# Starting Vite to serve
+	@$(VITE_PATH) $(SPA_DIR) --open --port 3000 
 
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true
@@ -107,16 +107,13 @@ test-api: ## 🧪 Run API integration tests
 	@figlet $@ || true
 	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
 
-generate: ## 🤖 Generate OpenAPI spec using TypeSpec
+generate-specs: ## 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
 	@figlet $@ || true
-	@cd api; npm install; ./node_modules/.bin/tsp compile ./nanomon.tsp --emit @typespec/openapi3
-	@mv api/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
-	@rm -rf api/tsp-output
+	@cd api/typespec; npm install; ./node_modules/.bin/tsp compile .
+	@cp api/typespec/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
+	@cp -r api/typespec/tsp-output/@typespec/json-schema/ api/json-schema
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
-	@rm -rf bin
-	@rm -rf .tools
-	@rm -rf frontend/config
-	@rm -rf api/node_modules
+	@rm -rf bin .tools frontend/config api/node_modules frontend/.vite
 	@docker volume rm nm-mongo-data || true

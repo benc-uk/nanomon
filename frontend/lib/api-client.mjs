@@ -18,35 +18,35 @@ export class APIClient {
   }
 
   async getMonitors() {
-    return this.baseRequest('monitors')
+    return this._baseRequest('monitors')
   }
 
   async getMonitor(monId) {
-    return this.baseRequest(`monitors/${monId}`)
+    return this._baseRequest(`monitors/${monId}`)
   }
 
   async getResultsForMonitor(monId, max = 10) {
-    return this.baseRequest(`monitors/${monId}/results?max=${max}`)
+    return this._baseRequest(`monitors/${monId}/results?max=${max}`)
   }
 
   async createMonitor(monitor) {
-    return this.baseRequest('monitors', 'POST', monitor, true)
+    return this._baseRequest('monitors', 'POST', monitor, true)
   }
 
   async deleteMonitor(monId) {
-    return this.baseRequest(`monitors/${monId}`, 'DELETE', null, true)
+    return this._baseRequest(`monitors/${monId}`, 'DELETE', null, true)
   }
 
   async updateMonitor(monId, monitor) {
-    return this.baseRequest(`monitors/${monId}`, 'PUT', monitor, true)
+    return this._baseRequest(`monitors/${monId}`, 'PUT', monitor, true)
   }
 
   async getResults(max = 50) {
-    return this.baseRequest(`results?max=${max}`)
+    return this._baseRequest(`results?max=${max}`)
   }
 
   // All requests go through this method, it handles auth if required
-  async baseRequest(path, method = 'GET', body, authRequest = false) {
+  async _baseRequest(path, method = 'GET', body, authRequest = false) {
     // This block handles authentication if enabled and the request requires it
     let tokenRes = null
     if (authRequest && this.msalApp) {

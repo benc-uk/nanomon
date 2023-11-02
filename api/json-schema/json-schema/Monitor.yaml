@@ -1,0 +1,44 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: Monitor.yaml
+type: object
+properties:
+  id:
+    type: string
+    pattern: "[A-Fa-f0-9]{24}"
+  updated:
+    type: string
+    format: date-time
+  name:
+    type: string
+    description: Name of this monitor
+  type:
+    $ref: MonitorType.yaml
+  target:
+    type: string
+  interval:
+    type: string
+    format: duration
+  rule:
+    type: string
+  enabled:
+    type: boolean
+  properties:
+    $ref: RecordString.yaml
+required:
+  - id
+  - updated
+  - name
+  - type
+  - target
+  - interval
+  - rule
+  - enabled
+  - properties
+$defs:
+  RecordString:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    $id: RecordString.yaml
+    type: object
+    properties: {}
+    additionalProperties:
+      type: string

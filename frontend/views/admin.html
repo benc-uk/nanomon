@@ -1,0 +1,17 @@
+<h1 class="bg-info p-2 text-light px-3"><i class="fa-solid fa-wrench"></i>&nbsp; Admin Tools</h1>
+
+<h3>Data Import & Export</h3>
+<button class="btn btn-success btn-larger" @click="exportMonitors"><i class="fas fa-download fa-fw"></i> EXPORT CONFIG</button>
+<br />
+<br />
+
+<form>
+  <input type="file" id="importBtn" style="display: none" @change="importMonitors" />
+  <button class="btn btn-larger btn-warning" @click="document.getElementById('importBtn').click();">
+    <i class="fas fa-upload fa-fw"></i>
+    IMPORT CONFIG
+  </button>
+</form>
+<br />
+<div class="alert alert-light" role="alert" x-show="message" x-text="message"></div>
+<div class="alert alert-danger" role="alert" x-show="error" x-text="error"></div>

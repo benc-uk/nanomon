@@ -16,9 +16,9 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
-const typeHTTP = "http"
-const typePing = "ping"
-const typeTCP = "tcp"
+const TypeHTTP = "http"
+const TypePing = "ping"
+const TypeTCP = "tcp"
 
 type Monitor struct {
 	Name         string            // Name
@@ -98,13 +98,13 @@ func (m *Monitor) run() (bool, *types.Result) {
 	log.Printf("### Running monitor '%s' at '%s'", m.Name, m.Target)
 
 	switch m.Type {
-	case typeHTTP:
+	case TypeHTTP:
 		result = m.runHTTP()
 
-	case typePing:
+	case TypePing:
 		result = m.runPing()
 
-	case typeTCP:
+	case TypeTCP:
 		result = m.runTCP()
 
 	default:

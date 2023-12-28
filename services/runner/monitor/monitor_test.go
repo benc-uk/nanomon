@@ -87,7 +87,7 @@ func TestMonitorRuleEval(t *testing.T) {
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
-	m.Type = typeHTTP
+	m.Type = TypeHTTP
 	m.Rule = "ozzy > 6"
 
 	ok, _ := m.run()
@@ -101,7 +101,7 @@ func TestMonitorRuleExp(t *testing.T) {
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
-	m.Type = typeHTTP
+	m.Type = TypeHTTP
 	m.Rule = ",,3!"
 
 	ok, _ := m.run()
@@ -115,7 +115,7 @@ func TestMonitorRuleNotBool(t *testing.T) {
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
-	m.Type = typeHTTP
+	m.Type = TypeHTTP
 	m.Rule = "5 + 9"
 
 	ok, _ := m.run()

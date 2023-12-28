@@ -26,6 +26,11 @@
   background-color: #2daf94;
 }
 
+.btn-larger {
+  padding: 0.9rem 1.2rem;
+  font-size: 1.4rem;
+}
+
 a .card-header {
   color: #fff;
   text-decoration: none;

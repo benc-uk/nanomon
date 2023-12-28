@@ -60,3 +60,27 @@ Content-Type: application/json
 ### Get results for ALL monitors
 ##########################################
 GET {{endpoint}}/results?max=10
+
+
+##########################################
+### Test import
+##########################################
+POST {{endpoint}}/monitors/import
+Content-Type: application/json
+
+[
+  {
+    "name": "Test Health",
+    "type": "http",
+    "interval": "20s",
+    "target": "http://localhost:8000/health",
+    "enabled": true
+  },
+  {
+    "name": "Test Status",
+    "type": "http",
+    "interval": "5s",
+    "target": "http://localhost:8000/status",
+    "enabled": true
+  }
+]

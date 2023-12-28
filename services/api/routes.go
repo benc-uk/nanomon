@@ -280,3 +280,85 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 
 	api.ReturnJSON(resp, results)
 }
+
+// Export all monitors, note 98% of this is the same as getMonitors
+func (api API) exportMonitors(resp http.ResponseWriter, req *http.Request) {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cur, err := api.db.Monitors.Find(timeoutCtx, bson.M{})
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+
+	monitors := make([]*MonitorResp, 0)
+
+	for cur.Next(context.TODO()) {
+		m := &MonitorResp{}
+		if err := cur.Decode(&m); err != nil {
+			problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
+			return
+		}
+
+		m.ID = ""
+		monitors = append(monitors, m)
+	}
+
+	// Return a downloadable JSON
+	resp.Header().Set("Content-Disposition", "attachment; filename=nanomon-export.json")
+	resp.Header().Set("Content-Type", "application/json")
+
+	err = json.NewEncoder(resp).Encode(monitors)
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "export", err).Send(resp)
+		return
+	}
+}
+
+func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
+	log.Printf("### Importing monitors")
+
+	monitors := []*MonitorReq{}
+
+	err := json.NewDecoder(req.Body).Decode(&monitors)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "import", err).Send(resp)
+		return
+	}
+
+	if len(monitors) == 0 {
+		problem.Wrap(400, req.RequestURI, "import", errors.New("no monitors in import")).Send(resp)
+		return
+	}
+
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	deleteResp, err := api.db.Monitors.DeleteMany(timeoutCtx, bson.M{})
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "import", err).Send(resp)
+		return
+	}
+
+	log.Printf("### Removed %d existing monitors", deleteResp.DeletedCount)
+
+	for _, m := range monitors {
+		m.Updated = time.Now()
+
+		if msg, ok := m.validate(); !ok {
+			problem.Wrap(400, req.RequestURI, "monitors", errors.New(msg)).Send(resp)
+			return
+		}
+
+		_, err := api.db.Monitors.InsertOne(timeoutCtx, m)
+		if err != nil {
+			problem.Wrap(500, req.RequestURI, "import", err).Send(resp)
+			return
+		}
+
+		log.Printf("### Imported monitor %s", m.Name)
+	}
+
+	resp.WriteHeader(204)
+}

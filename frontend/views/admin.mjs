@@ -10,6 +10,19 @@ export const adminComponent = (api) => ({
   message: '',
   error: '',
 
+  async init() {
+    window.addEventListener('view-changed', async (e) => {
+      const view = e.detail
+
+      if (!view || !view.startsWith('#admin')) {
+        return
+      }
+
+      this.message = ''
+      this.error = ''
+    })
+  },
+
   async exportMonitors() {
     const monitors = await api.getMonitors()
 
@@ -42,7 +55,7 @@ export const adminComponent = (api) => ({
         const data = JSON.parse(e.target.result)
         await api.importMonitors(data)
 
-        this.message = `Import successful. ${data.length} monitor(s) were imported`
+        this.message = `Import from '${file.name}' successful. ${data.length} monitor(s) were imported`
       } catch (err) {
         this.error = `Import failed. ${err}`
       }

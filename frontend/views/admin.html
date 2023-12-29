@@ -8,7 +8,9 @@
         <p>Importing monitors will replace all existing configuration and monitors! Are you sure you want to continue?</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" @click="$refs.importBtn.click();" data-bs-dismiss="modal">Select import JSON file</button>
+        <button class="btn btn-primary" @click="$refs.importBtn.value = null; $refs.importBtn.click();" data-bs-dismiss="modal">
+          Select import JSON file
+        </button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
       </div>
     </div>

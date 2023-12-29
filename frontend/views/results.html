@@ -1,6 +1,6 @@
 <div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
 
-<table class="table table-hover border border-3 border-dark-subtle shadow-lg" x-show="results && results.length > 0">
+<table class="table table-hover shadow-lg" x-show="results && results.length > 0">
   <thead>
     <tr>
       <th scope="col">Date</th>
@@ -13,20 +13,14 @@
   </thead>
   <tbody>
     <template x-for="r of results">
-      <tr :class="r.statusDetails.class">
-        <td x-text="r.dateNice"></td>
-        <td x-text="r.monitor_name"></td>
-        <td x-text="r.statusDetails.text"></td>
-        <td x-text="r.value"></td>
-        <td x-text="r.message || '-'" style="font-size: 0.8rem"></td>
-        <td>
-          <button
-            x-show="r.outputs"
-            class="btn btn-sm btn-outline-light"
-            @click="output = r.outputs"
-            data-bs-toggle="modal"
-            data-bs-target="#outModal"
-          >
+      <tr>
+        <td x-text="r.dateNice" :class="r.statusDetails.class"></td>
+        <td x-text="r.monitor_name" :class="r.statusDetails.class"></td>
+        <td x-text="r.statusDetails.text" :class="r.statusDetails.class"></td>
+        <td x-text="r.value" :class="r.statusDetails.class"></td>
+        <td x-text="r.message || '-'" style="font-size: 0.8rem" :class="r.statusDetails.class"></td>
+        <td :class="r.statusDetails.class">
+          <button x-show="r.outputs" class="btn btn-sm btn-secondary" @click="output = r.outputs" data-bs-toggle="modal" data-bs-target="#outModal">
             More
           </button>
         </td>

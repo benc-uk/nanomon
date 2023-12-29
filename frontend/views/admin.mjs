@@ -31,7 +31,7 @@ export const adminComponent = (api) => ({
     this.error = ''
     this.message = ''
 
-    const file = document.getElementById('importBtn').files[0]
+    const file = this.$refs.importBtn.files[0]
     if (!file) {
       return
     }
@@ -44,7 +44,6 @@ export const adminComponent = (api) => ({
 
         this.message = `Import successful. ${data.length} monitor(s) were imported`
       } catch (err) {
-        console.error(err)
         this.error = `Import failed. ${err}`
       }
     }

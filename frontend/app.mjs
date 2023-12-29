@@ -14,6 +14,7 @@ import { editComponent } from './views/edit.mjs'
 import { dashComponent } from './views/dash.mjs'
 import { resultsComponent } from './views/results.mjs'
 import { aboutComponent } from './views/about.mjs'
+import { adminComponent } from './views/admin.mjs'
 
 export let config = {}
 let msalApp = null
@@ -145,6 +146,7 @@ Alpine.data('edit', editComponent)
 Alpine.data('dash', dashComponent)
 Alpine.data('results', resultsComponent)
 Alpine.data('about', aboutComponent)
+Alpine.data('admin', adminComponent)
 
 // Async wrapper to fetch config before starting Alpine
 async function startApp() {

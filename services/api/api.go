@@ -32,6 +32,7 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 // These routes might be behind auth if it has been enabled
 func (api API) addProtectedRoutes(r chi.Router) {
 	r.Post("/api/monitors", api.createMonitor)
+	r.Post("/api/monitors/import", api.importMonitors)
 	r.Delete("/api/monitors/{id}", api.deleteMonitor)
 	r.Put("/api/monitors/{id}", api.updateMonitor)
 }

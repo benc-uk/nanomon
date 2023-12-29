@@ -24,6 +24,7 @@ RUN go mod download
 # Copy in Go source files
 COPY services/api/ ./services/api/
 COPY services/common/ ./services/common/
+COPY services/runner/ ./services/runner/
 
 # Now run the build
 # Inject version and build details, to be available at runtime 

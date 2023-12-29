@@ -74,7 +74,7 @@ func main() {
 }
 
 func shutdown() {
-	log.Println("### Runner shuting down, attempting clean exit")
+	log.Println("### Runner shutting down, attempting clean exit")
 	db.Close()
 
 	for _, m := range monitors {

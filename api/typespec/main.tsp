@@ -72,6 +72,13 @@ interface MonitorAPI {
     @statusCode code: 400;
     @body _: Problem;
   };
+
+  @doc("Import configuration from a JSON file")
+  @route("/import")
+  @post
+  importMonitors(@body monitor: Monitor[]): void | {
+    @statusCode code: 400;
+  };
 }
 
 // ====================================================

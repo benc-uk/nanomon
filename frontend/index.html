@@ -48,6 +48,9 @@
               <li class="nav-item m-1" x-show="userAccount" x-cloak>
                 <a class="nav-link btn btn-main fs-6 text-dark" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
               </li>
+              <li class="nav-item m-1" x-show="userAccount" x-cloak>
+                <a class="nav-link btn btn-main fs-6 text-dark" href="#admin"><i class="fa fa-fw fa-wrench"></i> Admin</a>
+              </li>
               <li class="nav-item m-1">
                 <a class="nav-link btn btn-main fs-6 text-dark" href="#about"><i class="fa fa-fw fa-info-circle"></i> About</a>
               </li>
@@ -75,6 +78,7 @@
         <div x-cloak x-transition x-data="results(api)" x-html="await (await fetch('views/results.html')).text()" x-show="view === '#results'"></div>
         <div x-cloak x-transition x-data="dash(api)" x-html="await (await fetch('views/dash.html')).text()" x-show="view === '#dash'"></div>
         <div x-cloak x-transition x-data="home(api)" x-html="await (await fetch('views/home.html')).text()" x-show="view === '#home'"></div>
+        <div x-cloak x-transition x-data="admin(api)" x-html="await (await fetch('views/admin.html')).text()" x-show="view === '#admin'"></div>
         <div
           x-cloak
           x-transition

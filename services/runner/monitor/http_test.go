@@ -98,7 +98,7 @@ func TestHTTPMonitor(t *testing.T) {
 			m := NewMonitor(nil)
 			m.Name = tc.name
 			m.Enabled = true
-			m.Type = typeHTTP
+			m.Type = TypeHTTP
 			m.Target = tc.target
 			m.Rule = tc.rule
 

@@ -1,0 +1,35 @@
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h1 class="modal-title fs-5" id="importModalLabel">Confirm Import</h1>
+      </div>
+      <div class="modal-body">
+        <p>Importing monitors will replace all existing configuration and monitors! Are you sure you want to continue?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" @click="$refs.importBtn.click();" data-bs-dismiss="modal">Select import JSON file</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow mb-4">
+  <div class="card-header fs-3 bg-info text-light"><i class="fas fa-wrench fa-fw"></i> Data Import & Export</div>
+  <div class="card-body">
+    <button class="btn btn-success btn-larger mb-3" @click="exportMonitors"><i class="fas fa-download fa-fw"></i> EXPORT CONFIG</button>
+
+    <form>
+      <!-- Hidden form and button for file picking -->
+      <input type="file" style="display: none" @change="importMonitors" x-ref="importBtn" />
+    </form>
+
+    <button class="btn btn-warning btn-larger mb-3" data-bs-toggle="modal" data-bs-target="#importModal">
+      <i class="fas fa-upload fa-fw"></i> IMPORT CONFIG
+    </button>
+
+    <div class="alert alert-success" role="alert" x-show="message" x-text="message"></div>
+    <div class="alert alert-danger" role="alert" x-show="error" x-text="error"></div>
+  </div>
+</div>

@@ -48,6 +48,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Monitor'
+  /api/monitors/import:
+    post:
+      tags:
+        - Monitors
+      operationId: MonitorAPI_importMonitors
+      description: Import configuration from a JSON file
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Monitor'
   /api/monitors/{id}:
     get:
       tags:

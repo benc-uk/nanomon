@@ -17,6 +17,23 @@
   </div>
 </div>
 
+<div class="modal fade" id="nukeModal" tabindex="-1" aria-labelledby="nukeModalLabel" aria-hidden="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h1 class="modal-title fs-5" id="nukeModalLabel">Confirm Nuke</h1>
+      </div>
+      <div class="modal-body">
+        <p>💥 This will remove all monitors, this means everything! 💥<br />Are you sure you want to continue?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" @click="deleteAllMonitors" data-bs-dismiss="modal">Nuke it all!</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="card shadow mb-4">
   <div class="card-header fs-3 bg-info text-light"><i class="fas fa-wrench fa-fw"></i> Data Import & Export</div>
   <div class="card-body">
@@ -29,6 +46,11 @@
 
     <button class="btn btn-warning btn-larger mb-3" data-bs-toggle="modal" data-bs-target="#importModal">
       <i class="fas fa-upload fa-fw"></i> IMPORT CONFIG
+    </button>
+
+    <br />
+    <button class="btn btn-danger btn-larger mb-3" data-bs-toggle="modal" data-bs-target="#nukeModal">
+      <i class="fas fa-bomb fa-fw"></i> DELETE CONFIG
     </button>
 
     <div class="alert alert-success" role="alert" x-show="message" x-text="message"></div>

@@ -48,6 +48,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Monitor'
+    delete:
+      tags:
+        - Monitors
+      operationId: MonitorAPI_deleteAll
+      description: Delete all monitors
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
   /api/monitors/import:
     post:
       tags:

@@ -66,4 +66,17 @@ export const adminComponent = (api) => ({
 
     reader.readAsText(file)
   },
+
+  async deleteAllMonitors() {
+    console.log('### Deleting all monitors...')
+    this.error = ''
+    this.message = ''
+
+    try {
+      await api.deleteAllMonitors()
+      this.message = 'All monitors deleted, bye bye!'
+    } catch (err) {
+      this.error = `Delete failed. ${err}`
+    }
+  },
 })

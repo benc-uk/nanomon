@@ -65,6 +65,10 @@ interface MonitorAPI {
     @body _: Problem;
   };
 
+  @doc("Delete all monitors")
+  @delete
+  deleteAll(): void;
+
   @doc("List *Results* for a single monitor. Doesn't require authentication")
   @route("/{id}/results")
   @get

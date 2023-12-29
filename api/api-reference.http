@@ -36,6 +36,12 @@ DELETE {{endpoint}}/monitors/{{ create.response.body.id }}
 
 
 ##########################################
+### Delete ALL monitors, yikes!
+##########################################
+DELETE {{endpoint}}/monitors
+
+
+##########################################
 ### Get results
 ##########################################
 GET {{endpoint}}/monitors/{{ create.response.body.id }}/results?max=5

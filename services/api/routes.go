@@ -279,6 +279,7 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 	api.ReturnJSON(resp, results)
 }
 
+// Import JSON to bulk configure monitors
 func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("### Importing monitors")
 
@@ -327,6 +328,24 @@ func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 
 		log.Printf("### Imported monitor %s", m.Name)
 	}
+
+	resp.WriteHeader(204)
+}
+
+// Reset and remove all monitors
+func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
+	log.Printf("### Resetting and deleting all monitors")
+
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	deleteResp, err := api.db.Monitors.DeleteMany(timeoutCtx, bson.M{})
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "delete-all", err).Send(resp)
+		return
+	}
+
+	log.Printf("### Removed %d monitors", deleteResp.DeletedCount)
 
 	resp.WriteHeader(204)
 }

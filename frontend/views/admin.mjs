@@ -30,6 +30,9 @@ export const adminComponent = (api) => ({
     for (const mon of monitors) {
       delete mon.id
       delete mon.updated
+      if (Object.keys(mon.properties).length === 0) {
+        delete mon.properties
+      }
     }
 
     // Force a download of the JSON response

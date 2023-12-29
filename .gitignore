@@ -11,3 +11,4 @@ my-*.bicepparam
 deploy/helm/nanomon/charts/
 .vite/
 tsp-output/
+my-*/

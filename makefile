@@ -88,7 +88,7 @@ run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 	# Creating JSON config file for frontend
 	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config
 	# Starting Vite to serve
-	@$(VITE_PATH) $(SPA_DIR) --open --port 3000 
+	@$(VITE_PATH) $(SPA_DIR)
 
 run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	@figlet $@ || true

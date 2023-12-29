@@ -23,7 +23,7 @@ type MonitorResp struct {
 	Rule       string            `json:"rule,omitempty"`
 	Updated    time.Time         `json:"updated"`
 	Enabled    bool              `json:"enabled"`
-	Properties map[string]string `json:"properties,omitempty"`
+	Properties map[string]string `json:"properties"`
 	Group      string            `json:"group,omitempty"`
 }
 

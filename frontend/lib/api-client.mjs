@@ -51,7 +51,8 @@ export class APIClient {
 
   // All requests go through this method, it handles auth if required
   async _baseRequest(path, method = 'GET', body, authRequest = false) {
-    console.log(`### API request: ${method} ${this.endpoint}/${path}`)
+    //console.log(`### API request: ${method} ${this.endpoint}/${path}`)
+
     // This block handles authentication if enabled and the request requires it
     let tokenRes = null
     if (authRequest && this.msalApp) {

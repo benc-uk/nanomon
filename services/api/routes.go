@@ -172,8 +172,6 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("%+v", insertRes)
-
 	oid, _ := insertRes.InsertedID.(primitive.ObjectID)
 	respMonitor := MonitorResp{
 		ID:         oid.Hex(),
@@ -310,6 +308,11 @@ func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 
 	for _, m := range monitors {
 		m.Updated = time.Now()
+
+		// Fix for properties being null/empty/weird
+		if m.Properties == nil || len(m.Properties) == 0 {
+			m.Properties = make(map[string]string)
+		}
 
 		if msg, ok := m.validate(); !ok {
 			problem.Wrap(400, req.RequestURI, "monitors", errors.New(msg)).Send(resp)

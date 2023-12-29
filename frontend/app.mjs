@@ -169,6 +169,11 @@ async function startApp() {
       BUILD_INFO: '__DEFAULT__',
     }
   }
+
+  // These are sort of hard coded as I'm lazy
+  config.apiDebug = false // Enable API debug logging
+  config.refreshTime = 15 // Seconds between refreshes
+
   console.log(`### Config: ${JSON.stringify(config)}`)
 
   Alpine.start()

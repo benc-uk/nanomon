@@ -3,6 +3,8 @@
 // NanoMon Frontend - API client for calling the backend NanoMon API
 // ----------------------------------------------------------------------------
 
+import { config } from '../app.mjs'
+
 export class APIClient {
   endpoint = 'http://localhost:8000'
   scopes = []
@@ -55,7 +57,9 @@ export class APIClient {
 
   // All requests go through this method, it handles auth if required
   async _baseRequest(path, method = 'GET', body, authRequest = false) {
-    // Removed console.log(`### API request: ${method} ${this.endpoint}/${path}`)
+    if (config.apiDebug) {
+      console.log(`### API request: ${method} ${this.endpoint}/${path}`)
+    }
 
     // This block handles authentication if enabled and the request requires it
     let tokenRes = null

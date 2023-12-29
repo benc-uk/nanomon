@@ -9,8 +9,7 @@
       @click="window.location.hash = '#monitor/'+m.id"
     >
       <div x-html="m.icon" class="fs-1"></div>
-      <!-- <hr /> -->
-      <div x-text="m.name"></div>
+      <div x-text="m.name" class="dash-name"></div>
     </div>
   </template>
 </div>
@@ -19,6 +18,7 @@
   <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">
     <span class="visually-hidden">Loading...</span>
   </div>
+
   <span x-text="updateText"></span>
 
   &mdash; <span x-text="paused ? 'Auto update paused': 'Auto update every '+autoUpdate+' seconds '"> </span> &mdash;

@@ -3,6 +3,7 @@
 // NanoMon Frontend
 // ----------------------------------------------------------------------------
 
+import { config } from '../app.mjs'
 import { getStatusFields, monitorIcon } from '../lib/utils.mjs'
 
 const charts = {}
@@ -11,7 +12,7 @@ const CHART_SIZE = 20
 export const homeComponent = (api) => ({
   monitors: [],
   error: '',
-  autoUpdate: 5,
+  autoUpdate: config.refreshTime,
   updated: new Date(),
   intervalToken: null,
   loading: true,

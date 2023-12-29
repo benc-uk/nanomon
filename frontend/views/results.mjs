@@ -3,12 +3,13 @@
 // NanoMon Frontend
 // ----------------------------------------------------------------------------
 
+import { config } from '../app.mjs'
 import { getStatusFields } from '../lib/utils.mjs'
 
 export const resultsComponent = (api) => ({
   results: [],
   error: '',
-  autoUpdate: 5,
+  autoUpdate: config.refreshTime,
   updated: new Date(),
   intervalToken: null,
   loading: true,

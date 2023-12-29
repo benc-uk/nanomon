@@ -1,6 +1,12 @@
-<div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
+<div class="alert alert-light" role="alert" x-show="!loading && error" x-text="error"></div>
 
-<table class="table table-hover shadow-lg" x-show="results && results.length > 0">
+<div class="d-flex justify-content-center" x-show="loading">
+  <div class="spinner-border" role="status" style="width: 5rem; height: 5rem" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<table class="table table-hover shadow-lg" x-show="!loading && results && results.length > 0">
   <thead>
     <tr>
       <th scope="col">Date</th>

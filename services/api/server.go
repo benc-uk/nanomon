@@ -97,11 +97,9 @@ func main() {
 		ticker := time.Tick(5 * time.Second)
 
 		for range ticker {
-			if err := db.Ping(); err != nil {
-				api.Healthy = false
-			} else {
-				api.Healthy = true
-			}
+			_ = db.Ping(func(dbHealthy bool) {
+				api.Healthy = dbHealthy
+			})
 		}
 	}()
 

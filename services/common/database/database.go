@@ -24,6 +24,8 @@ type DB struct {
 	Monitors *mongo.Collection
 	Results  *mongo.Collection
 	client   *mongo.Client
+
+	healthy bool
 }
 
 // Open and connect to the database based on env vars
@@ -75,18 +77,34 @@ func ConnectToDB() *DB {
 	db.Monitors = db.client.Database(mongoDB).Collection("monitors")
 	db.Results = db.client.Database(mongoDB).Collection("results")
 
+	db.healthy = true
+
 	return db
 }
 
 // Check the database is alive
-func (db DB) Ping() error {
+func (db *DB) Ping(healthCallback func(healthy bool)) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
 	err := db.client.Ping(ctx, readpref.Primary())
 	if err != nil {
+		if db.healthy {
+			log.Printf("### 🚨 DB connection lost: %v", err)
+			healthCallback(false)
+		}
+
+		db.healthy = false
+
 		return err
 	}
+
+	if !db.healthy {
+		log.Printf("### 🥳 DB connection re-established, wow!")
+		healthCallback(true)
+	}
+
+	db.healthy = true
 
 	return nil
 }

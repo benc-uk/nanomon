@@ -172,6 +172,7 @@ async function startApp() {
 
   // These are sort of hard coded as I'm lazy
   config.apiDebug = false // Enable API debug logging
+  config.apiDelay = 0 // Fake network delay in ms, use 0 for none
   config.refreshTime = 15 // Seconds between refreshes
 
   console.log(`### Config: ${JSON.stringify(config)}`)

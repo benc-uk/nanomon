@@ -8,10 +8,10 @@
         <p>Importing monitors will replace all existing configuration and monitors! Are you sure you want to continue?</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" @click="$refs.importBtn.value = null; $refs.importBtn.click();" data-bs-dismiss="modal">
-          Select import JSON file
+        <button class="btn btn-info wider" @click="$refs.importBtn.value = null; $refs.importBtn.click();" data-bs-dismiss="modal">
+          Import JSON
         </button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
+        <button type="button" class="btn btn-secondary wider" data-bs-dismiss="modal">Yikes no!</button>
       </div>
     </div>
   </div>
@@ -27,8 +27,8 @@
         <p>💥 This will remove all monitors, this means everything! 💥<br />Are you sure you want to continue?</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-danger" @click="deleteAllMonitors" data-bs-dismiss="modal">Nuke it all!</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
+        <button class="btn btn-danger wider" @click="deleteAllMonitors" data-bs-dismiss="modal">Nuke it all!</button>
+        <button class="btn btn-secondary wider" data-bs-dismiss="modal">Yikes no!</button>
       </div>
     </div>
   </div>

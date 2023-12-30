@@ -1,7 +1,7 @@
 <div class="alert alert-light" role="alert" x-show="!loading && error" x-text="error"></div>
 
 <div class="d-flex justify-content-center" x-show="loading">
-  <div class="spinner-border" role="status" style="width: 5rem; height: 5rem" x-show="loading">
+  <div class="spinner-border fiverem" role="status" x-show="loading">
     <span class="visually-hidden">Loading...</span>
   </div>
 </div>
@@ -24,7 +24,7 @@
         <td x-text="r.monitor_name" :class="r.statusDetails.class"></td>
         <td x-text="r.statusDetails.text" :class="r.statusDetails.class"></td>
         <td x-text="r.value" :class="r.statusDetails.class"></td>
-        <td x-text="r.message || '-'" style="font-size: 0.8rem" :class="r.statusDetails.class"></td>
+        <td x-text="r.message || '-'" :class="`${r.statusDetails.class} smallfont`"></td>
         <td :class="r.statusDetails.class">
           <button x-show="r.outputs" class="btn btn-sm btn-secondary" @click="output = r.outputs" data-bs-toggle="modal" data-bs-target="#outModal">
             More

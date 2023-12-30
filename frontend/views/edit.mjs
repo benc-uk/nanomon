@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { definitions } from '../definitions.mjs'
+import { monitorIcon } from '../lib/utils.mjs'
 
 export const editComponent = (api) => ({
   error: '',
@@ -13,6 +14,7 @@ export const editComponent = (api) => ({
   rulePop: false,
   def: definitions,
   saving: false,
+  monitorIcon,
 
   async init() {
     this.shown = false
@@ -100,5 +102,11 @@ export const editComponent = (api) => ({
   // Not used
   appendRule(propName) {
     this.monitor.rule += ` && ${propName} == 'some value'`
+  },
+
+  title() {
+    let title = this.monId === 'new' ? 'Create New Monitor' : 'Update Monitor'
+    title += `<span class='float-end'>` + monitorIcon(this.monitor) + '</span>'
+    return title
   },
 })

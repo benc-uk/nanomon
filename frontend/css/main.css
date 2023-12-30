@@ -108,3 +108,29 @@ a {
   min-height: 2.4rem;
   line-height: 1.2rem;
 }
+
+.fiverem {
+  width: 5rem;
+  height: 5rem;
+}
+
+.wide {
+  width: 6rem;
+}
+
+.wider {
+  width: 8rem;
+}
+
+.smallfont {
+  font-size: 0.8rem;
+}
+
+.notexttransform {
+  text-transform: none !important;
+}
+
+.target-url {
+  word-wrap: break-word;
+  word-break: break-all;
+}

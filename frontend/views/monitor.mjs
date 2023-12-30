@@ -3,7 +3,7 @@
 // NanoMon Frontend
 // ----------------------------------------------------------------------------
 
-import { getStatusFields, niceDate, monitorIcon } from '../lib/utils.mjs'
+import { getStatusFields, niceDate, monitorIcon, isEmpty } from '../lib/utils.mjs'
 
 export const monitorComponent = (api, userAccount) => ({
   results: [],
@@ -15,6 +15,7 @@ export const monitorComponent = (api, userAccount) => ({
   lastResultDate: '',
   icon: '',
   getStatusFields: getStatusFields,
+  isEmpty,
   userAccount: userAccount,
   output: '',
 

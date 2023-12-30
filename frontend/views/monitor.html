@@ -10,8 +10,8 @@
         <p>Are you sure you want to delete this monitor?</p>
       </div>
       <div class="modal-footer">
-        <button type="button" @click="deleteMonitor" data-bs-dismiss="modal" class="btn btn-success">Sure thing!</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yikes no!</button>
+        <button type="button" class="btn btn-success wider" @click="deleteMonitor" data-bs-dismiss="modal">Sure thing!</button>
+        <button type="button" class="btn btn-secondary wider" data-bs-dismiss="modal">Yikes no!</button>
       </div>
     </div>
   </div>
@@ -24,14 +24,10 @@
       <button class="btn btn-light btn-sm" @click="loadMonitor(monitor.id)"><i class="fas fa-refresh fa-fw"></i> REFRESH</button>
     </div>
     <div class="card-body">
-      <div class="float-end" x-show="userAccount">
-        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fas fa-trash fa-fw"></i> DELETE</button>
-        <a class="btn btn-info" :href="`#edit/${monitor.id}`"><i class="fas fa-edit fa-fw"></i> EDIT</a>
-      </div>
       <table class="table-sm">
         <tbody>
           <tr>
-            <td style="width: 8rem">Type:</td>
+            <td>Type:</td>
             <td x-html="`${icon} ${monitor.type}`"></td>
           </tr>
           <tr>
@@ -40,7 +36,9 @@
           </tr>
           <tr>
             <td>Target:</td>
-            <td x-show="monitor.type == 'http'"><a :href="monitor.target" x-text="monitor.target" target="_blank" class="text-primary"></a></td>
+            <td x-show="monitor.type == 'http'">
+              <a :href="monitor.target" x-text="monitor.target" target="_blank" class="text-primary target-url"></a>
+            </td>
             <td x-show="monitor.type != 'http'" x-text="monitor.target"></td>
           </tr>
           <tr x-show="results[0]?.message">
@@ -70,7 +68,7 @@
         </tbody>
       </table>
 
-      <table class="table table-sm table-hover mt-3" x-show="monitor.properties">
+      <table class="table table-sm table-hover mt-3" x-show="!isEmpty(monitor.properties)">
         <thead class="table-primary">
           <tr>
             <th scope="col">Property</th>
@@ -86,6 +84,12 @@
           </template>
         </tbody>
       </table>
+
+      <div x-show="userAccount">
+        <hr />
+        <a class="btn btn-info wide" :href="`#edit/${monitor.id}`"><i class="fas fa-edit fa-fw"></i> MODIFY</a>
+        <button class="btn btn-warning wide" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fas fa-trash fa-fw"></i> DELETE</button>
+      </div>
     </div>
   </div>
 </template>
@@ -108,15 +112,15 @@
         </thead>
         <tbody>
           <template x-for="r in results">
-            <tr :class="getStatusFields(r.status).class">
-              <td x-text="r.dateNice"></td>
-              <td x-text="r.statusDetails.text"></td>
-              <td x-text="r.value"></td>
-              <td x-text="r.message" style="font-size: 0.8rem"></td>
-              <td>
+            <tr>
+              <td x-text="r.dateNice" :class="r.statusDetails.class"></td>
+              <td x-text="r.statusDetails.text" :class="r.statusDetails.class"></td>
+              <td x-text="r.value" :class="r.statusDetails.class"></td>
+              <td x-text="r.message" :class="`${r.statusDetails.class} smallfont`"></td>
+              <td :class="r.statusDetails.class">
                 <button
                   x-show="r.outputs"
-                  class="btn btn-sm btn-outline-light"
+                  class="btn btn-sm btn-secondary"
                   @click="output = r.outputs"
                   data-bs-toggle="modal"
                   data-bs-target="#outModalMonitor"

@@ -61,11 +61,9 @@ export const homeComponent = (api) => ({
       this.error = ''
     } catch (err) {
       this.error = err.message
-      this.loading = false
       return
     }
 
-    this.loading = false
     this.updateText = new Date().toLocaleTimeString()
 
     // Collect all results for all monitors, needed for charts
@@ -84,6 +82,7 @@ export const homeComponent = (api) => ({
       m.icon = monitorIcon(m)
     }
 
+    this.loading = false
     this.monitors = monitorsNew
 
     await this.updateCharts(allResults)

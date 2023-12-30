@@ -1,18 +1,17 @@
 <div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
 
-<div x-show="monId == 'new'" class="mb-3">
-  Templates:
-  <button class="btn btn-primary" @click="newFromTemplate('http')">HTTP</button>
-  <button class="btn btn-primary" @click="newFromTemplate('tcp')">TCP</button>
-  <button class="btn btn-primary" @click="newFromTemplate('ping')">PING</button>
+<div x-show="monId == 'new'" class="mb-3 d-flex align-items-center">
+  <div class="d-none d-sm-block">Templates&nbsp;</div>
+  <div>
+    <button class="btn btn-primary wide" @click="newFromTemplate('http')">HTTP</button>
+    <button class="btn btn-primary wide" @click="newFromTemplate('tcp')">TCP</button>
+    <button class="btn btn-primary wide" @click="newFromTemplate('ping')">PING</button>
+  </div>
 </div>
 
 <template x-if="monitor">
   <div class="card shadow mb-4">
-    <div
-      class="card-header fs-3 bg-info text-light"
-      x-html="`<i class='fa fa-fw fa-edit'></i> `+(monId !== 'new' ? 'Edit Monitor' : 'Create Monitor')"
-    ></div>
+    <div class="card-header fs-3 bg-info text-light" x-html="`<i class='fa fa-fw fa-edit'></i> ` + title()"></div>
     <div class="card-body" x-show="!saving">
       <form>
         <div class="form-group mb-2">
@@ -107,7 +106,7 @@
           <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add Property</button>
           <ul class="dropdown-menu">
             <template x-for="prop of def[monitor.type].allowedProps">
-              <li><a class="dropdown-item" style="text-transform: none" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
+              <li><a class="dropdown-item notexttransform" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
             </template>
           </ul>
         </div>
@@ -138,12 +137,13 @@
         </tbody>
       </table>
 
-      <button class="btn btn-success" @click="save" :disabled="!canSave()">
+      <button class="btn btn-success wide" @click="save" :disabled="!canSave()">
         <i class="fa fa-fw fa-check"></i> <span x-text="monId == 'new' ? 'CREATE' : 'UPDATE'"></span>
       </button>
 
-      <a :href="monId== 'new' ? '#home':`#monitor/${monId}`" class="btn btn-warning"><i class="fa fa-fw fa-stop"></i> Cancel</a>
+      <a :href="monId== 'new' ? '#home':`#monitor/${monId}`" class="btn btn-warning wide"><i class="fa fa-fw fa-xmark"></i> Cancel</a>
     </div>
+
     <template x-if="saving">
       <div class="card-body d-flex justify-content-center">
         <div class="spinner-border text-info mx-5" role="status" style="width: 4rem; height: 4rem">

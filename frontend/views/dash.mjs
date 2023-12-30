@@ -52,11 +52,9 @@ export const dashComponent = (api) => ({
       this.error = ''
     } catch (err) {
       this.error = err.message
-      this.loading = false
       return
     }
 
-    this.loading = false
     this.updateText = new Date().toLocaleTimeString()
 
     for (const m of monitors) {
@@ -71,6 +69,7 @@ export const dashComponent = (api) => ({
       m.icon = monitorIcon(m)
     }
 
+    this.loading = false
     this.monitors = monitors
   },
 })

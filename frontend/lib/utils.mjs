@@ -59,3 +59,14 @@ export function monitorIcon(monitor) {
       return '<i class="far fa-circle-question"></i>'
   }
 }
+
+export function isEmpty(obj) {
+  if (obj === undefined || obj === null) {
+    return true
+  }
+  return Object.keys(obj).length === 0
+}
+
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}

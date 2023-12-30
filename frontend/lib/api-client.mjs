@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { config } from '../app.mjs'
+import { sleep } from './utils.mjs'
 
 export class APIClient {
   endpoint = 'http://localhost:8000'
@@ -92,6 +93,11 @@ export class APIClient {
       body: body ? JSON.stringify(body) : undefined,
       headers,
     })
+
+    // Add a fake delay to simulate network latency
+    if (config.apiDelay > 0) {
+      await sleep(config.apiDelay)
+    }
 
     if (!response.ok) {
       // Check if there is a JSON error message

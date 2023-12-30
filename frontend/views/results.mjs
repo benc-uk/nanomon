@@ -53,7 +53,6 @@ export const resultsComponent = (api) => ({
       this.error = ''
     } catch (err) {
       this.error = err.message
-      this.loading = false
       return
     }
 

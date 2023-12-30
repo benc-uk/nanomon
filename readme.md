@@ -19,7 +19,7 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
     - [Monitor](#monitor)
     - [Result](#result)
     - [Monitor Types](#monitor-types)
-  - [Repo Index](#repo-index)
+  - [Repo \& Project Details](#repo--project-details)
   - [Getting Started](#getting-started)
     - [Local Dev Quick Start](#local-dev-quick-start)
     - [Run Standalone Image](#run-standalone-image)
@@ -84,11 +84,11 @@ There are three types of monitor currently supported:
 
 For more details see the [complete monitor reference](#monitor-reference)
 
-## Repo Index
+## Repo & Project Details
 
 ```text
 📂
-├── api             - API reference and spec, using TypeSpec
+├── api             - API reference and specifications, using TypeSpec
 ├── build           - Dockerfiles and supporting build artifacts
 ├── deploy
 │   ├── azure       - Deploy to Azure using Bicep
@@ -104,6 +104,10 @@ For more details see the [complete monitor reference](#monitor-reference)
 │   └── runner      - Go source for the runner
 └── tests           - Integration and performance tests
 ```
+
+[![CI Pipeline](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml/badge.svg)](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml)
+
+![](https://img.shields.io/github/last-commit/benc-uk/nanomon) ![](https://img.shields.io/github/release-date/benc-uk/nanomon) ![](https://img.shields.io/github/v/release/benc-uk/nanomon) ![](https://img.shields.io/github/commit-activity/m/benc-uk/nanomon)
 
 ## Getting Started
 
@@ -191,6 +195,7 @@ build                🔨 Build all binaries into project bin directory
 images               📦 Build all container images
 image-standalone     📦 Build the standalone image
 push                 📤 Push all container images
+run-all              🚀 Run API + runner + frontend with hot-reload
 run-api              🎯 Run API service locally with hot-reload
 run-runner           🏃 Run monitor runner locally with hot-reload
 run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
@@ -312,17 +317,17 @@ regexMatch == 'a value'          # Check the of the RegEx
 
 ## Authentication & Security
 
-By default there is no authentication, security or sign-in. This is on purpose to make the app easy to deploy, and for simple use in learning scenarios and workshops.
+By default there is no authentication, security or user sign-in. This is by design to make the app easy to deploy, and for use in learning scenarios and workshops.
 
-Security is enabled using the Microsoft Identity Platform (Azure AD) and OAuth2 + OIDC. With an app registered in Azure AD, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, this changes the behavior as follows:
+Security is enabled using the Microsoft Identity Platform (now called Microsoft Entra ID) and OAuth2 + OIDC. With an app registered in Entra ID, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, this changes the behaviour of the application as follows:
 
-- API container - will enforce validation on certain API routes, like POST, PUT and DELETE, using OAuth 2.0 JWT bearer tokens. The token is checked for validity, a scope matching `system.admin` and audience matching the client id.
-- Frontend host - The UI will show a sign-in button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Azure AD for the signed-in user with the `system.admin` scope, and then passed when calling the API as bearer tokens
+- **API container** - Will enforce validation on certain API routes, like POST, PUT and DELETE, using OAuth 2.0 JWT bearer tokens. The token is checked for validity as follows; contains a scope matching `system.admin` and has an audience matching the client id.
+- **Frontend host** - The UI will show a sign-in button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Entra ID for the signed-in user with the `system.admin` scope, and then passed when calling the API as bearer tokens.
 
 A basic guide to set this up:
 
-- Register a new app in Azure AD. This needs to have the API scope `system.admin` exposed, and also be set with the correct SPA callback URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`
-- Test locally - Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then (re)start the frontend and API with `make run-frontend` and `make run-frontend`. You should see a login button in the page, and no way to create or edit monitors until you sign-in.
+- Register a new app in Microsoft Entra ID, his needs to have the API scope `system.admin` exposed, and also be set with the correct SPA redirect URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`, or use [the portal](https://entra.microsoft.com/#home).
+- Test locally - Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then (re)start the frontend and API with `make run-api` and frontend with `make run-frontend`. You should see a login button on the page, and no way to create or edit monitors until you sign-in.
 - For deploying elsewhere:
   - Get the frontend URL of the deployed running instance.
   - Add this URL to the SPA redirect URIs in the app registration. It's probably easiest doing this in the Azure Portal.
@@ -344,12 +349,12 @@ Known limitations:
 
 ## Appendix: Database Notes
 
-- Code will dynamically create the database and collections if they don't exist at startup. By default the database name is `nanomon` but this can be changed with the `MONGO_DB` env var.
+- The services will dynamically create the database and collections if they don't exist at startup. By default the database name is `nanomon` but this can be changed with the `MONGO_DB` env var.
 - For change stream support to work MongoDB must be running as a replica set, when running locally this is enabled in the Docker container that is started. Also the Helm chart will deploy MongoDB as a replica set.
 
 ### Azure Cosmos DB
 
-Azure Cosmos DB can be used as a database for NanoMon, however there are two things to menton:
+Azure Cosmos DB can be used as a database for NanoMon, however there are two things to consider:
 
 - An index must be added for the `date` field to the results collection, this can be done in the Azure Portal or with a single command:  
   `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`

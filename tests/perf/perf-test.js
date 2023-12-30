@@ -10,7 +10,7 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.3/index.js";
 
 // Top level test parameters & defaults
-const BASE_URL = __ENV.BASE_URL || "http://localhost:8080";
+const BASE_URL = __ENV.BASE_URL || "http://localhost:8000";
 const API_PATH = __ENV.API_PATH || "/api";
 const SLEEP_DURATION = parseFloat(__ENV.TEST_SLEEP) || 0.1;
 
@@ -64,17 +64,17 @@ export default function () {
   };
 
   //
-  // Tests for the foo API
+  // Tests for the Monitors API
   //
-  group("Foo API", () => {
+  group("Monitor API", () => {
     //
-    // Call foo API
+    // Call Monitors API
     //
-    let resp = http.get(`${endpoint}/foo`, { headers });
+    let resp = http.get(`${endpoint}/monitors`, { headers });
 
     check(resp, {
-      getFoos_returns_200: (r) => r.status === 200,
-      getFoos_has_results: (r) => r.json().length >= 5,
+      getMonitors_returns_200: (r) => r.status === 200,
+      getMonitors_has_results: (r) => r.json().length > 0,
     });
 
     customTrend.add(resp.timings.duration);

@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Common - can be overridden by .env file or when running make
-VERSION ?= 0.0.9
+VERSION ?= 0.0.10
 BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 AUTH_TENANT ?= common
@@ -98,6 +98,10 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	-e MONGODB_ADVERTISED_HOSTNAME=localhost \
 	-e ALLOW_EMPTY_PASSWORD=yes \
 	--name mongo bitnami/mongodb:6.0
+
+run-all: ## 🚀 Run all everything locally, including DB with hot-reload
+	@figlet $@ || true
+	@scripts/run-all.sh
 
 test: ## 🧪 Run all unit tests
 	@figlet $@ || true

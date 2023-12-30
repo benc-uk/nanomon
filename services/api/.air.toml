@@ -4,7 +4,8 @@ tmp_dir = "tmp"
 [build]
 include_ext = [ "go" ]
 include_dir = [ "services/api" ]
-cmd = "go build -o ./tmp/main -ldflags \"-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'\" nanomon/services/api"
+cmd = "go build -o ./tmp/api -ldflags \"-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'\" nanomon/services/api"
+bin = "tmp/api"
 
 [misc]
 clean_on_exit = true

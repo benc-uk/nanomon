@@ -4,7 +4,8 @@ tmp_dir = "tmp"
 [build]
 include_ext = [ "go" ]
 include_dir = [ "services/runner" ]
-cmd = "go build -o ./tmp/main nanomon/services/runner"
+cmd = "go build -o ./tmp/runner nanomon/services/runner"
+bin = "tmp/runner"
 
 [misc]
 clean_on_exit = true

@@ -50,7 +50,13 @@ func init() {
 	linkURL = fmt.Sprintf("%s/#monitor/", baseURL)
 
 	// Load email template
-	emailTemplate = template.Must(template.ParseFiles("templates/alert.html"))
+	var err error
+
+	emailTemplate, err = template.ParseFiles("ZZZZZZZZZZZZZZZZZZtemplates/alert.html")
+	if err != nil {
+		log.Printf("### Error loading email template: %s", err)
+		log.Printf("### SEVERE! Email alerting will be disabled!")
+	}
 }
 
 func checkForAlerts(m *Monitor, r types.Result) {
@@ -74,16 +80,18 @@ func checkForAlerts(m *Monitor, r types.Result) {
 	}
 
 	if m.ErrorCount >= maxFailCount && !m.InErrorState {
-		w := &bytes.Buffer{}
-		err := emailTemplate.Execute(w, alertData)
-		body := w.String()
+		if emailTemplate != nil {
+			w := &bytes.Buffer{}
+			err := emailTemplate.Execute(w, alertData)
+			body := w.String()
 
-		if err != nil {
-			log.Printf("###   Error executing email template: %s", err)
-			return
+			if err != nil {
+				log.Printf("###   Error executing email template: %s", err)
+				return
+			}
+
+			sendEmail(body, fmt.Sprintf("NanoMon alert for: %s", m.Name))
 		}
-
-		sendEmail(body, fmt.Sprintf("NanoMon alert for: %s", m.Name))
 
 		m.InErrorState = true
 	}
@@ -99,7 +107,7 @@ func sendEmail(body, subject string) {
 	log.Printf("###   Sending email alert")
 
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	subjectLine := "Subject: " + subject + "!\n"
+	subjectLine := "Subject: " + subject + "\n"
 	msg := []byte(subjectLine + mime + "\n" + body)
 
 	auth := smtp.PlainAuth("", from, pass, host)
@@ -114,5 +122,5 @@ func sendEmail(body, subject string) {
 }
 
 func IsAlertingEnabled() bool {
-	return from != "" && pass != "" && to != ""
+	return from != "" && pass != "" && to != "" && emailTemplate != nil
 }

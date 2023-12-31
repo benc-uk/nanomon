@@ -128,7 +128,12 @@ func (db *DB) StoreResult(r types.Result) error {
 		return nil
 	}
 
-	log.Printf("###   Storing result, status:%d msg:%s", r.Status, r.Message)
+	msg := ""
+	if r.Message != "" {
+		msg = "; msg:" + r.Message
+	}
+
+	log.Printf("###   Storing result, status:%d%s", r.Status, msg)
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
 	defer cancel()

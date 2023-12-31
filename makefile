@@ -65,7 +65,7 @@ build: ## 🔨 Build all binaries into ./bin/ directory
 
 images: ## 📦 Build all container images
 	@figlet $@ || true
-	docker compose -f build/compose.yaml build runner
+	docker compose -f build/compose.yaml build
 
 image-standalone: ## 📦 Build the standalone image
 	@figlet $@ || true

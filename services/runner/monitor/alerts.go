@@ -6,20 +6,25 @@
 package monitor
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"nanomon/services/common/types"
 	"net/smtp"
 	"os"
 	"strconv"
+	"text/template"
 )
 
 var (
-	from string
-	pass string
-	to   string
-	host string
-	port string
+	from    string
+	pass    string
+	to      string
+	host    string
+	port    string
+	linkURL string
+
+	emailTemplate *template.Template
 )
 
 func init() {
@@ -28,6 +33,7 @@ func init() {
 	to = os.Getenv("ALERT_SMTP_TO")
 	host = os.Getenv("ALERT_SMTP_HOST")
 	port = os.Getenv("ALERT_SMTP_PORT")
+	baseURL := os.Getenv("ALERT_LINK_BASEURL")
 
 	if host == "" {
 		host = "smtp.gmail.com"
@@ -36,6 +42,15 @@ func init() {
 	if port == "" {
 		port = "587"
 	}
+
+	if baseURL == "" {
+		baseURL = "http://localhost:3000"
+	}
+
+	linkURL = fmt.Sprintf("%s/#monitor/", baseURL)
+
+	// Load email template
+	emailTemplate = template.Must(template.ParseFiles("templates/alert.html"))
 }
 
 func checkForAlerts(m *Monitor, r types.Result) {
@@ -48,21 +63,27 @@ func checkForAlerts(m *Monitor, r types.Result) {
 
 	log.Printf("###   Monitor '%s' has failed %d times...", m.Name, m.ErrorCount)
 
+	alertData := struct {
+		Monitor *Monitor
+		Result  types.Result
+		LinkURL string
+	}{
+		Monitor: m,
+		Result:  r,
+		LinkURL: linkURL,
+	}
+
 	if m.ErrorCount >= maxFailCount && !m.InErrorState {
-		// Email body
-		body := fmt.Sprintf(`Monitor '%s' has failed %d times!
-  - Reason:%s
-  - When: %s
+		w := &bytes.Buffer{}
+		err := emailTemplate.Execute(w, alertData)
+		body := w.String()
 
-Configuration:
-  - Target: %s
-  - Type: %s
-  - Interval: %s
-  - Rule: %s
-  - Properties: %+v`, m.Name, m.ErrorCount, r.Message, r.Date.Format("15:04 - 02/01/2006"),
-			m.Target, m.Type, m.Interval, m.Rule, m.Properties)
+		if err != nil {
+			log.Printf("###   Error executing email template: %s", err)
+			return
+		}
 
-		sendEmail(body, fmt.Sprintf("⚠️ NanoMon alert for: %s", m.Name))
+		sendEmail(body, fmt.Sprintf("NanoMon alert for: %s", m.Name))
 
 		m.InErrorState = true
 	}
@@ -77,13 +98,13 @@ func sendEmail(body, subject string) {
 
 	log.Printf("###   Sending email alert")
 
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: " + subject + "\n\n" +
-		body
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	subjectLine := "Subject: " + subject + "!\n"
+	msg := []byte(subjectLine + mime + "\n" + body)
 
-	err := smtp.SendMail(host+":"+port, smtp.PlainAuth("", from, pass, host),
-		from, []string{to}, []byte(msg))
+	auth := smtp.PlainAuth("", from, pass, host)
+
+	err := smtp.SendMail(host+":"+port, auth, from, []string{to}, []byte(msg))
 	if err != nil {
 		log.Printf("### Alert SMTP error: %s", err)
 		return

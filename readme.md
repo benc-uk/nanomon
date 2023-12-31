@@ -102,6 +102,7 @@ For more details see the [complete monitor reference](#monitor-reference)
 │   ├── common      - Shared internal Go code
 │   ├── frontend    - Go source for the frontend host server
 │   └── runner      - Go source for the runner
+├── templates       - Email alert template used by runner
 └── tests           - Integration and performance tests
 ```
 
@@ -234,16 +235,19 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ### Variables used only by the runner:
 
-| _Name_              | _Description_                                                                                             | _Default_      |
-| ------------------- | --------------------------------------------------------------------------------------------------------- | -------------- |
-| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                                                | _blank_        |
-| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                                        | _blank_        |
-| ALERT_SMTP_TO       | Address alert emails are sent to                                                                          | _blank_        |
-| ALERT_SMTP_HOST     | SMTP hostname                                                                                             | smtp.gmail.com |
-| ALERT_SMTP_PORT     | SMTP port                                                                                                 | 587            |
-| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email                               | 3              |
-| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s            |
-| USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false          |
+> Note. All settings for alerting that begin with `ALERT_` are optional
+
+| _Name_              | _Description_                                                                                             | _Default_             |
+| ------------------- | --------------------------------------------------------------------------------------------------------- | --------------------- |
+| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                                                | _blank_               |
+| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                                        | _blank_               |
+| ALERT_SMTP_TO       | Address alert emails are sent to                                                                          | _blank_               |
+| ALERT_SMTP_HOST     | SMTP hostname                                                                                             | smtp.gmail.com        |
+| ALERT_SMTP_PORT     | SMTP port                                                                                                 | 587                   |
+| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email                               | 3                     |
+| ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL                    | http://localhost:3000 |
+| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s                   |
+| USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false                 |
 
 ## Monitor Reference
 
@@ -254,19 +258,19 @@ This makes a single HTTP request to the target URL each time it is run, it will 
 - **Target:** A URL, with HTTP scheme `http://` or `https://`
 - **Value:** Time to complete the HTTP request & read the response in milliseconds.
 - **Properties:**
-  - *method* - Which HTTP method to use (default: "GET")
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 5s)
-  - *validateTLS* - Set to "false" to disable TLS cert validation (default: "true")
-  - *body* - Body string to send with the HTTP request (default: none) 
-  - *headers* - HTTP headers as JSON object, e.g. `{"content-type": "application/json"}` (default: none)
-  - *bodyRegex* - Run this regEx against the body, and sets `regexMatch` output (default: none)
-- **Outputs / Rule Props:** 
-  - *respTime* - Same as monitor value (number)
-  - *status* - HTTP status code (number)
-  - *body* - The response body (string)
-  - *bodyLen* - The number of bytes in the response (number)
-  - *certExpiryDays* - Number of days before the TLS cert of the site expires (number)
-  - *regexMatch* - Match of the bodyRegex if any (number or string)
+  - _method_ - Which HTTP method to use (default: "GET")
+  - _timeout_ - Timeout interval e.g. "10s" or "500ms" (default: 5s)
+  - _validateTLS_ - Set to "false" to disable TLS cert validation (default: "true")
+  - _body_ - Body string to send with the HTTP request (default: none)
+  - _headers_ - HTTP headers as JSON object, e.g. `{"content-type": "application/json"}` (default: none)
+  - _bodyRegex_ - Run this regEx against the body, and sets `regexMatch` output (default: none)
+- **Outputs / Rule Props:**
+  - _respTime_ - Same as monitor value (number)
+  - _status_ - HTTP status code (number)
+  - _body_ - The response body (string)
+  - _bodyLen_ - The number of bytes in the response (number)
+  - _certExpiryDays_ - Number of days before the TLS cert of the site expires (number)
+  - _regexMatch_ - Match of the bodyRegex if any (number or string)
 
 ### Type: TCP
 
@@ -275,41 +279,41 @@ Each time a TCP monitor runs it attempts to open a TCP connection to given host 
 - **Target:** A hostname (or IP address) and port tuple, separated by colon
 - **Value:** Time for TCP connection to open in milliseconds.
 - **Properties:**
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 5s)
-- **Outputs / Rule Props:** 
-  - *respTime* - Same as monitor value (number)
-  - *ipAddress* - Resolved IP address of the target (string)
+  - _timeout_ - Timeout interval e.g. "10s" or "500ms" (default: 5s)
+- **Outputs / Rule Props:**
+  - _respTime_ - Same as monitor value (number)
+  - _ipAddress_ - Resolved IP address of the target (string)
 
 ### Type: Ping
 
-This monitor will send one or more ICMP ping packets to the given host or IP address, it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK. 
+This monitor will send one or more ICMP ping packets to the given host or IP address, it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK.
 
 Note. As this monitor needs to send ICMP packets, the runner process needs certain OS privileges to do that otherwise you will see `socket: operation not permitted` errors. When running inside a container it runs as root so there is no issue. When running locally if you want to use this monitor type, build the runner binary with `make build` then start the runner process with sudo e.g. `sudo ./bin/runner`
 
 - **Target:** A hostname or IP address.
 - **Value:** Average round trip time in milliseconds.
 - **Properties:**
-  - *timeout* - Timeout interval e.g. "10s" or "500ms" (default: 1s)
-  - *count* - Number of packets to send (default: 3)
-  - *interval* - Interval between packets (default: 150ms)
-- **Outputs / Rule Props:** 
-  - *minRtt* - Min round trip time of the packets (number)
-  - *avgRtt* - Avg round trip time of the packets (number)
-  - *maxRtt* - Max round trip time of the packets (number)
-  - *packetsRecv* - How many packets were received (number)
-  - *packetLoss* - Percentage of packet that were lost (number)
-  - *ipAddress* - Resolved IP address of the target (string)
+  - _timeout_ - Timeout interval e.g. "10s" or "500ms" (default: 1s)
+  - _count_ - Number of packets to send (default: 3)
+  - _interval_ - Interval between packets (default: 150ms)
+- **Outputs / Rule Props:**
+  - _minRtt_ - Min round trip time of the packets (number)
+  - _avgRtt_ - Avg round trip time of the packets (number)
+  - _maxRtt_ - Max round trip time of the packets (number)
+  - _packetsRecv_ - How many packets were received (number)
+  - _packetLoss_ - Percentage of packet that were lost (number)
+  - _ipAddress_ - Resolved IP address of the target (string)
 
 ### Monitor Rules
 
-All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run. 
+All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run.
 
 The rule expression should always return a boolean, a false value will set the result to error status, anything else will leave the status as is (i.e. OK or failed) you can use a [range of operators in the rule expression](https://github.com/Knetic/govaluate#what-operators-and-types-does-this-support), such as logical `AND`, `OR`, `NOT` etc plus other advanced operators like `=~` for regex searching (e.g string contains).
 
 Some rule examples:
 
 ```bash
-status >= 200 && status < 300    # Check for OK range of status codes 
+status >= 200 && status < 300    # Check for OK range of status codes
 status == 200 && respTime < 5000 # Check status code and response time
 body =~ 'some words'             # Look for a string in the HTTP body
 regexMatch == 'a value'          # Check the of the RegEx

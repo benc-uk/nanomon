@@ -41,6 +41,9 @@ WORKDIR /app
 # Copy the Go server binary
 COPY --from=go-build /build/runner . 
 
+# Templates are needed just for the runner
+COPY ./templates ./templates/
+
 # And root certs too
 COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 

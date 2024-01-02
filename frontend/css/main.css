@@ -19,11 +19,20 @@
   background-color: #44a855 !important;
 }
 
-.btn-main {
+.navbtn-main {
   background-color: #3ec8ac;
+  border-radius: 0.3rem;
 }
-.btn-main:hover {
+.navbtn-main:hover {
   background-color: #2daf94;
+}
+
+.navbtn-user {
+  background-color: #3e91c8;
+  border-radius: 0.3rem;
+}
+.navbtn-user:hover {
+  background-color: #2872a3;
 }
 
 .btn-larger {

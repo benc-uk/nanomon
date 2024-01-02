@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -20,54 +20,56 @@
   </head>
   <body>
     <div id="app" x-data="app">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <nav class="navbar navbar-expand navbar-dark bg-primary sticky-top">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#home"><img src="static/icon.png" /> NanoMon</a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarMain"
-            aria-controls="navbarMain"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarMain">
-            <ul class="navbar-nav me-auto">
-              <li class="nav-item m-1">
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#home"><i class="fa fa-fw fa-line-chart"></i> Monitors</a>
-              </li>
-              <li class="nav-item m-1">
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#dash"><i class="fa fa-fw fa-eye"></i> Dashboard</a>
-              </li>
-              <li class="nav-item m-1">
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#results"><i class="fa fa-fw fa-list-alt"></i> Results</a>
-              </li>
-              <li class="nav-item m-1" x-show="userAccount" x-cloak>
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#edit/new"><i class="fa fa-fw fa-edit"></i> New</a>
-              </li>
-              <li class="nav-item m-1" x-show="userAccount" x-cloak>
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#admin"><i class="fa fa-fw fa-wrench"></i> Admin</a>
-              </li>
-              <li class="nav-item m-1">
-                <a class="nav-link btn btn-main fs-6 text-dark" href="#about"><i class="fa fa-fw fa-info-circle"></i> About</a>
-              </li>
-            </ul>
+          <a class="navbar-brand" href="#home"><img src="static/icon.png" /> <span class="d-none d-md-inline">NanoMon</span></a>
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item m-1">
+              <a class="nav-link fs-6 navbtn-main text-dark" href="#home">
+                <i class="fa fa-fw fa-line-chart"></i> <span class="d-none d-md-inline">Monitors</span>
+              </a>
+            </li>
+            <li class="nav-item m-1">
+              <a class="nav-link navbtn-main fs-6 text-dark" href="#dash">
+                <i class="fa fa-fw fa-eye"></i> <span class="d-none d-md-inline">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item m-1">
+              <a class="nav-link navbtn-main fs-6 text-dark" href="#results">
+                <i class="fa fa-fw fa-list-alt"></i> <span class="d-none d-md-inline">Results</span>
+              </a>
+            </li>
+            <li class="nav-item m-1" x-show="userAccount" x-cloak>
+              <a class="nav-link navbtn-main fs-6 text-dark" href="#edit/new">
+                <i class="fa fa-fw fa-edit"></i> <span class="d-none d-md-inline">New</span>
+              </a>
+            </li>
+            <li class="nav-item m-1" x-show="userAccount" x-cloak>
+              <a class="nav-link navbtn-main fs-6 text-dark" href="#admin">
+                <i class="fa fa-fw fa-wrench"></i> <span class="d-none d-md-inline">Admin</span>
+              </a>
+            </li>
+            <li class="nav-item m-1">
+              <a class="nav-link navbtn-main fs-6 text-dark" href="#about">
+                <i class="fa fa-fw fa-info-circle"></i> <span class="d-none d-md-inline">About</span>
+              </a>
+            </li>
+          </ul>
 
-            <ul class="navbar-nav ms-auto">
-              <li class="nav-item btn btn-info m-1 float-end" x-show="!userAccount" x-cloak>
-                <a class="nav-link fs-6 text-light" @click="login"><i class="fa fa-fw fa-user"></i> LOGIN</a>
-              </li>
-              <li class="nav-item btn btn-warning m-1 float-end" x-show="userAccount && userAccount !== 'AUTH_DISABLED'" x-cloak>
-                <a class="nav-link fs-6 text-light" @click="confirm('Are you sure you want to logout?') ? logout() : null">
-                  <i class="fa fa-fw fa-right-from-bracket"></i>
-                  LOGOUT
-                </a>
-              </li>
-            </ul>
-          </div>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item m-1" x-show="!userAccount" x-cloak>
+              <a class="nav-link navbtn-user fs-6 text-white" @click="login">
+                <i class="fa fa-fw fa-user"></i>
+                <span class="d-none d-md-inline">LOGIN</span>
+              </a>
+            </li>
+            <li class="nav-item m-1" x-show="userAccount && userAccount !== 'AUTH_DISABLED'" x-cloak>
+              <a class="nav-link navbtn-user fs-6 text-white" @click="confirm('Are you sure you want to logout?') ? logout() : null">
+                <i class="fa fa-fw fa-right-from-bracket"></i>
+                <span class="d-none d-md-inline">LOGOUT</span>
+              </a>
+            </li>
+          </ul>
         </div>
       </nav>
 

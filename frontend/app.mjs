@@ -154,14 +154,16 @@ async function startApp() {
   // NOTE 1: When running in dev mode, the local config file will be found and used
   // NOTE 2: The frontend gets it's version and build info from the backend
   try {
-    const configResp = await fetch('/config')
+    const configResp = await fetch('/config.json')
+    console.log(`### Fetching config from /config.json, status: ${configResp.status}`)
     if (configResp.ok) {
       config = await configResp.json()
     } else {
       throw new Error('Unable to fetch config')
     }
   } catch (err) {
-    console.warn('### Unable to fetch from /config. Internal defaults will be used')
+    console.warn('### Config error: ' + err)
+    console.warn('### Internal defaults will be used')
     config = {
       API_ENDPOINT: 'http://localhost:8000/api',
       AUTH_CLIENT_ID: '',
@@ -170,12 +172,12 @@ async function startApp() {
     }
   }
 
+  console.log(`### Config: ${JSON.stringify(config)}`)
+
   // These are sort of hard coded as I'm lazy
   config.apiDebug = false // Enable API debug logging
   config.apiDelay = 0 // Fake network delay in ms, use 0 for none
   config.refreshTime = 15 // Seconds between refreshes
-
-  console.log(`### Config: ${JSON.stringify(config)}`)
 
   Alpine.start()
 }

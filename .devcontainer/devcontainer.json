@@ -2,7 +2,7 @@
   "image": "mcr.microsoft.com/devcontainers/go:1.21",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "lst"
+      "version": "lts"
     },
     "ghcr.io/devcontainers-contrib/features/k6": {},
     "ghcr.io/devcontainers/features/docker-in-docker": {},

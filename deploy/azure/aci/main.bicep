@@ -1,7 +1,7 @@
-// ==============================================================================
-// Deploy as standalone Azure Container Instance, connected to existing database
-// This was an experiment to see if it was possible to run the app as a single ACI
-// ==============================================================================
+// =================================================================================
+// Deploy as standalone Azure Container Instance
+// This mode will not support auth (no HTTPS), only use for testing
+// =================================================================================
 
 targetScope = 'resourceGroup'
 
@@ -11,12 +11,8 @@ param appName string
 @description('Azure region for all resources')
 param location string = 'uksouth'
 
-@description('Connect to external MongoDB instance')
-@secure()
-param externalMongoDbURI string
-
-@description('After deployment, set this')
-param apiEndpoint string = '/api'
+@description('Version of container image to deploy')
+param imageTag string = '0.0.10'
 
 resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2022-09-01' = {
   name: appName
@@ -27,7 +23,7 @@ resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2022-09-
       {
         name: 'nanomon'
         properties: {
-          image: 'ghcr.io/benc-uk/nanomon-standalone:latest'
+          image: 'ghcr.io/benc-uk/nanomon-standalone:${imageTag}'
 
           resources: {
             requests: {
@@ -49,16 +45,8 @@ resource containerInstance 'Microsoft.ContainerInstance/containerGroups@2022-09-
 
           environmentVariables: [
             {
-              name: 'NO_MONGO'
-              value: 'true'
-            }
-            {
-              name: 'MONGO_URI'
-              value: externalMongoDbURI
-            }
-            {
               name: 'API_ENDPOINT'
-              value: apiEndpoint
+              value: 'http://${appName}.${location}.azurecontainer.io:8000/api'
             }
           ]
         }

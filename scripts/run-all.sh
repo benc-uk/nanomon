@@ -10,6 +10,11 @@
 
 DIR=$(dirname "$0")
 
+# Load .env file
+if [ -f "$DIR/../.env" ]; then
+  export "$(cat "$DIR/../.env" | sed 's/#.*//g' | xargs)"
+fi
+
 # Check docker
 if ! [ -x "$(command -v docker)" ]; then
   echo 'Error: docker is not installed.' >&2
@@ -42,6 +47,9 @@ echo "### 🚀 Starting Runner"
 sleep 2
 
 echo "### 🚀 Starting Frontend"
+# This is a hack to fake the normally dyanmic config.json file
+jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' >"$DIR"/../frontend/config.json
+sleep 1
 "$DIR/../.tools/node_modules/.bin/vite" "$DIR/../frontend" &
 
 # Sleep infinity

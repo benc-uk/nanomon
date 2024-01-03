@@ -86,7 +86,7 @@ run-runner: ## 🏃 Run monitor runner locally with hot-reload
 run-frontend: ## 🌐 Run frontend with dev HTTP server & hot-reload
 	@figlet $@ || true
 	# Creating JSON config file for frontend
-	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config
+	@jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config.json
 	# Starting Vite to serve
 	@$(VITE_PATH) $(SPA_DIR)
 

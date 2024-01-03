@@ -4,7 +4,7 @@ _data/
 bin/
 .tools/
 tmp/
-frontend/config
+frontend/config*
 release-notes.md
 my-*.yaml
 my-*.bicepparam
@@ -12,4 +12,4 @@ deploy/helm/nanomon/charts/
 .vite/
 tsp-output/
 tests/perf/output/
-my-*/
+.local/

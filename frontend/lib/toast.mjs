@@ -9,7 +9,7 @@ toastStyles.innerHTML = `
   color: white;
   background-color: #444;
   position: fixed;
-  z-index: 50;
+  z-index: 1500;
   padding: 1rem;
   box-shadow: 0.2rem 0.5rem 0.8rem rgba(0, 0, 0, 0.5);
   border-radius: 0.5rem;
@@ -41,12 +41,12 @@ export function showToast(message, duration = 2000, pos = 'top-center') {
 
   switch (pos) {
     case 'top-center':
-      toast.style.top = '2rem'
+      toast.style.top = '5rem'
       toast.style.left = '50%'
       toast.style.transform = 'translateX(-50%)'
       break
     case 'top-right':
-      toast.style.top = '2rem'
+      toast.style.top = '5rem'
       toast.style.right = '2rem'
       break
     case 'top-left':
@@ -54,20 +54,20 @@ export function showToast(message, duration = 2000, pos = 'top-center') {
       toast.style.left = '2rem'
       break
     case 'bottom-center':
-      toast.style.bottom = '2rem'
+      toast.style.bottom = '5rem'
       toast.style.left = '50%'
       toast.style.transform = 'translateX(-50%)'
       break
     case 'bottom-right':
-      toast.style.bottom = '2rem'
+      toast.style.bottom = '5rem'
       toast.style.right = '2rem'
       break
     case 'bottom-left':
-      toast.style.bottom = '2rem'
+      toast.style.bottom = '5rem'
       toast.style.left = '2rem'
       break
     default:
-      toast.style.top = '2rem'
+      toast.style.top = '5rem'
       toast.style.left = '50%'
       toast.style.transform = 'translateX(-50%)'
   }

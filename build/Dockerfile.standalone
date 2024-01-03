@@ -59,6 +59,8 @@ COPY build/standalone.sh .
 
 # Frontend HTML/JS/CSS
 COPY frontend/ .
+# Templates are needed just for the runner
+COPY ./templates ./templates/
 
 # Copy the Go server binaries
 COPY --from=go-build /build/api . 

@@ -2,10 +2,11 @@
   "image": "mcr.microsoft.com/devcontainers/go:1.21",
   "features": {
     "ghcr.io/devcontainers/features/node": {
-      "version": "lts"
+      "version": "18"
     },
     "ghcr.io/devcontainers-contrib/features/k6": {},
-    "ghcr.io/devcontainers/features/docker-in-docker": {}
+    "ghcr.io/devcontainers/features/docker-in-docker": {},
+    "ghcr.io/frntn/devcontainers-features/newman": {}
   },
   "postCreateCommand": "sudo apt clean && sudo apt update && sudo apt install -yq figlet",
   "customizations": {

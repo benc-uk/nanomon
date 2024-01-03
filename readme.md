@@ -121,10 +121,7 @@ When working locally, copy the `.env.sample` to `.env` and set any configuration
 To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
 
 - Run `make install-tools`
-- Run `make run-db` (Note. Needs Docker)
-- Open another terminal, run `make run-api`
-- Open another terminal, run `make run-runner`
-- Open another terminal, run `make run-frontend`
+- Run `make run-all`
 - The frontend should automatically open in your browser.
 
 ### Run Standalone Image
@@ -188,23 +185,24 @@ See [Azure & Bicep docs](./deploy/azure/)
 ## Makefile Reference
 
 ```text
-help                 💬 This help message :)
-install-tools        🔮 Install dev tools into project tools directory
-lint                 🔍 Lint & format check only, sets exit code on error for CI
-lint-fix             📝 Lint & format, attempts to fix errors & modify code
-build                🔨 Build all binaries into project bin directory
-images               📦 Build all container images
-image-standalone     📦 Build the standalone image
-push                 📤 Push all container images
-run-all              🚀 Run API + runner + frontend with hot-reload
-run-api              🎯 Run API service locally with hot-reload
-run-runner           🏃 Run monitor runner locally with hot-reload
-run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
-run-db               🍃 Run MongoDB in container (needs Docker)
-test                 🧪 Run all unit tests
-test-api             🧪 Run API integration tests
-generate-specs       🤖 Generate OpenAPI spec using TypeSpec
+build                🔨 Build all binaries into ./bin/ directory, not really needed
 clean                🧹 Clean up, remove dev data and files
+generate-specs       🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
+help                 💬 This help message :)
+image-standalone     📦 Build the standalone image
+images               📦 Build all container images
+install-tools        🔮 Install dev tools into project tools directory
+lint-fix             📝 Lint & format, attempts to fix errors & modify code
+lint                 🔍 Lint & format check only, sets exit code on error for CI
+push                 📤 Push all container images
+run-all              🚀 Run all everything locally, including DB with hot-reload
+run-api              🎯 Run API service locally with hot-reload
+run-db               🍃 Run MongoDB in container (needs Docker)
+run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
+run-runner           🏃 Run monitor runner locally with hot-reload
+test-api             🔬 Run API integration tests
+test-load            🔥 Run load test using k6
+test                 🧪 Run all unit tests
 ```
 
 ## Configuration Reference

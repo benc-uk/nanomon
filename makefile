@@ -35,7 +35,7 @@ NEWMAN_PATH := $(REPO_DIR)/.tools/node_modules/.bin/newman
 
 help: ## 💬 This help message :)
 	@figlet $@ || true
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install-tools: ## 🔮 Install dev tools into project tools directory
 	@figlet $@ || true
@@ -58,10 +58,10 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@$(PRETTIER_PATH) ./frontend --write
 	$(GOLINT_PATH) run --fix
 
-build: ## 🔨 Build all binaries into ./bin/ directory
+build: ## 🔨 Build all binaries into ./bin/ directory, not really needed
 	@figlet $@ || true
 	@mkdir -p bin
-	@go build -o bin -ldflags "-X main.version=$(VERSION) -X 'main.buildInfo=$(BUILD_INFO)'" nanomon/services/...
+	@go build -o bin -ldflags '-X main.version=$(VERSION) -X "main.buildInfo=$(BUILD_INFO)"' nanomon/services/...
 
 images: ## 📦 Build all container images
 	@figlet $@ || true
@@ -107,7 +107,11 @@ test: ## 🧪 Run all unit tests
 	@figlet $@ || true
 	@ALERT_SMTP_TO= go test -v ./... 
 
-test-api: ## 🧪 Run API integration tests
+test-api: ## 🔬 Run API integration tests
+	@figlet $@ || true
+	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
+
+test-load: ## 🔥 Run load test using k6
 	@figlet $@ || true
 	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
 

@@ -27,7 +27,7 @@ AIR_PATH := $(REPO_DIR)/.tools/air
 VITE_PATH := $(REPO_DIR)/.tools/node_modules/.bin/vite
 ESLINT_PATH := $(REPO_DIR)/.tools/node_modules/.bin/eslint
 PRETTIER_PATH := $(REPO_DIR)/.tools/node_modules/.bin/prettier
-NEWMAN_PATH := $(REPO_DIR)/.tools/node_modules/.bin/newman
+BRUNO_PATH := $(REPO_DIR)/.tools/node_modules/.bin/bru
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
@@ -44,7 +44,7 @@ install-tools: ## 🔮 Install dev tools into project tools directory
 	@$(VITE_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools vite
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools eslint
 	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools prettier
-	@$(NEWMAN_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools newman
+	@$(BRUNO_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools @usebruno/cli
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
@@ -107,13 +107,11 @@ test: ## 🧪 Run all unit tests
 	@figlet $@ || true
 	@ALERT_SMTP_TO= go test -v ./... 
 
-test-api: ## 🔬 Run API integration tests
+test-api: ## 🔬 Run API integration tests, using Bruno
 	@figlet $@ || true
-	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
+	@cd api/bruno; $(BRUNO_PATH) run -r --env local
 
 test-load: ## 🔥 Run load test using k6
-	@figlet $@ || true
-	@$(NEWMAN_PATH) run --env-var baseUrl=$(API_ENDPOINT) ./tests/test-suite-postman.json
 
 generate-specs: ## 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
 	@figlet $@ || true

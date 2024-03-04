@@ -1,0 +1,20 @@
+meta {
+  name: Get All Results
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/results
+  body: none
+  auth: bearer
+}
+
+query {
+  ~max: 
+}
+
+assert {
+  res.body: isDefined
+  res.status: eq 200
+}

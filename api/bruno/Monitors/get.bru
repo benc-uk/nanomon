@@ -1,0 +1,21 @@
+meta {
+  name: Get One
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/monitors/{{monitorId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.body: isDefined
+  res.status: eq 200
+  res.body.name: contains {{randomInt}}
+}
+
+tests {
+  res.body
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Get Results
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/monitors/{{monitorId}}/results?max=100
+  body: none
+  auth: bearer
+}
+
+query {
+  max: 100
+}
+
+assert {
+  res.status: eq 200
+  res.body: isDefined
+  ~res.body: length > 0
+}

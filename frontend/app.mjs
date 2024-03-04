@@ -19,9 +19,8 @@ import { adminComponent } from './views/admin.mjs'
 export let config = {}
 let msalApp = null
 
-// This scope is used to request access to the API
-// The app registration must be configured to allow & expose this scope
-// See services/api/server.go where this is also set
+// This scope is used to validate access to the API. The app registration must
+// - be configured to allow & expose this scope. Also see services/api/server.go
 const appScope = 'system.admin'
 let scopes = []
 

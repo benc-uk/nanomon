@@ -17,8 +17,9 @@ import (
 	"github.com/benc-uk/go-rest-api/pkg/env"
 	"github.com/benc-uk/go-rest-api/pkg/logging"
 
-	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -30,9 +31,8 @@ var (
 	defaultPort = 8000
 )
 
-// This scope is used to validate access to the API
-// The app registration must be configured to allow & expose this scope
-// See frontend/app.mjs where this is also set
+// This scope is used to validate access to the API. The app registration must
+// - be configured to allow & expose this scope. Also see frontend/app.mjs
 const authScope = "system.admin"
 
 func main() {
@@ -52,11 +52,11 @@ func main() {
 	router.Use(logging.NewFilteredRequestLogger(regexp.MustCompile(`(^/api/metrics)|(^/api/health)`)))
 	router.Use(middleware.Recoverer)
 
-	// Some custom middleware for CORS
-	router.Use(api.SimpleCORSMiddleware)
+	// Some custom middleware for very permissive CORS policy
+	router.Use(cors.AllowAll().Handler)
 
 	// Protected routes
-	router.Group(func(appRouter chi.Router) {
+	router.Group(func(privateRouter chi.Router) {
 		// Authentication can be switched on or off
 		clientID := os.Getenv("AUTH_CLIENT_ID")
 		if clientID == "" {
@@ -64,18 +64,18 @@ func main() {
 		} else {
 			log.Println("### 🔐 Auth enabled, validating JWT tokens")
 
-			// Validate JWT tokens using the Microsoft common public key endpoint
+			// Validate JWT tokens using the Microsoft common public key endpoint and our scope
 			jwtValidator := auth.NewJWTValidator(
 				clientID,
 				"https://login.microsoftonline.com/common/discovery/v2.0/keys",
 				authScope,
 			)
 
-			appRouter.Use(jwtValidator.Middleware)
+			privateRouter.Use(jwtValidator.Middleware)
 		}
 
-		// These routes do create, update, delete operations
-		api.addProtectedRoutes(appRouter)
+		// These routes carry out create, update, delete operations
+		api.addProtectedRoutes(privateRouter)
 	})
 
 	// Anonymous routes
@@ -88,7 +88,7 @@ func main() {
 		api.AddStatusEndpoint(publicRouter, "api/status")
 		api.AddOKEndpoint(publicRouter, "api/")
 
-		// Rest of the NanoMon routes
+		// Rest of the NanoMon routes which are public
 		api.addAnonymousRoutes(publicRouter)
 	})
 

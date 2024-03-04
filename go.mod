@@ -4,12 +4,12 @@ go 1.21
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/benc-uk/go-rest-api v1.0.8
-	github.com/go-chi/chi v4.1.1+incompatible
-	github.com/go-chi/chi/v5 v5.0.10
+	github.com/benc-uk/go-rest-api v1.0.11
+	github.com/go-chi/chi/v5 v5.0.11
+	github.com/go-chi/cors v1.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus-community/pro-bing v0.3.0
-	go.mongodb.org/mongo-driver v1.12.1
+	go.mongodb.org/mongo-driver v1.13.1
 )
 
 require (
@@ -18,8 +18,8 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/elastic/go-sysinfo v1.11.1 // indirect
 	github.com/elastic/go-windows v1.0.0 // indirect
-	github.com/go-chi/cors v1.2.1 // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
+	github.com/go-chi/chi v4.1.1+incompatible // indirect
+	github.com/golang-jwt/jwt/v5 v5.1.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect

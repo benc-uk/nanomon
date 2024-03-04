@@ -13,6 +13,7 @@ import (
 )
 
 // API is a wrap of the common base API with NanoMon implementation
+// We inject our dependencies here
 type API struct {
 	// Embedding the common API struct
 	*api.Base

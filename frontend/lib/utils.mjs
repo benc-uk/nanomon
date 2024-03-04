@@ -43,6 +43,9 @@ export function getStatusFields(statusCode) {
 }
 
 export function niceDate(d) {
+  if (!d) {
+    return ''
+  }
   return d.replace('T', ' ').split('.')[0]
 }
 

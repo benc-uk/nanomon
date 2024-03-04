@@ -57,7 +57,7 @@ export class APIClient {
   }
 
   // All requests go through this method, it handles auth if required
-  async _baseRequest(path, method = 'GET', body, authRequest = false) {
+  async _baseRequest(path, method = 'GET', body, authRequest = false, extraHeaders = {}) {
     if (config.apiDebug) {
       console.log(`### API request: ${method} ${this.endpoint}/${path}`)
     }
@@ -81,12 +81,15 @@ export class APIClient {
       }
     }
 
-    const headers = new Headers({ 'Content-Type': 'application/json' })
+    let headers = new Headers({ 'Content-Type': 'application/json' })
 
     // Append the access token to the request if we have one
     if (tokenRes && tokenRes.accessToken) {
       headers.append('Authorization', `Bearer ${tokenRes.accessToken}`)
     }
+
+    // Add any extra headers
+    headers = { ...headers, ...extraHeaders }
 
     const response = await fetch(`${this.endpoint}/${path}`, {
       method,

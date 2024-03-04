@@ -1,5 +1,5 @@
 // =================================================================================
-// Deploy as standalone Azure Container Instance
+// Deploy as Azure Container Instance using the special "standalone" image
 // This mode will not support auth (no HTTPS), only use for testing
 // =================================================================================
 

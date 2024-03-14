@@ -18,11 +18,15 @@ body:json {
   {
     "name": "Test {{randomInt}}",
     "type": "http",
-    "interval": "1s",
+    "interval": "300s",
     "target": "http://localhost:8000",
     "enabled": true,
     "group": "test"
   }
+}
+
+vars:post-response {
+  monitorId: res("id")
 }
 
 assert {
@@ -36,6 +40,3 @@ script:pre-request {
   bru.setVar("randomInt", nanoid())
 }
 
-script:post-response {
-  bru.setVar("monitorId", res.body.id);
-}

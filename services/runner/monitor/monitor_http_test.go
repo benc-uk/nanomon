@@ -94,7 +94,6 @@ var cases = []httpTestCase{
 func TestHTTPMonitor(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-
 			m := NewMonitor(nil)
 			m.Name = tc.name
 			m.Enabled = true

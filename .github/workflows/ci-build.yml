@@ -42,6 +42,13 @@ jobs:
       - name: Run build
         run: make build
 
+      - name: Run API integration tests
+        run: |
+          make run-all &
+          sleep 20
+          npm install -g @usebruno/cli
+          cd api/bruno && bru run --env local
+
   image-build:
     name: Build and push images
     if: github.ref == 'refs/heads/main'

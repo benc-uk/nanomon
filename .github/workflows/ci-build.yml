@@ -37,6 +37,7 @@ jobs:
       - name: Linting & formatting
         run: make lint
 
+      # Run tests with output in JUnit format
       - name: Run unit tests
         run: |
           go install github.com/jstemmer/go-junit-report/v2@latest 
@@ -50,6 +51,7 @@ jobs:
           path: results.xml
           reporter: java-junit
 
+      # Run API integration tests with output in JUnit format
       - name: Run API integration tests
         run: |
           make run-all &

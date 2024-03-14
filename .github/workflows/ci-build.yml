@@ -43,7 +43,7 @@ jobs:
         run: |
           make run-all &
           sleep 20
-          cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local --reporter junit --output results.xml
+          cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local --format junit --output results.xml
 
       - name: Test Report
         uses: dorny/test-reporter@v1

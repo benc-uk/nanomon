@@ -43,7 +43,7 @@ jobs:
         run: |
           make run-all &
           sleep 20
-          cd api/bruno && ./.tools/node_modules/.bin/bru run --env local
+          cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local
 
       - name: Check the build
         run: make build

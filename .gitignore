@@ -14,3 +14,4 @@ tsp-output/
 tests/perf/output/
 .local/
 api/bruno/*.html
+api/bruno/*.xml

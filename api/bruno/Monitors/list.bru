@@ -13,6 +13,7 @@ get {
 assert {
   res.body: isDefined
   res.status: eq 200
+  res.body[0]: isDefined 
 }
 
 tests {

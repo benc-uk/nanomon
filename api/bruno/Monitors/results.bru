@@ -17,5 +17,5 @@ query {
 assert {
   res.status: eq 200
   res.body: isDefined
-  ~res.body: length > 0
+  res.body[0]: isDefined > 0
 }

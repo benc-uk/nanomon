@@ -17,6 +17,7 @@ on:
 
 permissions:
   packages: write
+  checks: write
 
 jobs:
   lint-test:

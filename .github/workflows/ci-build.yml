@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   lint-test:
-    name: Lint and run tests
+    name: Testing & Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
         run: |
           make run-all &
           sleep 20
-          cd api/bruno && .tools/node_modules/.bin/bru run --env local
+          cd api/bruno && ./.tools/node_modules/.bin/bru run --env local
 
       - name: Check the build
         run: make build

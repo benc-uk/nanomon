@@ -38,7 +38,16 @@ jobs:
         run: make lint
 
       - name: Run unit tests
-        run: make test
+        run: |
+          go test -v 2>&1 ./... | go-junit-report -set-exit-code > results.xml
+
+      - name: Test Report (Unit)
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Unit Tests
+          path: results.xml
+          reporter: java-junit
 
       - name: Run API integration tests
         run: |
@@ -46,7 +55,7 @@ jobs:
           sleep 20
           cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local --format junit --output results.xml
 
-      - name: Test Report
+      - name: Test Report (API)
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:

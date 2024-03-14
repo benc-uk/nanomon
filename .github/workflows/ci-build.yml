@@ -33,21 +33,20 @@ jobs:
       - name: Install tools
         run: make install-tools
 
-      - name: Run linting
+      - name: Linting & formatting
         run: make lint
 
-      - name: Run tests
+      - name: Run unit tests
         run: make test
-
-      - name: Run build
-        run: make build
 
       - name: Run API integration tests
         run: |
           make run-all &
           sleep 20
-          npm install -g @usebruno/cli
-          cd api/bruno && bru run --env local
+          cd api/bruno && .tools/node_modules/.bin/bru run --env local
+
+      - name: Check the build
+        run: make build
 
   image-build:
     name: Build and push images

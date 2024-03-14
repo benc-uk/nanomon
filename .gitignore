@@ -13,3 +13,4 @@ deploy/helm/nanomon/charts/
 tsp-output/
 tests/perf/output/
 .local/
+api/bruno/*.html

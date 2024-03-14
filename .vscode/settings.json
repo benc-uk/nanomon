@@ -6,11 +6,12 @@
   // Pretend we're not using NPM
   "zfiles.exclude": {
     "**/package*.json": true,
-    "**/node_modules": true,
+    "**/node_modules": true
   },
 
   // Override icons for specific file types
   "material-icon-theme.files.associations": {
-    "*.tsp": "xml"
+    "*.tsp": "xml",
+    "*.bru": "http"
   }
 }

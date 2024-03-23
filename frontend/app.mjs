@@ -4,9 +4,10 @@
 // ----------------------------------------------------------------------------
 
 import Alpine from 'https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js'
+import { AuthProviderMSAL } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library/auth-provider-msal.mjs'
 
 import { APIClient } from './lib/api-client.mjs'
-import { showToast } from './lib/toast.mjs'
+import { showToast } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library/toast.mjs'
 
 import { homeComponent } from './views/home.mjs'
 import { monitorComponent } from './views/monitor.mjs'
@@ -17,12 +18,12 @@ import { aboutComponent } from './views/about.mjs'
 import { adminComponent } from './views/admin.mjs'
 
 export let config = {}
-let msalApp = null
+let authProvider = null
+let scopes = []
 
 // This scope is used to validate access to the API. The app registration must
 // - be configured to allow & expose this scope. Also see services/api/server.go
-const appScope = 'system.admin'
-let scopes = []
+const APP_SCOPE = 'system.admin'
 
 // Top level Alpine.js component
 Alpine.data('app', () => ({
@@ -41,20 +42,8 @@ Alpine.data('app', () => ({
 
     // Set up the auth client using MSAL
     if (config.AUTH_CLIENT_ID) {
-      // Create the MSAL app, this is our main interface to MSAL and Azure AD
-      msalApp = new msal.PublicClientApplication({
-        auth: {
-          clientId: config.AUTH_CLIENT_ID,
-          redirectUri: window.location.origin,
-          authority: `https://login.microsoftonline.com/${config.AUTH_TENANT}`,
-        },
-        cache: {
-          cacheLocation: 'localStorage',
-        },
-      })
-
       // Load any cached user
-      this.userAccount = msalApp.getActiveAccount()
+      this.userAccount = authProvider.msalApp.getActiveAccount()
       if (this.userAccount) {
         showToast(`Welcome ${this.userAccount.name}!`)
         this.updateUser(this.userAccount)
@@ -64,11 +53,11 @@ Alpine.data('app', () => ({
       this.userAccount = 'AUTH_DISABLED'
     }
 
-    // Save scopes array for further use
-    scopes = [`api://${config.AUTH_CLIENT_ID}/${appScope}`]
-
-    // Create the API client, passing in the MSAL app
-    this.api = new APIClient(config.API_ENDPOINT, scopes, msalApp)
+    // Create the API client, passing in the auth provider, which can be null
+    this.api = new APIClient(config.API_ENDPOINT, {
+      // This was created and initialized in startApp() after the config was loaded
+      authProvider,
+    })
 
     // Support direct linking to specific views, when the page (re)loads
     if (window.location.hash) {
@@ -88,12 +77,19 @@ Alpine.data('app', () => ({
   },
 
   async login() {
+    const msalApp = authProvider.msalApp
+    if (!msalApp) {
+      console.error('### MSAL not initialised')
+      return
+    }
+
     try {
       const loginResp = await msalApp.loginPopup()
       console.log(`### User '${loginResp.account.username}' logged in`)
 
       const allAccts = await msalApp.getAllAccounts()
       if (allAccts.length > 0) {
+        // Set the first account as the active account
         const acct = allAccts[0]
 
         await msalApp.setActiveAccount(acct)
@@ -118,6 +114,12 @@ Alpine.data('app', () => ({
   },
 
   async logout() {
+    const msalApp = authProvider.msalApp
+    if (!msalApp) {
+      console.error('### MSAL not initialised')
+      return
+    }
+
     try {
       await msalApp.logoutPopup({
         account: this.userAccount,
@@ -160,6 +162,13 @@ async function startApp() {
     } else {
       throw new Error('Unable to fetch config')
     }
+
+    if (config.AUTH_CLIENT_ID) {
+      // Create the auth provider, this is a wrapper around MSAL
+      scopes = [`api://${config.AUTH_CLIENT_ID}/${APP_SCOPE}`]
+      authProvider = new AuthProviderMSAL(config.AUTH_CLIENT_ID, scopes, config.AUTH_TENANT)
+      await authProvider.initialize()
+    }
   } catch (err) {
     console.warn('### Config error: ' + err)
     console.warn('### Internal defaults will be used')
@@ -174,8 +183,6 @@ async function startApp() {
   console.log(`### Config: ${JSON.stringify(config)}`)
 
   // These are sort of hard coded as I'm lazy
-  config.apiDebug = false // Enable API debug logging
-  config.apiDelay = 0 // Fake network delay in ms, use 0 for none
   config.refreshTime = 15 // Seconds between refreshes
 
   Alpine.start()

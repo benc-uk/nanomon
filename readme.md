@@ -1,50 +1,17 @@
 # NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted with Kubernetes (or other container based system). It is written in Go and based on the microservices pattern, decomposed into several discreet but interlinked components. Features include:
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted any container based system e.g. Kubernetes, or just run locally. It is written in Go and based on the now ubiquitous microservices pattern, so decomposed into several discreet but interlinked components. The features of Nanomon include:
 
 - A range of configurable monitor types
-- Web frontend for viewing results & configuration of monitors
+- Web frontend for viewing results & editing/creating monitors
 - Email alerting
 - Range of deployment options
-- Rules for evaluating results and setting monitor status
+- Rules for setting monitor status and evaluating results
 - OAuth2 based user sign-in and authentication
 
 It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
 
 In a hurry? - Jump to the sections [running locally quick start](#local-dev-quick-start) or [deploying with Helm](#deploy-to-kubernetes-using-helm)
-
-- [NanoMon - Monitoring Tool](#nanomon---monitoring-tool)
-  - [Architecture](#architecture)
-  - [Concepts](#concepts)
-    - [Monitor](#monitor)
-    - [Result](#result)
-    - [Monitor Types](#monitor-types)
-  - [Repo \& Project Details](#repo--project-details)
-  - [Getting Started](#getting-started)
-    - [Local Dev Quick Start](#local-dev-quick-start)
-    - [Run Standalone Image](#run-standalone-image)
-    - [Deploy to Kubernetes using Helm](#deploy-to-kubernetes-using-helm)
-    - [Deploy to Azure Container Apps with Bicep](#deploy-to-azure-container-apps-with-bicep)
-  - [Components \& Services](#components--services)
-    - [Runner](#runner)
-    - [API](#api)
-    - [Frontend](#frontend)
-    - [Frontend Host](#frontend-host)
-  - [Makefile Reference](#makefile-reference)
-  - [Configuration Reference](#configuration-reference)
-    - [Variables used only by the frontend host:](#variables-used-only-by-the-frontend-host)
-    - [Variables used by both API service and runner:](#variables-used-by-both-api-service-and-runner)
-    - [Variables used by both the API and frontend host:](#variables-used-by-both-the-api-and-frontend-host)
-    - [Variables used only by the runner:](#variables-used-only-by-the-runner)
-  - [Monitor Reference](#monitor-reference)
-    - [Type: HTTP](#type-http)
-    - [Type: TCP](#type-tcp)
-    - [Type: Ping](#type-ping)
-    - [Monitor Rules](#monitor-rules)
-  - [Authentication \& Security](#authentication--security)
-  - [Alerting Configuration](#alerting-configuration)
-  - [Appendix: Database Notes](#appendix-database-notes)
-    - [Azure Cosmos DB](#azure-cosmos-db)
 
 ## Architecture
 

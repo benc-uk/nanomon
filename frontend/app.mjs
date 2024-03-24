@@ -4,10 +4,10 @@
 // ----------------------------------------------------------------------------
 
 import Alpine from 'https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js'
-import { AuthProviderMSAL } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library/auth-provider-msal.mjs'
+import { AuthProviderMSAL } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/auth-provider-msal.mjs'
 
 import { APIClient } from './lib/api-client.mjs'
-import { showToast } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library/toast.mjs'
+import { showToast } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/toast.mjs'
 
 import { homeComponent } from './views/home.mjs'
 import { monitorComponent } from './views/monitor.mjs'

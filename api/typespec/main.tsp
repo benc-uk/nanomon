@@ -3,9 +3,11 @@
 // ===============================================================
 import "@typespec/http";
 import "@typespec/json-schema";
+import "@typespec/openapi";
 
 using TypeSpec.Http;
 using TypeSpec.JsonSchema;
+using TypeSpec.OpenAPI;
 
 @jsonSchema
 
@@ -13,7 +15,9 @@ using TypeSpec.JsonSchema;
 @doc("The REST API for operating and using NanoMon")
 @service({
   title: "NanoMon API Service",
-  version: "2023-03-12",
+})
+@info({
+  version: "2024-10-17",
 })
 @useAuth(BearerAuth)
 
@@ -126,6 +130,7 @@ enum MonitorType {
   http,
   ping,
   tcp,
+  dns,
 }
 
 // This holds the result of a single monitor check

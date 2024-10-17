@@ -111,7 +111,7 @@ Content-Type: application/json
 
 
 ### Get single monitor results
-# @sleep 3000
+# @sleep 10000
 GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 ?? status == 200
@@ -120,7 +120,7 @@ GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 
 ### Get results for all monitors
-# @sleep 3000
+# @sleep 10000
 GET {{endpoint}}/results?max=10
 
 ?? status == 200

@@ -1,4 +1,6 @@
 @endpoint={{ this.endpoint ?? 'http://localhost:8000/api' }}
+@monName = Test {{$randomInt 1 1000}}
+@newName = Test New {{$randomInt 1 1000}}
 
 
 ### Get all monitors
@@ -8,7 +10,6 @@ GET {{endpoint}}/monitors
 
 
 ### Create a monitor
-@monName = Test {{$randomInt 1 1000}}
 # @name createMon
 POST {{endpoint}}/monitors
 Content-Type: application/json
@@ -39,7 +40,6 @@ GET {{endpoint}}/monitors/{{ createMon.id }}
 
 
 ### Update a monitor
-@newName = Test New {{$randomInt 1 1000}}
 PUT {{endpoint}}/monitors/{{ createMon.id }}
 Content-Type: application/json
 

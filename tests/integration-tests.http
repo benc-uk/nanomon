@@ -120,6 +120,7 @@ GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 
 ### Get results for all monitors
+# @sleep 3000
 GET {{endpoint}}/results?max=10
 
 ?? status == 200

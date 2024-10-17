@@ -311,7 +311,7 @@ func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 		m.Updated = time.Now()
 
 		// Fix for properties being null/empty/weird
-		if m.Properties == nil || len(m.Properties) == 0 {
+		if len(m.Properties) == 0 {
 			m.Properties = make(map[string]string)
 		}
 

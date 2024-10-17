@@ -9,7 +9,7 @@ import { monitorIcon } from '../lib/utils.mjs'
 export const editComponent = (api) => ({
   error: '',
   monitor: null,
-  types: ['http', 'ping', 'tcp'],
+  types: ['http', 'ping', 'tcp', 'dns'],
   monId: null,
   rulePop: false,
   def: definitions,

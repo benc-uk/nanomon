@@ -57,6 +57,8 @@ export function monitorIcon(monitor) {
       return '<i class="fas fa-satellite-dish"></i>'
     case 'tcp':
       return '<i class="fas fa-plug"></i>'
+    case 'dns':
+      return '<i class="fas d fa-address-card"></i>'
 
     default:
       return '<i class="far fa-circle-question"></i>'

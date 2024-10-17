@@ -49,4 +49,20 @@ export const definitions = {
       },
     },
   },
+
+  dns: {
+    ruleHint: 'Properties: <b>respTime, result1, result2, resultCount</b>',
+    allowedProps: ['timeout', 'network', 'server', 'type'],
+    template: {
+      name: 'New DNS Monitor',
+      type: 'dns',
+      interval: '30s',
+      enabled: true,
+      target: 'example.net',
+      rule: "result1 == '93.184.215.14'",
+      properties: {
+        timeout: '500ms',
+      },
+    },
+  },
 }

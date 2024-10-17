@@ -19,6 +19,9 @@ import (
 const TypeHTTP = "http"
 const TypePing = "ping"
 const TypeTCP = "tcp"
+const TypeDNS = "dns"
+
+var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS}
 
 type Monitor struct {
 	Name         string            // Name
@@ -107,6 +110,9 @@ func (m *Monitor) run() (bool, *types.Result) {
 	case TypeTCP:
 		result = m.runTCP()
 
+	case TypeDNS:
+		result = m.runDNS()
+
 	default:
 		log.Printf("### Unknown monitor type '%s', will be skipped", m.Type)
 		return false, nil
@@ -121,14 +127,15 @@ func (m *Monitor) run() (bool, *types.Result) {
 	if m.Rule != "" && result.Outputs != nil {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
-			result.Message = fmt.Sprintf("rule expression error: " + err.Error())
+			result.Message = fmt.Sprintf("rule expression error: %s", err.Error())
 			result.Status = types.StatusFailed
 		}
 
 		if ruleExp != nil {
 			ruleResult, err := ruleExp.Evaluate(result.Outputs)
+
 			if err != nil {
-				result.Message = fmt.Sprintf("rule eval error: " + err.Error())
+				result.Message = fmt.Sprintf("rule eval error: %s", err.Error())
 				result.Status = types.StatusFailed
 			}
 

@@ -44,7 +44,7 @@ jobs:
           go test -v 2>&1 ./... | go-junit-report -set-exit-code > unit-test-results.xml
 
       - name: Test Report (Unit)
-        uses: dorny/test-reporter@v1
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()
         with:
           name: Unit Tests
@@ -59,10 +59,10 @@ jobs:
           make test-api TEST_REPORT=1
 
       - name: Test Report (Integration)
-        uses: dorny/test-reporter@v1
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()
         with:
-          name: API Tests
+          name: Integration Tests
           path: api-test-results.xml
           reporter: java-junit
 

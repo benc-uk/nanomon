@@ -1,6 +1,7 @@
-@endpoint={{ this.endpoint ?? 'http://localhost:8000/api' }}
-@monName = Test {{$randomInt 1 1000}}
-@newName = Test New {{$randomInt 1 1000}}
+@endpoint = {{ this.endpoint ?? 'http://localhost:8000/api' }}
+@num = 216913
+@monName = Test {{ num }}
+@newName = Test Updated {{ num }} 
 
 
 ### Get all monitors
@@ -37,7 +38,6 @@ GET {{endpoint}}/monitors/{{ createMon.id }}
 ?? status == 200
 ?? body id == {{ createMon.id }}
 ?? body name == {{ monName }}
-
 
 ### Update a monitor
 PUT {{endpoint}}/monitors/{{ createMon.id }}
@@ -104,3 +104,5 @@ Content-Type: application/json
 
 ### Delete all monitors
 DELETE {{endpoint}}/monitors
+
+?? status == 204

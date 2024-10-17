@@ -56,14 +56,14 @@ jobs:
         run: |
           make run-all &
           sleep 20
-          cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local --format junit --output results.xml
+          make test-api TEST_REPORT=1
 
-      - name: Test Report (API)
+      - name: Test Report (Integration)
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: API Tests
-          path: api/bruno/results.xml
+          path: api-results.xml
           reporter: java-junit
 
       - name: Check the build

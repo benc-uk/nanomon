@@ -27,7 +27,13 @@ AIR_PATH := $(REPO_DIR)/.tools/air
 VITE_PATH := $(REPO_DIR)/.tools/node_modules/.bin/vite
 ESLINT_PATH := $(REPO_DIR)/.tools/node_modules/.bin/eslint
 PRETTIER_PATH := $(REPO_DIR)/.tools/node_modules/.bin/prettier
-BRUNO_PATH := $(REPO_DIR)/.tools/node_modules/.bin/bru
+HTTPYAC_PATH := $(REPO_DIR)/.tools/node_modules/.bin/httpyac
+
+# If TEST_REPORT set then output test results as JUnit
+TEST_EXTRA_ARGS ?= 
+ifdef TEST_REPORT
+  TEST_EXTRA_ARGS = --junit > api-tests.xml
+endif
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
@@ -44,7 +50,7 @@ install-tools: ## 🔮 Install dev tools into project tools directory
 	@$(VITE_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools vite
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools eslint
 	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools prettier
-	@$(BRUNO_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools @usebruno/cli
+	@$(HTTPYAC_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools httpyac
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
@@ -107,9 +113,9 @@ test: ## 🧪 Run all unit tests
 	@figlet $@ || true
 	@ALERT_SMTP_TO= go test -v ./... 
 
-test-api: ## 🔬 Run API integration tests, using Bruno
+test-api: ## 🔬 Run API integration tests, using HttpYac
 	@figlet $@ || true
-	@cd api/bruno; $(BRUNO_PATH) run -r --env local
+	$(HTTPYAC_PATH) send tests/integration-tests.http --all --output short $(TEST_EXTRA_ARGS)
 
 test-load: ## 🔥 Run load test using k6
 

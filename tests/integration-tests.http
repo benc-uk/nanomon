@@ -1,0 +1,106 @@
+@endpoint={{ this.endpoint ?? 'http://localhost:8000/api' }}
+
+
+### Get all monitors
+GET {{endpoint}}/monitors
+
+?? status == 200
+
+
+### Create a monitor
+@monName = Test {{$randomInt 1 1000}}
+# @name createMon
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "{{ monName }}",
+  "type": "http",
+  "interval": "60s",
+  "target": "https://example.net",
+  "properties": {
+    "timeout": "10s"
+  },
+  "enabled": true
+}
+
+?? status == 200
+?? body id isString
+?? body updated isString
+?? body name == {{ monName }}
+
+
+### Get single monitor
+GET {{endpoint}}/monitors/{{ createMon.id }}
+
+?? status == 200
+?? body id == {{ createMon.id }}
+?? body name == {{ monName }}
+
+
+### Update a monitor
+@newName = Test New {{$randomInt 1 1000}}
+PUT {{endpoint}}/monitors/{{ createMon.id }}
+Content-Type: application/json
+
+{
+  "name": "{{ newName }}",
+  "type": "http",
+  "interval": "10s",
+  "target": "http://localhost:8000",
+  "enabled": true
+}
+
+?? status == 200
+?? body id == {{ createMon.id }}
+?? body name == {{ newName }}
+
+
+### Get single monitor results
+GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
+
+?? status == 200
+?? js response.parsedBody.length > 0
+?? js response.parsedBody[0].monitor_name == {{ newName }}
+
+
+### Get results for all monitors
+GET {{endpoint}}/results?max=10
+
+?? status == 200
+?? js response.parsedBody.length > 0
+?? js response.parsedBody[0].monitor_name == {{ newName }}
+
+
+### Delete single monitor
+DELETE {{endpoint}}/monitors/{{ createMon.id }}
+
+?? status == 204
+
+
+### Import a set of monitors
+POST {{endpoint}}/monitors/import
+Content-Type: application/json
+
+[
+  {
+    "name": "Test Health",
+    "type": "http",
+    "interval": "20s",
+    "target": "http://localhost:8000/health",
+    "enabled": true
+  },
+  {
+    "name": "Test Status",
+    "type": "http",
+    "interval": "5s",
+    "target": "http://localhost:8000/status",
+    "enabled": true
+  }
+]
+
+?? status == 204
+
+
+### Delete all monitors
+DELETE {{endpoint}}/monitors

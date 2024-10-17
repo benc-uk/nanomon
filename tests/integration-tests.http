@@ -57,6 +57,7 @@ Content-Type: application/json
 
 
 ### Get single monitor results
+# @sleep 3000
 GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 ?? status == 200

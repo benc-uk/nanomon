@@ -32,7 +32,7 @@ HTTPYAC_PATH := $(REPO_DIR)/.tools/node_modules/.bin/httpyac
 # If TEST_REPORT set then output test results as JUnit
 TEST_EXTRA_ARGS ?= 
 ifdef TEST_REPORT
-  TEST_EXTRA_ARGS = --junit > api-tests.xml
+  TEST_EXTRA_ARGS = --junit > api-test-results.xml
 endif
 
 .EXPORT_ALL_VARIABLES:

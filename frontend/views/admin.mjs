@@ -79,4 +79,17 @@ export const adminComponent = (api) => ({
       this.error = `Delete failed. ${err}`
     }
   },
+
+  async deleteAllResults() {
+    console.log('### Deleting all results...')
+    this.error = ''
+    this.message = ''
+
+    try {
+      await api.deleteAllResults()
+      this.message = 'All results deleted, bye bye!'
+    } catch (err) {
+      this.error = `Delete failed. ${err}`
+    }
+  },
 })

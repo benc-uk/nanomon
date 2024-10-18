@@ -35,6 +35,7 @@ func (api API) addProtectedRoutes(r chi.Router) {
 	r.Post("/api/monitors", api.createMonitor)
 	r.Post("/api/monitors/import", api.importMonitors)
 	r.Delete("/api/monitors", api.deleteMonitors)
+	r.Delete("/api/results", api.deleteResults)
 	r.Delete("/api/monitors/{id}", api.deleteMonitor)
 	r.Put("/api/monitors/{id}", api.updateMonitor)
 }

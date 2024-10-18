@@ -61,12 +61,28 @@
             <td>Updated:</td>
             <td x-text="updatedDate"></td>
           </tr>
-          <tr>
-            <td>Last Result:</td>
-            <td x-text="lastResultDate || 'None'"></td>
-          </tr>
         </tbody>
       </table>
+
+      <div x-show="lastResultDate" class="mt-2">
+        <td>
+          <details>
+            <summary>Click to see last output</summary>
+            <table class="table table-striped">
+              <tr>
+                <td>timestamp</td>
+                <td x-text="lastResultDate"></td>
+              </tr>
+              <template x-for="[key, value] of Object.entries(results[0]?.outputs || {})">
+                <tr>
+                  <td x-text="`${key}:`"></td>
+                  <td x-html="value"></td>
+                </tr>
+              </template>
+            </table>
+          </details>
+        </td>
+      </div>
 
       <table class="table table-sm table-hover mt-3" x-show="!isEmpty(monitor.properties)">
         <thead class="table-primary">

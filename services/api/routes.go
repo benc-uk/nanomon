@@ -367,3 +367,20 @@ func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
 
 	resp.WriteHeader(204)
 }
+
+func (api API) deleteResults(resp http.ResponseWriter, req *http.Request) {
+	log.Printf("### Resetting and deleting all results")
+
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	deleteResp, err := api.db.Results.DeleteMany(timeoutCtx, bson.M{})
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "delete-all", err).Send(resp)
+		return
+	}
+
+	log.Printf("### Removed %d results", deleteResp.DeletedCount)
+
+	resp.WriteHeader(204)
+}

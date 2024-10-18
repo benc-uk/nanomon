@@ -43,7 +43,7 @@ DELETE {{endpoint}}/monitors
 
 
 ### Get results
-GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
+GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=1212121
 
 
 ### Update a monitor
@@ -60,7 +60,7 @@ Content-Type: application/json
 
 
 ### Get results for ALL monitors
-GET {{endpoint}}/results?max=10
+GET {{endpoint}}/results?max=0
 
 
 ### Test import

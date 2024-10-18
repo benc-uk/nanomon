@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "golang.go",
     "ms-azuretools.vscode-bicep",
-    "mikestead.dotenv"
+    "mikestead.dotenv",
+    "anweber.vscode-httpyac"
   ]
 }

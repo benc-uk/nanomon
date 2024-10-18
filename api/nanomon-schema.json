@@ -1,0 +1,146 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "nanomon-schema.json",
+    "$defs": {
+        "Monitor": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "Monitor.json",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "[A-Fa-f0-9]{24}"
+                },
+                "updated": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of this monitor"
+                },
+                "type": {
+                    "$ref": "MonitorType.json"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "interval": {
+                    "type": "string",
+                    "format": "duration"
+                },
+                "rule": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "properties": {
+                    "$ref": "#/$defs/RecordString"
+                }
+            },
+            "required": [
+                "id",
+                "updated",
+                "name",
+                "type",
+                "target",
+                "interval",
+                "rule",
+                "enabled",
+                "properties"
+            ],
+            "$defs": {
+                "RecordString": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "MonitorType": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "MonitorType.json",
+            "type": "string",
+            "enum": [
+                "http",
+                "ping",
+                "tcp",
+                "dns"
+            ]
+        },
+        "Problem": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "Problem.json",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "instance": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 599
+                }
+            },
+            "required": [
+                "type",
+                "title",
+                "detail",
+                "instance",
+                "status"
+            ]
+        },
+        "Result": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "Result.json",
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "value": {
+                    "type": "number"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "monitor_id": {
+                    "type": "string"
+                },
+                "monitor_name": {
+                    "type": "string"
+                },
+                "monitor_target": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2
+                }
+            },
+            "required": [
+                "date",
+                "value",
+                "message",
+                "monitor_id",
+                "monitor_name",
+                "monitor_target",
+                "status"
+            ]
+        }
+    }
+}

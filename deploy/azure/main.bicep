@@ -39,7 +39,8 @@ param alertTo string = ''
 param alertMailHost string = ''
 param alertMailPort string = ''
 @secure()
-param alertPassword string = ''
+#disable-next-line secure-parameter-default
+param alertPassword string = '__ignored__'
 param alertFailCount int = 3
 
 // ===== Variables ============================================================

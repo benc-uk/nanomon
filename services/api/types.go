@@ -6,6 +6,7 @@
 package main
 
 import (
+	"slices"
 	"time"
 
 	"nanomon/services/runner/monitor"
@@ -50,7 +51,8 @@ func (m MonitorReq) validate() (string, bool) {
 		return "missing monitor type", false
 	}
 
-	if m.Type != monitor.TypeHTTP && m.Type != monitor.TypePing && m.Type != monitor.TypeTCP {
+	// check if monitor type is valid based on string slice of valid monitor types
+	if !slices.Contains(monitor.ValidTypes, m.Type) {
 		return "invalid monitor type", false
 	}
 

@@ -1,0 +1,309 @@
+@endpoint = {{ this.endpoint ?? 'http://localhost:8000/api' }}
+@num = 216913
+@monName = Test {{ num }}
+@newName = Test Updated {{ num }} 
+@fakeOID = 671232a56e8a5e82420ab2b9
+
+### Get all monitors
+GET {{endpoint}}/monitors
+
+?? status == 200
+
+
+### Create a HTTP monitor
+# @name createMon
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "{{ monName }} HTTP",
+  "type": "http",
+  "interval": "60s",
+  "target": "https://example.net",
+  "properties": {
+    "timeout": "10s"
+  },
+  "enabled": true
+}
+
+?? status == 200
+?? body id isString
+?? body updated isString
+?? body name == {{ monName }} HTTP
+
+
+### Create a ping monitor
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "{{ monName }} PING",
+  "type": "ping",
+  "interval": "60s",
+  "target": "127.0.0.1",
+  "enabled": true
+}
+
+?? status == 200
+?? body id isString
+?? body type ping
+?? body name == {{ monName }} PING
+
+
+### Create a TCP monitor
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "{{ monName }} TCP",
+  "type": "tcp",
+  "interval": "60s",
+  "target": "example.net",
+  "enabled": true
+}
+
+?? status == 200
+?? body id isString
+?? body type tcp
+?? body name == {{ monName }} TCP
+
+
+### Create a DNS monitor
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "{{ monName }} DNS",
+  "type": "dns",
+  "interval": "60s",
+  "target": "example.net",
+  "enabled": true
+}
+
+?? status == 200
+?? body id isString
+?? body type dns
+?? body name == {{ monName }} DNS
+
+
+### Get single monitor
+GET {{endpoint}}/monitors/{{ createMon.id }}
+
+?? status == 200
+?? body id == {{ createMon.id }}
+?? body name == {{ monName }} HTTP
+
+
+### Update a monitor
+PUT {{endpoint}}/monitors/{{ createMon.id }}
+Content-Type: application/json
+
+{
+  "name": "{{ newName }}",
+  "type": "http",
+  "interval": "10s",
+  "target": "http://localhost:8000",
+  "enabled": true
+}
+
+?? status == 200
+?? body id == {{ createMon.id }}
+?? body name == {{ newName }}
+
+
+### Get single monitor results
+# @sleep 10000
+GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
+
+?? status == 200
+?? js response.parsedBody.length > 0
+?? js response.parsedBody[0].monitor_name == {{ newName }}
+
+
+### Get results for all monitors
+# @sleep 10000
+GET {{endpoint}}/results?max=10
+
+?? status == 200
+?? js response.parsedBody.length > 0
+
+
+### Delete single monitor
+DELETE {{endpoint}}/monitors/{{ createMon.id }}
+
+?? status == 204
+
+
+### Import a set of monitors
+POST {{endpoint}}/monitors/import
+Content-Type: application/json
+
+[
+  {
+    "name": "Test Health",
+    "type": "http",
+    "interval": "20s",
+    "target": "http://localhost:8000/health",
+    "enabled": true
+  },
+  {
+    "name": "Test Status",
+    "type": "http",
+    "interval": "5s",
+    "target": "http://localhost:8000/status",
+    "enabled": true
+  }
+]
+
+?? status == 204
+
+
+### Delete all monitors
+DELETE {{endpoint}}/monitors
+
+?? status == 204
+
+
+### Invalid monitor type
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "gibberish",
+  "interval": "__ignore__",
+  "target": "__ignore__",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == invalid monitor type
+
+
+### Invalid interval
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "http",
+  "interval": "gibberish",
+  "target": "__ignore__",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == invalid monitor interval
+
+
+### Invalid interval too short
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "http",
+  "interval": "5ms",
+  "target": "__ignore__",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == monitor interval must be greater than 1s
+
+
+### Invalid target blank
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "http",
+  "interval": "5ms",
+  "target": "",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == missing monitor target
+
+
+### Invalid interval blank
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "http",
+  "interval": "",
+  "target": "__ignore__",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == missing monitor interval
+
+
+### Invalid name blank
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "",
+  "type": "http",
+  "interval": "5m",
+  "target": "__ignore__",
+  "enabled": true
+}
+
+?? status == 400
+?? body detail == missing monitor name
+
+
+### Invalid enabled
+POST {{endpoint}}/monitors
+Content-Type: application/json
+
+{
+  "name": "__ignore__",
+  "type": "__ignore__",
+  "interval": "__ignore__",
+  "target": "__ignore__",
+  "enabled": 123
+}
+
+?? status == 400
+
+
+### Invalid results max
+GET {{endpoint}}/results?max=abc
+
+?? status == 400
+
+
+### Invalid monitor id
+GET {{endpoint}}/monitors/abc
+
+?? status == 400
+
+
+### Invalid monitor id not found
+
+GET {{endpoint}}/monitors/{{ fakeOID }}
+
+?? status == 404
+
+
+### Invalid monitor id for results
+
+GET {{endpoint}}/monitors/abc/results
+
+?? status == 400
+
+
+### Invalid nonexistent id for results
+
+GET {{endpoint}}/monitors/{{ fakeOID }}/results
+
+?? status == 200
+?? js response.parsedBody.length == 0

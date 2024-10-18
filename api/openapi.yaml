@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: NanoMon API Service
-  version: 2023-03-12
+  version: 2024-10-17
   description: The REST API for operating and using NanoMon
 tags:
   - name: Monitors
@@ -9,8 +9,6 @@ tags:
 paths:
   /api/monitors:
     get:
-      tags:
-        - Monitors
       operationId: MonitorAPI_list
       description: List all monitors. Doesn't require authentication
       parameters: []
@@ -23,9 +21,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Monitor'
-    post:
       tags:
         - Monitors
+    post:
       operationId: MonitorAPI_create
       description: Create a new monitor
       parameters: []
@@ -42,6 +40,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+      tags:
+        - Monitors
       requestBody:
         required: true
         content:
@@ -49,18 +49,16 @@ paths:
             schema:
               $ref: '#/components/schemas/Monitor'
     delete:
-      tags:
-        - Monitors
       operationId: MonitorAPI_deleteAll
       description: Delete all monitors
       parameters: []
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-  /api/monitors/import:
-    post:
       tags:
         - Monitors
+  /api/monitors/import:
+    post:
       operationId: MonitorAPI_importMonitors
       description: Import configuration from a JSON file
       parameters: []
@@ -69,6 +67,8 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
         '400':
           description: The server could not understand the request due to invalid syntax.
+      tags:
+        - Monitors
       requestBody:
         required: true
         content:
@@ -79,8 +79,6 @@ paths:
                 $ref: '#/components/schemas/Monitor'
   /api/monitors/{id}:
     get:
-      tags:
-        - Monitors
       operationId: MonitorAPI_get
       description: Get a monitor by ID. Doesn't require authentication
       parameters:
@@ -108,9 +106,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-    post:
       tags:
         - Monitors
+    post:
       operationId: MonitorAPI_update
       description: Update a single monitor
       parameters:
@@ -138,6 +136,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+      tags:
+        - Monitors
       requestBody:
         required: true
         content:
@@ -145,8 +145,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Monitor'
     delete:
-      tags:
-        - Monitors
       operationId: MonitorAPI_delete
       description: Delete a monitor
       parameters:
@@ -170,10 +168,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /api/monitors/{id}/results:
-    get:
       tags:
         - Monitors
+  /api/monitors/{id}/results:
+    get:
       operationId: MonitorAPI_getResults
       description: List *Results* for a single monitor. Doesn't require authentication
       parameters:
@@ -188,6 +186,7 @@ paths:
           schema:
             type: integer
             format: int32
+          explode: false
       responses:
         '200':
           description: The request has succeeded.
@@ -203,10 +202,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+      tags:
+        - Monitors
   /api/results:
     get:
-      tags:
-        - Results
       operationId: ResultsAPI_getResults
       description: List *Results* for ALL monitors. Doesn't require authentication
       parameters:
@@ -216,6 +215,7 @@ paths:
           schema:
             type: integer
             format: int32
+          explode: false
       responses:
         '200':
           description: The request has succeeded.
@@ -225,6 +225,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
+      tags:
+        - Results
 security:
   - BearerAuth: []
 components:
@@ -274,6 +276,7 @@ components:
         - http
         - ping
         - tcp
+        - dns
     Problem:
       type: object
       required:

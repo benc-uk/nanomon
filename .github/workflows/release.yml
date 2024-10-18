@@ -12,6 +12,7 @@ on:
         type: string
 
 env:
+  # Base the version and image tag on the release tag or user input
   IMAGE_TAG: ${{ github.event.release.tag_name || github.event.inputs.version }}
   VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
 

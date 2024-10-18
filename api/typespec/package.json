@@ -1,8 +1,7 @@
 {
   "dependencies": {
-    "@typespec/compiler": "0.51.0",
-    "@typespec/rest": "0.51.0",
-    "@typespec/openapi3": "0.51.0",
-    "@typespec/json-schema": "0.51.0"
+    "@typespec/compiler": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/json-schema": "latest"
   }
 }

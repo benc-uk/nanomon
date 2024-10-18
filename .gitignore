@@ -1,5 +1,6 @@
 .env
 node_modules/
+package-lock.json
 _data/
 bin/
 .tools/
@@ -13,5 +14,4 @@ deploy/helm/nanomon/charts/
 tsp-output/
 tests/perf/output/
 .local/
-api/bruno/*.html
-api/bruno/*.xml
+/*.xml

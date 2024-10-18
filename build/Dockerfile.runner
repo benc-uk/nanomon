@@ -1,7 +1,7 @@
 # ===================================================================================
 # === Stage 1: Build the runner service =============================================
 # ===================================================================================
-FROM golang:1.20-alpine as go-build
+FROM golang:1.23-alpine AS go-build
 
 # Note these are ALWAYS passed in, so the values here are never used
 ARG VERSION="0.0.0"

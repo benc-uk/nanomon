@@ -82,7 +82,16 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 		maxStr = "100"
 	}
 
-	max, _ := strconv.Atoi(maxStr)
+	max, err := strconv.Atoi(maxStr)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "results", err).Send(resp)
+		return
+	}
+
+	if max > 1000 || max < 1 {
+		problem.Wrap(400, req.RequestURI, "results", errors.New("max must be between 1 and 1000")).Send(resp)
+		return
+	}
 
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -90,7 +99,7 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 	// parse oidstr to oid
 	oid, err := primitive.ObjectIDFromHex(oidStr)
 	if err != nil {
-		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
+		problem.Wrap(400, req.RequestURI, "results", err).Send(resp)
 		return
 	}
 
@@ -251,7 +260,16 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 		maxStr = "100"
 	}
 
-	max, _ := strconv.Atoi(maxStr)
+	max, err := strconv.Atoi(maxStr)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "results", err).Send(resp)
+		return
+	}
+
+	if max > 1000 || max < 1 {
+		problem.Wrap(400, req.RequestURI, "results", errors.New("max must be between 1 and 1000")).Send(resp)
+		return
+	}
 
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -311,7 +329,7 @@ func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 		m.Updated = time.Now()
 
 		// Fix for properties being null/empty/weird
-		if m.Properties == nil || len(m.Properties) == 0 {
+		if len(m.Properties) == 0 {
 			m.Properties = make(map[string]string)
 		}
 

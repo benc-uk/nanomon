@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/go:1.21",
+  "image": "mcr.microsoft.com/devcontainers/go:1.23",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
@@ -13,7 +13,15 @@
     "vscode": {
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh"
-      }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "ms-azuretools.vscode-bicep",
+        "mikestead.dotenv",
+        "anweber.vscode-httpyac"
+      ]
     }
   }
 }

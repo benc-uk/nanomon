@@ -37,18 +37,18 @@ jobs:
       - name: Linting & formatting
         run: make lint
 
-      # Run tests with output in JUnit format
+      # Run tests and filter the output to JUnit format
       - name: Run unit tests
         run: |
           go install github.com/jstemmer/go-junit-report/v2@latest 
-          go test -v 2>&1 ./... | go-junit-report -set-exit-code > results.xml
+          go test -v 2>&1 ./... | go-junit-report -set-exit-code > unit-test-results.xml
 
       - name: Test Report (Unit)
-        uses: dorny/test-reporter@v1
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()
         with:
           name: Unit Tests
-          path: results.xml
+          path: unit-test-results.xml
           reporter: java-junit
 
       # Run API integration tests with output in JUnit format
@@ -56,14 +56,14 @@ jobs:
         run: |
           make run-all &
           sleep 20
-          cd api/bruno && ../../.tools/node_modules/.bin/bru run --env local --format junit --output results.xml
+          make test-api TEST_REPORT=1
 
-      - name: Test Report (API)
-        uses: dorny/test-reporter@v1
+      - name: Test Report (Integration)
+        uses: phoenix-actions/test-reporting@v8
         if: success() || failure()
         with:
-          name: API Tests
-          path: api/bruno/results.xml
+          name: Integration Tests
+          path: api-test-results.xml
           reporter: java-junit
 
       - name: Check the build

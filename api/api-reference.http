@@ -1,56 +1,53 @@
+# ==================================================================================================
+# API Reference
+# This is a collection of API calls that can be used to interact with the monitoring service.
+# You will need to use httpYac or a similar tool to run these requests.
+# - https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac
+# - https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# ==================================================================================================
+
 @endpoint = http://localhost:8000/api
 
-##########################################
+
 ### Get all monitors
-##########################################
 GET {{endpoint}}/monitors
 
 
-##########################################
 ### Create a monitor
-##########################################
-# @name create
+# @name createMon
 POST {{endpoint}}/monitors
 Content-Type: application/json
 
 {
-  "name": "Test {{$randomInt 1 1000}}",
+  "name": "Test Monitor {{$randomInt 1 1000}}",
   "type": "http",
-  "interval": "1s",
-  "target": "http://localhost:8000",
-  "enabled": true,
-  "group": "test"
+  "interval": "20s",
+  "target": "http://example.net",
+  "properties": {
+    "timeout": "5s"
+  },
+  "enabled": true
 }
 
 
-##########################################
 ### Get single monitor
-##########################################
-GET {{endpoint}}/monitors/{{ create.response.body.id }}
+GET {{endpoint}}/monitors/{{ createMon.id }}
 
 
-##########################################
 ### Delete single monitor
-##########################################
-DELETE {{endpoint}}/monitors/{{ create.response.body.id }}
+DELETE {{endpoint}}/monitors/{{ createMon.id }}
 
 
-##########################################
 ### Delete ALL monitors, yikes!
-##########################################
 DELETE {{endpoint}}/monitors
 
 
-##########################################
 ### Get results
-##########################################
-GET {{endpoint}}/monitors/{{ create.response.body.id }}/results?max=5
+GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=1212121
 
 
-##########################################
 ### Update a monitor
-##########################################
-PUT {{endpoint}}/monitors/{{ create.response.body.id }}
+PUT {{endpoint}}/monitors/{{ createMon.id }}
 Content-Type: application/json
 
 {
@@ -62,15 +59,11 @@ Content-Type: application/json
 }
 
 
-##########################################
 ### Get results for ALL monitors
-##########################################
-GET {{endpoint}}/results?max=10
+GET {{endpoint}}/results?max=0
 
 
-##########################################
 ### Test import
-##########################################
 POST {{endpoint}}/monitors/import
 Content-Type: application/json
 

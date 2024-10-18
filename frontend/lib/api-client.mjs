@@ -3,7 +3,7 @@
 // NanoMon Frontend - API client for calling the backend NanoMon API
 // ----------------------------------------------------------------------------
 
-// We wrap/exted the base APIClient class to add our specific API calls
+// Extend the base APIClient class to add our specific API calls
 import { APIClient as APIClientBase } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/api-client.mjs'
 
 export class APIClient extends APIClientBase {

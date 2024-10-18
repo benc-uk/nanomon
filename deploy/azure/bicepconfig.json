@@ -8,8 +8,5 @@
         }
       }
     }
-  },
-  "experimentalFeaturesEnabled": {
-    "paramsFiles":true
   }
 }

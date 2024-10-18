@@ -5,10 +5,12 @@
         <h1 class="modal-title fs-5" id="importModalLabel">Confirm Import</h1>
       </div>
       <div class="modal-body">
-        <p>Importing monitors will replace all existing configuration and monitors! Are you sure you want to continue?</p>
+        <p>Importing monitors will replace all existing configuration and monitors! Are you sure you want to continue?
+        </p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-info wider" @click="$refs.importBtn.value = null; $refs.importBtn.click();" data-bs-dismiss="modal">
+        <button class="btn btn-info wider" @click="$refs.importBtn.value = null; $refs.importBtn.click();"
+          data-bs-dismiss="modal">
           Import JSON
         </button>
         <button type="button" class="btn btn-secondary wider" data-bs-dismiss="modal">Yikes no!</button>
@@ -55,7 +57,9 @@
   <div class="card-header fs-3 bg-info text-light"><i class="fas fa-wrench fa-fw"></i> Data Import & Export</div>
   <div class="card-body">
     <h3>Import & Export</h3>
-    <button class="btn btn-success btn-larger mb-3 wide-button" @click="exportMonitors"><i class="fas fa-download fa-fw"></i> EXPORT CONFIG</button>
+    <button class="btn btn-success btn-larger mb-3 wide-button" @click="exportMonitors">
+      <i class="fas fa-download fa-fw"></i> EXPORT CONFIG
+    </button>
 
     <form>
       <!-- Hidden form and button for file picking -->
@@ -71,8 +75,9 @@
       <i class="fas fa-bomb fa-fw"></i> DELETE CONFIG
     </button>
 
-    <br />
-    <button class="btn btn-danger btn-larger mb-3 wide-button" data-bs-toggle="modal" data-bs-target="#nukeResultsModal">
+    <br>
+    <button class="btn btn-danger btn-larger mb-3 wide-button" data-bs-toggle="modal"
+      data-bs-target="#nukeResultsModal">
       <i class="fas fa-trash-can fa-fw"></i> DELETE RESULTS
     </button>
 

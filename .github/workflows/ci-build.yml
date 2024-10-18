@@ -37,7 +37,7 @@ jobs:
       - name: Linting & formatting
         run: make lint
 
-      # Run tests with output in JUnit format
+      # Run tests and filter the output to JUnit format
       - name: Run unit tests
         run: |
           go install github.com/jstemmer/go-junit-report/v2@latest 

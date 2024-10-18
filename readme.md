@@ -167,8 +167,7 @@ run-api              🎯 Run API service locally with hot-reload
 run-db               🍃 Run MongoDB in container (needs Docker)
 run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
 run-runner           🏃 Run monitor runner locally with hot-reload
-test-api             🔬 Run API integration tests
-test-load            🔥 Run load test using k6
+test-api             🔬 Run API integration tests, using HttpYac
 test                 🧪 Run all unit tests
 ```
 
@@ -215,6 +214,8 @@ All three components (API, runner and frontend host) expect their configuration 
 | USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false                 |
 
 ## Monitor Reference
+
+Nanomon currently supports four types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
 
 ### Type: HTTP
 
@@ -268,6 +269,22 @@ Note. As this monitor needs to send ICMP packets, the runner process needs certa
   - _packetsRecv_ - How many packets were received (number)
   - _packetLoss_ - Percentage of packet that were lost (number)
   - _ipAddress_ - Resolved IP address of the target (string)
+
+### Type: DNS
+
+The DNS monitor looks up DNS records and returns the results, if the name fails to resolve it will return failed status, otherwise it will return OK.
+
+- **Target:** The domain or hostname you want to lookup in DNS
+- **Value:** Time for lookup to complete
+- **Properties:**
+  - _timeout_ - Timeout interval e.g. "500ms" (default: 2s)
+  - _type_ - Type of DNS record to query, one of; 'A', 'CNAME', 'TXT', 'MX or 'NS' (default: 'A')
+  - _server_ - Hostname or IP of DNS server to use for querying (default: use the DNS server configured in the OS of the runner)
+  - _network_ - Network to use and sorts of addresses to return, one of; 'ip4', 'ip6' or 'ip' (default: 'ip')
+- **Outputs / Rule Props:**
+  - _respTime_ - Same as monitor value (number)
+  - _resultCount_ - Number of records returned from the query (number)
+  - _result1_, _result2_ etc - Each result of the query returned as a separate numbered output (string)
 
 ### Monitor Rules
 

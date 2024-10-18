@@ -116,13 +116,11 @@ test-api: ## 🔬 Run API integration tests, using HttpYac
 	@figlet $@ || true
 	$(HTTPYAC_PATH) send tests/integration-tests.http --all --output short --var endpoint=$(API_ENDPOINT) $(TEST_EXTRA_ARGS)
 
-test-load: ## 🔥 Run load test using k6
-
 generate-specs: ## 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
 	@figlet $@ || true
 	@cd api/typespec; npm install; ./node_modules/.bin/tsp compile .
 	@cp api/typespec/tsp-output/@typespec/openapi3/openapi.yaml api/openapi.yaml
-	@cp -r api/typespec/tsp-output/@typespec/json-schema/ api/json-schema
+	@cp -r api/typespec/tsp-output/@typespec/json-schema/*.json api/
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true

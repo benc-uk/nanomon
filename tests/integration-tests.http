@@ -2,7 +2,7 @@
 @num = 216913
 @monName = Test {{ num }}
 @newName = Test Updated {{ num }} 
-
+@fakeOID = 671232a56e8a5e82420ab2b9
 
 ### Get all monitors
 GET {{endpoint}}/monitors
@@ -92,6 +92,7 @@ GET {{endpoint}}/monitors/{{ createMon.id }}
 ?? status == 200
 ?? body id == {{ createMon.id }}
 ?? body name == {{ monName }} HTTP
+
 
 ### Update a monitor
 PUT {{endpoint}}/monitors/{{ createMon.id }}
@@ -272,3 +273,37 @@ Content-Type: application/json
 }
 
 ?? status == 400
+
+
+### Invalid results max
+GET {{endpoint}}/results?max=abc
+
+?? status == 400
+
+
+### Invalid monitor id
+GET {{endpoint}}/monitors/abc
+
+?? status == 400
+
+
+### Invalid monitor id not found
+
+GET {{endpoint}}/monitors/{{ fakeOID }}
+
+?? status == 404
+
+
+### Invalid monitor id for results
+
+GET {{endpoint}}/monitors/abc/results
+
+?? status == 400
+
+
+### Invalid nonexistent id for results
+
+GET {{endpoint}}/monitors/{{ fakeOID }}/results
+
+?? status == 200
+?? js response.parsedBody.length == 0

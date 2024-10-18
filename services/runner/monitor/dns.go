@@ -22,7 +22,7 @@ func (m *Monitor) runDNS() *types.Result {
 	var err error
 
 	timeout := time.Duration(2000) * time.Millisecond
-	networkType := "ip4"
+	networkType := "ip"
 	server := ""
 	recordType := "A"
 

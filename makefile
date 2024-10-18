@@ -9,6 +9,11 @@ BUILD_INFO ?= Local and manual build
 AUTH_CLIENT_ID ?= 
 AUTH_TENANT ?= common
 API_ENDPOINT ?= http://localhost:8000/api
+# If TEST_REPORT set then output test results as JUnit
+TEST_EXTRA_ARGS ?= 
+ifdef TEST_REPORT
+  TEST_EXTRA_ARGS = --junit > api-test-results.xml
+endif
 
 # Override these if building your own images
 IMAGE_REG ?= ghcr.io
@@ -29,14 +34,8 @@ ESLINT_PATH := $(REPO_DIR)/.tools/node_modules/.bin/eslint
 PRETTIER_PATH := $(REPO_DIR)/.tools/node_modules/.bin/prettier
 HTTPYAC_PATH := $(REPO_DIR)/.tools/node_modules/.bin/httpyac
 
-# If TEST_REPORT set then output test results as JUnit
-TEST_EXTRA_ARGS ?= 
-ifdef TEST_REPORT
-  TEST_EXTRA_ARGS = --junit > api-test-results.xml
-endif
-
 .EXPORT_ALL_VARIABLES:
-.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test
+.PHONY: help images push lint lint-fix install-tools run-api run-db run-frontend run-runner build test test-api
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)
@@ -115,7 +114,7 @@ test: ## 🧪 Run all unit tests
 
 test-api: ## 🔬 Run API integration tests, using HttpYac
 	@figlet $@ || true
-	$(HTTPYAC_PATH) send tests/integration-tests.http --all --output short $(TEST_EXTRA_ARGS)
+	$(HTTPYAC_PATH) send tests/integration-tests.http --all --output short --var endpoint=$(API_ENDPOINT) $(TEST_EXTRA_ARGS)
 
 test-load: ## 🔥 Run load test using k6
 
@@ -127,5 +126,5 @@ generate-specs: ## 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
 
 clean: ## 🧹 Clean up, remove dev data and files
 	@figlet $@ || true
-	@rm -rf bin .tools frontend/config api/node_modules frontend/.vite
+	@rm -rf bin .tools frontend/config api/node_modules frontend/.vite *.xml
 	@docker volume rm nm-mongo-data || true

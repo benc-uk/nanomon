@@ -46,6 +46,7 @@ export const monitorComponent = (api, userAccount) => ({
     this.monitor = null
     this.results = []
     this.status = null
+    this.lastResultDate = null
     this.error = ''
 
     try {

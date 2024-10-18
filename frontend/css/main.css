@@ -145,3 +145,21 @@ a {
   word-wrap: break-word;
   word-break: break-all;
 }
+
+.mini-out-table td {
+  border: 2px solid #eee;
+  padding: 0.2rem;
+  padding-right: 2rem;
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover {
+  color: #2872a3;
+}
+
+.wide-button {
+  width: 20rem;
+}

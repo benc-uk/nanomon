@@ -164,6 +164,12 @@ DELETE {{endpoint}}/monitors
 ?? status == 204
 
 
+### Delete all results
+DELETE {{endpoint}}/results
+
+?? status == 204
+
+
 ### Invalid monitor type
 POST {{endpoint}}/monitors
 Content-Type: application/json

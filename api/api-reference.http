@@ -42,8 +42,12 @@ DELETE {{endpoint}}/monitors/{{ createMon.id }}
 DELETE {{endpoint}}/monitors
 
 
+### Delete ALL results, yikes!
+DELETE {{endpoint}}/results
+
+
 ### Get results
-GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=1212121
+GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=20
 
 
 ### Update a monitor
@@ -60,7 +64,7 @@ Content-Type: application/json
 
 
 ### Get results for ALL monitors
-GET {{endpoint}}/results?max=0
+GET {{endpoint}}/results?max=50
 
 
 ### Test import

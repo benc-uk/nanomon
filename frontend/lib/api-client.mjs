@@ -42,4 +42,8 @@ export class APIClient extends APIClientBase {
   async deleteAllMonitors() {
     return this._request(`monitors`, 'DELETE', null, true)
   }
+
+  async deleteAllResults() {
+    return this._request(`results`, 'DELETE', null, true)
+  }
 }

@@ -217,7 +217,7 @@ All three components (API, runner and frontend host) expect their configuration 
 
 Nanomon currently supports four types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
 
-### Type: HTTP
+### HTTP Monitor
 
 This makes a single HTTP request to the target URL each time it is run, it will return failed status in the event of network failure e.g. no network connection, unable to resolve name with DNS, invalid URL etc. Otherwise any sort of HTTP response will return an OK status. If you want to check the HTTP response code, use a rule as described above e.g. `status == 200` or `status >= 200 && status < 300`.
 
@@ -238,7 +238,7 @@ This makes a single HTTP request to the target URL each time it is run, it will 
   - _certExpiryDays_ - Number of days before the TLS cert of the site expires (number)
   - _regexMatch_ - Match of the bodyRegex if any (number or string)
 
-### Type: TCP
+### TCP Monitor
 
 Each time a TCP monitor runs it attempts to open a TCP connection to given host on the given port, it will return failed status in the event of network/connection failure, DNS resolution failure, or if the port is closed or blocked. Otherwise it will return OK.
 
@@ -250,7 +250,7 @@ Each time a TCP monitor runs it attempts to open a TCP connection to given host 
   - _respTime_ - Same as monitor value (number)
   - _ipAddress_ - Resolved IP address of the target (string)
 
-### Type: Ping
+### Ping Monitor
 
 This monitor will send one or more ICMP ping packets to the given host or IP address, it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK.
 
@@ -270,7 +270,7 @@ Note. As this monitor needs to send ICMP packets, the runner process needs certa
   - _packetLoss_ - Percentage of packet that were lost (number)
   - _ipAddress_ - Resolved IP address of the target (string)
 
-### Type: DNS
+### DNS Monitor
 
 The DNS monitor looks up DNS records and returns the results, if the name fails to resolve it will return failed status, otherwise it will return OK.
 

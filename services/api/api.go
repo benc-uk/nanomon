@@ -28,6 +28,8 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 	r.Get("/api/monitors/{id}", api.getMonitor)
 	r.Get("/api/monitors/{id}/results", api.getMonitorResults)
 	r.Get("/api/results", api.getResults)
+
+	r.HandleFunc("/metrics", newPromWrapper(api.db).handler)
 }
 
 // These routes might be behind auth if it has been enabled

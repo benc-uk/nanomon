@@ -7,6 +7,7 @@ package main
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"nanomon/services/runner/monitor"
@@ -81,4 +82,9 @@ func (m MonitorReq) validate() (string, bool) {
 	}
 
 	return "", true
+}
+
+func (m MonitorResp) getPromName() string {
+	// replace spaces with underscores and lowercase
+	return strings.ToLower(strings.ReplaceAll(m.Name, " ", "_"))
 }

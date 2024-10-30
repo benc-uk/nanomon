@@ -17,14 +17,12 @@ import (
 )
 
 type PromWrapper struct {
-	// registry           *prometheus.Registry
 	db                 *database.DB
 	registeredMonitors map[string]*prometheus.GaugeVec
 }
 
 func newPromWrapper(db *database.DB) *PromWrapper {
 	return &PromWrapper{
-		// registry:           prometheus.NewRegistry(),
 		db:                 db,
 		registeredMonitors: make(map[string]*prometheus.GaugeVec),
 	}
@@ -39,6 +37,7 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 		// write error and http 500
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 		return
 	}
 
@@ -50,6 +49,7 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 			// write error
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 			return
 		}
 
@@ -76,9 +76,11 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 
 		// Parse monitor.ID to oid
 		oid, err := primitive.ObjectIDFromHex(monitor.ID)
+
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 			return
 		}
 
@@ -89,6 +91,7 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 			return
 		}
 
@@ -100,6 +103,7 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 			if err := cur.Decode(&result); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 				return
 			}
 

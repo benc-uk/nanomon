@@ -129,7 +129,7 @@ func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Set the gauge values based on the result
-		g.WithLabelValues("status").Set(float64(result.Status))
+		g.WithLabelValues("monitorStatus").Set(float64(result.Status))
 		g.WithLabelValues("value").Set(float64(result.Value))
 
 		// Result will have a map of outputs, which could be multiple types

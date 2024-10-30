@@ -150,6 +150,10 @@ func (api API) deleteMonitor(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if api.prometheus != nil {
+		api.prometheus.unregisterMonitorGauge(oidStr)
+	}
+
 	resp.WriteHeader(204)
 }
 
@@ -193,6 +197,10 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
 		Group:      m.Group,
+	}
+
+	if api.prometheus != nil {
+		api.prometheus.registerMonitorGauge(&respMonitor)
 	}
 
 	api.ReturnJSON(resp, respMonitor)
@@ -247,6 +255,11 @@ func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
 		Updated:    m.Updated,
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
+	}
+
+	if api.prometheus != nil {
+		api.prometheus.unregisterMonitorGauge(oidStr)
+		api.prometheus.registerMonitorGauge(&respMonitor)
 	}
 
 	api.ReturnJSON(resp, respMonitor)
@@ -364,6 +377,12 @@ func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Printf("### Removed %d monitors", deleteResp.DeletedCount)
+
+	if api.prometheus != nil {
+		for id := range api.prometheus.registeredMonitors {
+			api.prometheus.unregisterMonitorGauge(id)
+		}
+	}
 
 	resp.WriteHeader(204)
 }

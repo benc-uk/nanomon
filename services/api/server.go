@@ -44,12 +44,15 @@ func main() {
 
 	// Note this will exit the process if the DB connection fails, so no need to check for errors
 	db := database.ConnectToDB()
-	api := NewAPI(db)
+	api, err := NewAPI(db, env.GetEnvBool("ENABLE_PROMETHEUS", false))
+	if err != nil {
+		log.Fatalf("### ❌ Failed to create API: %v", err)
+	}
 
 	// Some basic middleware, change as you see fit, see: https://github.com/go-chi/chi#core-middlewares
 	router.Use(middleware.RealIP)
 	// Filtered request logger, exclude /metrics & /health endpoints
-	router.Use(logging.NewFilteredRequestLogger(regexp.MustCompile(`(^/api/metrics)|(^/api/health)`)))
+	router.Use(logging.NewFilteredRequestLogger(regexp.MustCompile(`(^/metrics)|(^/api/health)`)))
 	router.Use(middleware.Recoverer)
 
 	// Some custom middleware for very permissive CORS policy
@@ -80,9 +83,6 @@ func main() {
 
 	// Anonymous routes
 	router.Group(func(publicRouter chi.Router) {
-		// Add Prometheus metrics endpoint, must be before the other routes
-		api.AddMetricsEndpoint(publicRouter, "api/metrics")
-
 		// Add optional root, health & status endpoints
 		api.AddHealthEndpoint(publicRouter, "api/health")
 		api.AddStatusEndpoint(publicRouter, "api/status")
@@ -91,6 +91,8 @@ func main() {
 		// Rest of the NanoMon routes which are public
 		api.addAnonymousRoutes(publicRouter)
 	})
+
+	log.Printf("### ⚓ API routes configured")
 
 	// Start ticker to check the DB connection, and set the health status
 	go func() {

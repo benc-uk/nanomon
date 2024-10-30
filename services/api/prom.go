@@ -3,103 +3,113 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"nanomon/services/common/database"
 	"nanomon/services/common/types"
 	"net/http"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type PromWrapper struct {
-	// registry           *prometheus.Registry
+type prometheusHelper struct {
 	db                 *database.DB
 	registeredMonitors map[string]*prometheus.GaugeVec
 }
 
-func newPromWrapper(db *database.DB) *PromWrapper {
-	return &PromWrapper{
-		// registry:           prometheus.NewRegistry(),
+func newPrometheusHelper(db *database.DB) (*prometheusHelper, error) {
+	p := &prometheusHelper{
 		db:                 db,
 		registeredMonitors: make(map[string]*prometheus.GaugeVec),
 	}
-}
 
-func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
+	log.Println("### Prometheus metrics enabled")
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cur, err := p.db.Monitors.Find(timeoutCtx, bson.M{})
+	// Register all monitors as gauges
+	cur, err := db.Monitors.Find(timeoutCtx, bson.M{})
 	if err != nil {
-		// write error and http 500
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error: %v", err)))
-		return
+		return nil, err
 	}
-
-	monitors := make([]*MonitorResp, 0)
 
 	for cur.Next(context.TODO()) {
 		m := &MonitorResp{}
 		if err := cur.Decode(&m); err != nil {
-			// write error
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
-			return
+			return nil, err
 		}
 
-		monitors = append(monitors, m)
+		p.registerMonitorGauge(m)
 	}
 
-	// Register all monitors as gauges if not already registered
-	for _, monitor := range monitors {
-		// Check if monitor is already registered
-		if _, ok := p.registeredMonitors[monitor.ID]; !ok {
-			// Create gauge
-			g := promauto.NewGaugeVec(prometheus.GaugeOpts{
-				Name: monitor.getPromName(),
-				Help: fmt.Sprintf("%s (%s)", monitor.Name, monitor.Type),
-				ConstLabels: prometheus.Labels{
-					"monitorID":   monitor.ID,
-					"monitorType": monitor.Type,
-				},
-				Namespace: "nanomon",
-			}, []string{"result"})
+	return p, nil
+}
 
-			p.registeredMonitors[monitor.ID] = g
-		}
+func (p *prometheusHelper) registerMonitorGauge(m *MonitorResp) {
+	// Avoid creating the same gauge multiple times
+	if _, ok := p.registeredMonitors[m.ID]; ok {
+		return
+	}
 
+	g := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: m.getPromName(),
+		Help: fmt.Sprintf("%s (%s)", m.Name, m.Type),
+		ConstLabels: prometheus.Labels{
+			"id":   m.ID,
+			"type": m.Type,
+		},
+		Namespace: "nanomon",
+	}, []string{"result"})
+
+	prometheus.MustRegister(g)
+	p.registeredMonitors[m.ID] = g
+	log.Printf("Registered '%s' in Prometheus registry", m.Name)
+}
+
+func (p *prometheusHelper) unregisterMonitorGauge(id string) {
+	prometheus.Unregister(p.registeredMonitors[id])
+	delete(p.registeredMonitors, id)
+}
+
+func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Part 2 - Output each monitor as a gauge
+	for id, g := range p.registeredMonitors {
 		// Parse monitor.ID to oid
-		oid, err := primitive.ObjectIDFromHex(monitor.ID)
+		oid, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+			_, _ = w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 			return
 		}
 
 		options := options.Find().SetSort(bson.M{"date": -1}).SetLimit(1)
 
-		// Get the latest result for the monitor
+		// Part 3 - Get a single last result for the monitor from the database
 		cur, err := p.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oid}, options)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+			_, _ = w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 			return
 		}
 
-		// Get the last result for the monitor
+		// Hold a single result
 		var result *types.Result
 
 		for cur.Next(context.TODO()) {
 			result = &types.Result{}
 			if err := cur.Decode(&result); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+				_, _ = w.Write([]byte(fmt.Sprintf("Error: %v", err)))
+
 				return
 			}
 
@@ -110,25 +120,26 @@ func (p *PromWrapper) handler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// Set the gauge values based on the result
-		p.registeredMonitors[monitor.ID].WithLabelValues("status").Set(float64(result.Status))
-		p.registeredMonitors[monitor.ID].WithLabelValues("value").Set(float64(result.Value))
+		// Part 4 - Set the gauge values based on the result
+		g.WithLabelValues("status").Set(float64(result.Status))
+		g.WithLabelValues("value").Set(float64(result.Value))
 
 		// Result will have a map of outputs, which could be multiple types
+		// Assert the type and set the gauge value if it is a float or int
 		for outKey := range result.Outputs {
 			outValI, ok := result.Outputs[outKey].(int32)
 			if !ok {
 				continue
 			}
 
-			p.registeredMonitors[monitor.ID].WithLabelValues(outKey).Set(float64(outValI))
+			g.WithLabelValues(outKey).Set(float64(outValI))
 
 			outValF, ok := result.Outputs[outKey].(float32)
 			if !ok {
 				continue
 			}
 
-			p.registeredMonitors[monitor.ID].WithLabelValues(outKey).Set(float64(outValF))
+			g.WithLabelValues(outKey).Set(float64(outValF))
 		}
 	}
 

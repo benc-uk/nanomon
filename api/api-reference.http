@@ -87,3 +87,7 @@ Content-Type: application/json
     "enabled": true
   }
 ]
+
+
+### Get Prometheus metrics
+GET http://localhost:8000/metrics

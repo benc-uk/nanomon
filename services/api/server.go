@@ -44,6 +44,7 @@ func main() {
 
 	// Note this will exit the process if the DB connection fails, so no need to check for errors
 	db := database.ConnectToDB()
+
 	api, err := NewAPI(db, env.GetEnvBool("ENABLE_PROMETHEUS", false))
 	if err != nil {
 		log.Fatalf("### ❌ Failed to create API: %v", err)

@@ -6,6 +6,7 @@
 package main
 
 import (
+	"log"
 	"nanomon/services/common/database"
 
 	"github.com/benc-uk/go-rest-api/pkg/api"
@@ -34,6 +35,8 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 	if api.prometheus != nil {
 		// It's not part of the API, but we expose Prometheus metrics here
 		r.HandleFunc("/metrics", api.prometheus.httpHandler)
+
+		log.Println("### 📈 Prometheus enabled at: /metrics")
 	}
 }
 
@@ -50,6 +53,7 @@ func (api API) addProtectedRoutes(r chi.Router) {
 // Create an API with the given database context, with optional Prometheus metrics
 func NewAPI(db *database.DB, promEnabled bool) (*API, error) {
 	var promWrapper *prometheusHelper
+
 	var err error
 
 	if promEnabled {

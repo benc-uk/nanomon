@@ -1,9 +1,13 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) Ben Coleman, 2024. Licensed under the MIT License.
+// Support for exposing Prometheus metrics from the API
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"nanomon/services/common/database"
 	"nanomon/services/common/types"
 	"net/http"
@@ -16,18 +20,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// Holds gauges and database connection for Prometheus
 type prometheusHelper struct {
-	db                 *database.DB
-	registeredMonitors map[string]*prometheus.GaugeVec
+	db     *database.DB
+	gauges map[string]*prometheus.GaugeVec
 }
 
+// Create a new Prometheus helper, this will register all existing monitors as gauges
 func newPrometheusHelper(db *database.DB) (*prometheusHelper, error) {
 	p := &prometheusHelper{
-		db:                 db,
-		registeredMonitors: make(map[string]*prometheus.GaugeVec),
+		db:     db,
+		gauges: make(map[string]*prometheus.GaugeVec),
 	}
 
-	log.Println("### Prometheus metrics enabled")
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -43,15 +48,16 @@ func newPrometheusHelper(db *database.DB) (*prometheusHelper, error) {
 			return nil, err
 		}
 
-		p.registerMonitorGauge(m)
+		p.registerGauge(m)
 	}
 
 	return p, nil
 }
 
-func (p *prometheusHelper) registerMonitorGauge(m *MonitorResp) {
+// Register a monitor as a gauge in Prometheus
+func (p *prometheusHelper) registerGauge(m *MonitorResp) {
 	// Avoid creating the same gauge multiple times
-	if _, ok := p.registeredMonitors[m.ID]; ok {
+	if _, ok := p.gauges[m.ID]; ok {
 		return
 	}
 
@@ -66,21 +72,23 @@ func (p *prometheusHelper) registerMonitorGauge(m *MonitorResp) {
 	}, []string{"result"})
 
 	prometheus.MustRegister(g)
-	p.registeredMonitors[m.ID] = g
-	log.Printf("Registered '%s' in Prometheus registry", m.Name)
+	p.gauges[m.ID] = g
 }
 
-func (p *prometheusHelper) unregisterMonitorGauge(id string) {
-	prometheus.Unregister(p.registeredMonitors[id])
-	delete(p.registeredMonitors, id)
+// Unregister a monitor gauge from Prometheus
+func (p *prometheusHelper) unregisterGauge(id string) {
+	prometheus.Unregister(p.gauges[id])
+	delete(p.gauges, id)
 }
 
+// Middleware for the /metrics endpoint, it will first update all our custom gauges
+// Then serve the metrics from the promhttp handler
 func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Part 2 - Output each monitor as a gauge
-	for id, g := range p.registeredMonitors {
+	// Update all gauges with the latest results
+	for id, g := range p.gauges {
 		// Parse monitor.ID to oid
 		oid, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
@@ -92,7 +100,7 @@ func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
 
 		options := options.Find().SetSort(bson.M{"date": -1}).SetLimit(1)
 
-		// Part 3 - Get a single last result for the monitor from the database
+		// Get a single last result for the monitor from the database
 		cur, err := p.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oid}, options)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -111,16 +119,16 @@ func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write([]byte(fmt.Sprintf("Error: %v", err)))
 
 				return
+			} else {
+				break
 			}
-
-			break
 		}
 
 		if result == nil {
 			continue
 		}
 
-		// Part 4 - Set the gauge values based on the result
+		// Set the gauge values based on the result
 		g.WithLabelValues("status").Set(float64(result.Status))
 		g.WithLabelValues("value").Set(float64(result.Value))
 
@@ -143,6 +151,6 @@ func (p *prometheusHelper) httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Serve the metrics
+	// Finally, serve the metrics from the promhttp handler
 	promhttp.Handler().ServeHTTP(w, r)
 }

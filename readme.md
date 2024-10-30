@@ -8,6 +8,7 @@ NanoMon is a lightweight network and HTTP monitoring system, designed to be self
 - Range of deployment options
 - Rules for setting monitor status and evaluating results
 - OAuth2 based user sign-in and authentication
+- Exporting of metrics & data to Prometheus
 
 It also serves as a reference & learning app for microservices and is used by my Kubernetes workshop as the workload & application deployed in order to demonstrate Kubernetes concepts.
 
@@ -181,6 +182,12 @@ All three components (API, runner and frontend host) expect their configuration 
 | ------------ | ------------------------------------------------ | --------- |
 | API_ENDPOINT | Instructs the frontend SPA where to find the API | /api      |
 
+### Variables used only by the API service:
+
+| _Name_            | _Description_                                             | _Default_ |
+| ----------------- | --------------------------------------------------------- | --------- |
+| ENABLE_PROMETHEUS | Enable exporting metrics in Prometheus format (see below) | false     |
+
 ### Variables used by both API service and runner:
 
 | _Name_        | _Description_                     | _Default_                 |
@@ -345,3 +352,23 @@ Azure Cosmos DB can be used as a database for NanoMon, however there are two thi
 - An index must be added for the `date` field to the results collection, this can be done in the Azure Portal or with a single command:  
   `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
 - Cosmos DB for MongoDB does have support for change streams, however it comes with [several limitations, most notably the lack of support for delete events](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/change-streams?tabs=javascript#current-limitations). Given these limitations NanoMon will fall back to polling when using Cosmos DB
+
+### Prometheus
+
+Nanomon has support for Prometheus metrics which are exposed from the API service in the standard text-based exposition format.
+
+This feature is optional and is enabled by setting the `ENABLE_PROMETHEUS` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges, these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
+
+Enabling Prometheus means you do not need to use the Nanomon frontend, as you can visualize the data through other tools, and optional enable things like the Prometheus exporter.
+
+Example of metrics
+
+```
+# HELP nanomon_example_monitor Example Monitor (http)
+# TYPE nanomon_example_monitor gauge
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="bodyLen",type="http"} 15256
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="monitorStatus",type="http"} 0
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="respTime",type="http"} 178
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="status",type="http"} 404
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="value",type="http"} 178
+```

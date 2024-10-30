@@ -1,6 +1,6 @@
 # NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted any container based system e.g. Kubernetes, or just run locally. It is written in Go and based on the now ubiquitous microservices pattern, so decomposed into several discreet but interlinked components. The features of Nanomon include:
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted any container based system e.g. Kubernetes, or just run locally. It is written in Go and based on the now ubiquitous microservices pattern, so decomposed into several discreet but interlinked components. The features of NanoMon include:
 
 - A range of configurable monitor types
 - Web frontend for viewing results & editing/creating monitors
@@ -222,7 +222,7 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ## Monitor Reference
 
-Nanomon currently supports four types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
+NanoMon currently supports four types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
 
 ### HTTP Monitor
 
@@ -355,11 +355,11 @@ Azure Cosmos DB can be used as a database for NanoMon, however there are two thi
 
 ### Prometheus
 
-Nanomon has support for Prometheus metrics which are exposed from the API service in the standard text-based exposition format.
+NanoMon has support for Prometheus metrics which are exposed from the API service in the standard text-based exposition format.
 
 This feature is optional and is enabled by setting the `ENABLE_PROMETHEUS` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges, these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
 
-Enabling Prometheus means you do not need to use the Nanomon frontend, as you can visualize the data through other tools, and optional enable things like the Prometheus exporter.
+Enabling Prometheus means you do not need to use the NanoMon frontend, as you can visualize the data through other tools, and optional enable things like the Prometheus exporter.
 
 Example of metrics
 

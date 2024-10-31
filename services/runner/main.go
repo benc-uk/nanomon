@@ -9,10 +9,15 @@ import (
 	"log"
 	"nanomon/services/common/database"
 	"nanomon/services/runner/monitor"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/benc-uk/go-rest-api/pkg/env"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -20,15 +25,20 @@ var (
 	monitors  []*monitor.Monitor
 	version   = "0.0.0"            // App version number, injected at build time
 	buildInfo = "No build details" // Build details, injected at build time
+
+	// Used only when Prometheus is enabled
+	promServer *http.Server
+	promGauges map[string]*prometheus.GaugeVec
 )
 
 // Entrypoint - begin here :)
 func main() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
+	// Try to trap shutdown signals and have a clean stop & exit
 	go func() {
-		<-c
+		<-sigChan
 		shutdown()
 		os.Exit(1)
 	}()
@@ -57,7 +67,32 @@ func main() {
 		log.Fatalln("### Error loading monitors:", err)
 	}
 
+	// Optionally start the Prometheus metrics server
+	if env.GetEnvBool("PROMETHEUS_ENABLED", true) {
+		port := env.GetEnvString("PROMETHEUS_PORT", "8080")
+
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+
+		promServer = &http.Server{
+			Addr:         ":" + port,
+			Handler:      mux,
+			ReadTimeout:  2 * time.Second,
+			WriteTimeout: 2 * time.Second,
+		}
+
+		// Start the Prometheus metrics server in a goroutine
+		go func() {
+			log.Printf("### Prometheus metrics endpoint: http://localhost:%s/metrics", port)
+			err := promServer.ListenAndServe()
+			if err != nil {
+				log.Println("### Prometheus server failed to start", err)
+			}
+		}()
+	}
+
 	// Start the monitors loaded from the database
+	// Note they each run in their own goroutines
 	for i, m := range monitors {
 		// Delay each monitor start by 2 seconds for a staggered start
 		go m.Start(i * 2)
@@ -71,6 +106,7 @@ func main() {
 		// Fallback to polling
 		pollMonitors(pollInterval)
 	}
+
 }
 
 func shutdown() {

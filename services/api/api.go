@@ -6,7 +6,6 @@
 package main
 
 import (
-	"log"
 	"nanomon/services/common/database"
 
 	"github.com/benc-uk/go-rest-api/pkg/api"
@@ -21,8 +20,6 @@ type API struct {
 
 	// Instance of our DB connection
 	db *database.DB
-
-	prometheus *prometheusHelper
 }
 
 // These are all GET and can be called without auth
@@ -31,13 +28,6 @@ func (api API) addAnonymousRoutes(r chi.Router) {
 	r.Get("/api/monitors/{id}", api.getMonitor)
 	r.Get("/api/monitors/{id}/results", api.getMonitorResults)
 	r.Get("/api/results", api.getResults)
-
-	if api.prometheus != nil {
-		// It's not part of the API, but we expose Prometheus metrics here
-		r.HandleFunc("/metrics", api.prometheus.httpHandler)
-
-		log.Println("### 📈 Prometheus enabled at: /metrics")
-	}
 }
 
 // These routes might be behind auth if it has been enabled
@@ -50,22 +40,10 @@ func (api API) addProtectedRoutes(r chi.Router) {
 	r.Put("/api/monitors/{id}", api.updateMonitor)
 }
 
-// Create an API with the given database context, with optional Prometheus metrics
-func NewAPI(db *database.DB, promEnabled bool) (*API, error) {
-	var promWrapper *prometheusHelper
-
-	var err error
-
-	if promEnabled {
-		promWrapper, err = newPrometheusHelper(db)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &API{
+// Create an API with the given database context
+func NewAPI(db *database.DB) API {
+	return API{
 		api.NewBase(serviceName, version, buildInfo, true),
 		db,
-		promWrapper,
-	}, nil
+	}
 }

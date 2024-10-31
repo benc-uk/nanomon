@@ -45,10 +45,8 @@ func main() {
 	// Note this will exit the process if the DB connection fails, so no need to check for errors
 	db := database.ConnectToDB()
 
-	api, err := NewAPI(db, env.GetEnvBool("ENABLE_PROMETHEUS", false))
-	if err != nil {
-		log.Fatalf("### ❌ Failed to create API: %v", err)
-	}
+	// Core API wrapping base go-rest-api/pkg/api
+	api := NewAPI(db)
 
 	// Some basic middleware, change as you see fit, see: https://github.com/go-chi/chi#core-middlewares
 	router.Use(middleware.RealIP)

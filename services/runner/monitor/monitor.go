@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const TypeHTTP = "http"
@@ -39,6 +40,7 @@ type Monitor struct {
 
 	ticker *time.Ticker
 	db     *database.DB
+	gauge  *prometheus.GaugeVec
 }
 
 // Create a new monitor
@@ -74,6 +76,10 @@ func (m *Monitor) Start(delay int) {
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
+	// Register the monitor as a Prometheus gauge
+	m.registerGauge()
+
+	// Run the monitor immediately on start
 	m.run()
 
 	m.ticker = time.NewTicker(intervalDuration)
@@ -166,6 +172,9 @@ func (m *Monitor) run() (bool, *types.Result) {
 		return false, result
 	}
 
+	// Update the values in the Prometheus gauge
+	m.updateGauge(result)
+
 	if result.Status > types.StatusOK {
 		m.ErrorCount++
 
@@ -180,11 +189,12 @@ func (m *Monitor) run() (bool, *types.Result) {
 	return true, result
 }
 
-// ========================================================================
 // Stop the monitor
-// ========================================================================
 func (m *Monitor) Stop() {
 	log.Println("### Stopping monitor", m.Name)
+
+	// Unregister the Prometheus gauge for this monitor
+	m.unregisterGauge()
 
 	if m.ticker != nil {
 		m.ticker.Stop()

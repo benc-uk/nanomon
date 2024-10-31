@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/benc-uk/go-rest-api/pkg/env"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -28,7 +27,6 @@ var (
 
 	// Used only when Prometheus is enabled
 	promServer *http.Server
-	promGauges map[string]*prometheus.GaugeVec
 )
 
 // Entrypoint - begin here :)
@@ -85,6 +83,7 @@ func main() {
 		go func() {
 			log.Printf("### Prometheus enabled")
 			log.Printf("### Metrics endpoint: http://localhost:%s/metrics", port)
+
 			err := promServer.ListenAndServe()
 			if err != nil {
 				log.Println("### Prometheus server failed to start", err)
@@ -107,7 +106,6 @@ func main() {
 		// Fallback to polling
 		pollMonitors(pollInterval)
 	}
-
 }
 
 func shutdown() {

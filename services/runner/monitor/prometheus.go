@@ -34,6 +34,7 @@ func (m *Monitor) registerGauge() {
 	err := prometheus.Register(m.gauge)
 	if err != nil {
 		log.Printf("### Error registering gauge: %v\n", err)
+
 		m.gauge = nil
 	}
 }

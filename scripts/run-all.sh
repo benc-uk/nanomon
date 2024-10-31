@@ -31,7 +31,7 @@ if ! docker ps | grep -q mongo; then
     -e MONGODB_REPLICA_SET_MODE=primary \
     -e MONGODB_ADVERTISED_HOSTNAME=localhost \
     -e ALLOW_EMPTY_PASSWORD=yes \
-    --name mongo bitnami/mongodb:6.0
+    --name mongo bitnami/mongodb:8.0
 else
   echo "### 🚀 MongoDB is already running"
 fi

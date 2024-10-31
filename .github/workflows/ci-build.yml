@@ -54,7 +54,7 @@ jobs:
       # Run API integration tests with output in JUnit format
       - name: Run API integration tests
         run: |
-          make run-all &
+          make run-all PROMETHEUS_ENABLED=1 &
           sleep 20
           make test-api TEST_REPORT=1
 

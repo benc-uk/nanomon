@@ -1,4 +1,5 @@
 @endpoint = {{ this.endpoint ?? 'http://localhost:8000/api' }}
+@endpointRunner = {{ this.endpointRunner ?? 'http://localhost:8080' }}
 @num = 216913
 @monName = Test {{ num }}
 @newName = Test Updated {{ num }} 
@@ -156,6 +157,15 @@ Content-Type: application/json
 ]
 
 ?? status == 204
+
+
+### Prometheus metrics (runner)
+
+GET {{endpointRunner}}/metrics
+
+?? status == 200
+?? header Content-Type is text/plain
+?? body contains nanomon_test
 
 
 ### Delete all monitors

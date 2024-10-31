@@ -89,5 +89,5 @@ Content-Type: application/json
 ]
 
 
-### Get Prometheus metrics
-GET http://localhost:8000/metrics
+### Get Prometheus metrics from the runner, note this doesn't call the API server
+GET http://localhost:8080/metrics

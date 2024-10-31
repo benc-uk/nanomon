@@ -68,7 +68,7 @@ func main() {
 	}
 
 	// Optionally start the Prometheus metrics server
-	if env.GetEnvBool("PROMETHEUS_ENABLED", true) {
+	if env.GetEnvBool("PROMETHEUS_ENABLED", false) {
 		port := env.GetEnvString("PROMETHEUS_PORT", "8080")
 
 		mux := http.NewServeMux()
@@ -83,7 +83,8 @@ func main() {
 
 		// Start the Prometheus metrics server in a goroutine
 		go func() {
-			log.Printf("### Prometheus metrics endpoint: http://localhost:%s/metrics", port)
+			log.Printf("### Prometheus enabled")
+			log.Printf("### Metrics endpoint: http://localhost:%s/metrics", port)
 			err := promServer.ListenAndServe()
 			if err != nil {
 				log.Println("### Prometheus server failed to start", err)

@@ -48,6 +48,7 @@ func (m *Monitor) unregisterGauge() {
 // Update the gauge with the given monitor result
 func (m *Monitor) updateGauge(r *types.Result) {
 	if m.gauge != nil {
+		// Special labels for status and value
 		m.gauge.WithLabelValues("_status").Set(float64(r.Status))
 		m.gauge.WithLabelValues("_value").Set(float64(r.Value))
 

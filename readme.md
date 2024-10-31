@@ -16,15 +16,15 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
 
 ## Architecture
 
-The architecture is fairly simple consisting of four application components and a database.
+The architecture is a fairly standard design, consisting of four application components and a database.
 
 ![architecture diagram](./etc/architecture.drawio.png)
 
 - **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the MongoDB database.
 - **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
-- **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is [developed using Alpine.js](https://alpinejs.dev/)
+- **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using Alpine.js](https://alpinejs.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
-- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB v6. External services which provide MongoDB compatibility (e.g. Azure Cosmos DB) will also work
+- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB. Cloud and hosted services which provide MongoDB compatibility (e.g. Azure Cosmos DB) also work
 
 ## Concepts
 
@@ -118,10 +118,10 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Written in Go, [source code - /services/runner](./services/runner/)
 - The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
 - It keeps in sync with the `monitors` collection in the database, it does this one of two ways:
-  - Watching the collection using MongoDB change stream. This mode is prefered as it results in instant updates to changes made in the frontend & UI
-  - If change stream isn't supported, then the runner will poll the database and look for changes.
+  - Watching the collection using MongoDB change stream. This mode is preferred as it results in instant updates to changes made in the frontend & UI
+  - If change stream isn't supported, then the runner falls back to polling the database for changes.
 - If configured the runner will send email alerts, see [alerting section below](#alerting-configuration)
-- The runner doesn't listen to inbound network connections or bind to any ports.
+- By default runner doesn't listen to inbound network connections or bind to any ports, the exception being if [Prometheus support is enabled](#appendix-prometheus)
 
 ### API
 
@@ -182,12 +182,6 @@ All three components (API, runner and frontend host) expect their configuration 
 | ------------ | ------------------------------------------------ | --------- |
 | API_ENDPOINT | Instructs the frontend SPA where to find the API | /api      |
 
-### Variables used only by the API service:
-
-| _Name_            | _Description_                                             | _Default_ |
-| ----------------- | --------------------------------------------------------- | --------- |
-| ENABLE_PROMETHEUS | Enable exporting metrics in Prometheus format (see below) | false     |
-
 ### Variables used by both API service and runner:
 
 | _Name_        | _Description_                     | _Default_                 |
@@ -219,6 +213,8 @@ All three components (API, runner and frontend host) expect their configuration 
 | ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL                    | http://localhost:3000 |
 | POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s                   |
 | USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false                 |
+| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                                                 | false                 |
+| PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                                            | 8080                  |
 
 ## Monitor Reference
 
@@ -279,7 +275,7 @@ Note. As this monitor needs to send ICMP packets, the runner process needs certa
 
 ### DNS Monitor
 
-The DNS monitor looks up DNS records and returns the results, if the name fails to resolve it will return failed status, otherwise it will return OK.
+The DNS monitor looks up DNS records and returns the results as outputs, if the name fails to resolve it will return failed status, otherwise it will return OK.
 
 - **Target:** The domain or hostname you want to lookup in DNS
 - **Value:** Time for lookup to complete
@@ -302,19 +298,20 @@ The rule expression should always return a boolean, a false value will set the r
 Some rule examples:
 
 ```bash
-status >= 200 && status < 300    # Check for OK range of status codes
-status == 200 && respTime < 5000 # Check status code and response time
-body =~ 'some words'             # Look for a string in the HTTP body
-regexMatch == 'a value'          # Check the of the RegEx
+status >= 200 && status < 300          # Check for OK range of HTTP status codes
+status == 200 && respTime < 5000       # Check status code and response time
+'93.184.215.14' IN (result1, result2)  # Check IP in multiple DNS results
+body =~ 'some words'                   # Look for a string in the HTTP body
+regexMatch == 'a value'                # Check the value of the RegEx match
 ```
 
 ## Authentication & Security
 
 By default there is no authentication, security or user sign-in. This is by design to make the app easy to deploy, and for use in learning scenarios and workshops.
 
-Security is enabled using the Microsoft Identity Platform (now called Microsoft Entra ID) and OAuth2 + OIDC. With an app registered in Entra ID, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon containers, this changes the behaviour of the application as follows:
+Security is enabled using the Microsoft Identity Platform (now called Microsoft Entra ID) and OAuth2 + OIDC. With an app registered in Entra ID, then passing the app's client id as `AUTH_CLIENT_ID` to the NanoMon services. Setting this changes the behaviour of the application as follows:
 
-- **API container** - Will enforce validation on certain API routes, like POST, PUT and DELETE, using OAuth 2.0 JWT bearer tokens. The token is checked for validity as follows; contains a scope matching `system.admin` and has an audience matching the client id.
+- **API** - Will enforce validation on certain API routes, like POST, PUT and DELETE, using OAuth 2.0 JWT bearer tokens. The token is checked for validity as follows; contains a scope matching `system.admin` and has an audience matching the client id.
 - **Frontend host** - The UI will show a sign-in button and only allow signed-in users to create, edit or delete monitors. Access tokens are fetched from Entra ID for the signed-in user with the `system.admin` scope, and then passed when calling the API as bearer tokens.
 
 A basic guide to set this up:
@@ -332,9 +329,9 @@ NanoMon provides basic alerting support, which sends emails when monitors return
 
 To enable alerting all of the env vars starting `ALERT_` will need to be set, there are six of these as described above. However as three of these variables have defaults, you only need to set the remaining three `ALERT_SMTP_PASSWORD`, `ALERT_SMTP_FROM` and `ALERT_SMTP_FROM` to switch the feature on, this will be using GMail to send emails. For the password you will need [setup an Google app password](https://support.google.com/accounts/answer/185833?hl=en) this will use your personal Google account to send the emails, so this probably isn't a good option for production (putting it mildly).
 
-Known limitations:
+Limitations:
 
-- Only been tested with the GMail SMTP server, I have no idea if it'll work with others!
+- Only been tested with the GMail SMTP server, I have no idea if it'll work with others! ¯\\\_(ツ)\_/¯
 - The from address is also used as the login user to the SMTP server.
 - Only a single email address can be set to send emails to.
 - Restarting the runner will resend alerts for failing monitors.
@@ -353,22 +350,22 @@ Azure Cosmos DB can be used as a database for NanoMon, however there are two thi
   `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
 - Cosmos DB for MongoDB does have support for change streams, however it comes with [several limitations, most notably the lack of support for delete events](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/change-streams?tabs=javascript#current-limitations). Given these limitations NanoMon will fall back to polling when using Cosmos DB
 
-### Prometheus
+## Appendix: Prometheus
 
-NanoMon has support for Prometheus metrics which are exposed from the API service in the standard text-based exposition format.
+NanoMon has support for Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
 
-This feature is optional and is enabled by setting the `ENABLE_PROMETHEUS` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges, these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
+This feature is disabled by default and is enabled by setting the `PROMETHEUS_ENABLE` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges (one gauge per monitor), these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
 
-Enabling Prometheus means you do not need to use the NanoMon frontend, as you can visualize the data through other tools, and optional enable things like the Prometheus exporter.
+Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools, and optionally enable things like the Prometheus alerts.
 
 Example of metrics
 
 ```
 # HELP nanomon_example_monitor Example Monitor (http)
 # TYPE nanomon_example_monitor gauge
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="_status",type="http"} 0
+nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="_value",type="http"} 178
 nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="bodyLen",type="http"} 15256
-nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="monitorStatus",type="http"} 0
 nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="respTime",type="http"} 178
 nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="status",type="http"} 404
-nanomon_example_monitor{id="6722474d0c73d60184f14c73",result="value",type="http"} 178
 ```

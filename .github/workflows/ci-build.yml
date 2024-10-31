@@ -24,10 +24,10 @@ jobs:
     name: Testing & Linting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -54,7 +54,7 @@ jobs:
       # Run API integration tests with output in JUnit format
       - name: Run API integration tests
         run: |
-          make run-all &
+          make run-all PROMETHEUS_ENABLED=1 &
           sleep 20
           make test-api TEST_REPORT=1
 
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: make images

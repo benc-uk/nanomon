@@ -102,7 +102,7 @@ run-db: ## 🍃 Run MongoDB in container (needs Docker)
 	-e MONGODB_REPLICA_SET_MODE=primary \
 	-e MONGODB_ADVERTISED_HOSTNAME=localhost \
 	-e ALLOW_EMPTY_PASSWORD=yes \
-	--name mongo bitnami/mongodb:6.0
+	--name mongo bitnami/mongodb:8.0
 
 run-all: ## 🚀 Run all everything locally, including DB with hot-reload
 	@figlet $@ || true

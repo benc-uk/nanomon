@@ -40,7 +40,7 @@ func (api API) addProtectedRoutes(r chi.Router) {
 	r.Put("/api/monitors/{id}", api.updateMonitor)
 }
 
-// Simply create an API with the given database context
+// Create an API with the given database context
 func NewAPI(db *database.DB) API {
 	return API{
 		api.NewBase(serviceName, version, buildInfo, true),

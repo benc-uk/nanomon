@@ -236,7 +236,7 @@ module mongodb './bicep-iac/modules/containers/app.bicep' = if (externalMongoDbU
   params: {
     location: location
     name: 'mongo'
-    image: 'bitnami/mongodb:6.0'
+    image: 'bitnami/mongodb:8.0'
     environmentId: containerAppEnv.outputs.id
 
     ingressPort: 27017

@@ -48,7 +48,7 @@ RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
 # ================================================================================================
 # === Stage 2: Munge everything into a single image 
 # ================================================================================================
-FROM bitnami/mongodb:6.0
+FROM bitnami/mongodb:8.0
 WORKDIR /app 
 
 # Root certs

@@ -368,6 +368,7 @@ func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(204)
 }
 
+// Reset and remove all results
 func (api API) deleteResults(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("### Resetting and deleting all results")
 

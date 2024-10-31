@@ -46,8 +46,12 @@ DELETE {{endpoint}}/monitors
 DELETE {{endpoint}}/results
 
 
-### Get results
+### Get results for a single monitor
 GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=20
+
+
+### Get results for ALL monitors
+GET {{endpoint}}/results?max=50
 
 
 ### Update a monitor
@@ -61,7 +65,6 @@ Content-Type: application/json
   "target": "http://localhost:8000",
   "enabled": true
 }
-
 
 ### Get results for ALL monitors
 GET {{endpoint}}/results?max=50
@@ -87,3 +90,7 @@ Content-Type: application/json
     "enabled": true
   }
 ]
+
+
+### Get Prometheus metrics from the runner, note this doesn't call the API server
+GET http://localhost:8080/metrics

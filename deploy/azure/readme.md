@@ -15,7 +15,7 @@ Then deploy using the bash helper script
 
 ```bash
 cd deploy/azure
-./deploy.sh example.bicepparam
+./deploy.sh myparams.bicepparam
 ```
 
 ### Resources
@@ -26,4 +26,4 @@ cd deploy/azure
 
 By default the template will deploy a new VNet and link the Container Apps Environment to it, then create all the NanoMon containers + MongoDB container. This will take quite some time to deploy, but as the MongoDB container requires TCP ingress, a custom VNet is [the only way to support that](https://learn.microsoft.com/en-us/azure/container-apps/ingress-overview#tcp).
 
-If you set `externalMongoDbURI` to point to an existing MongoDB (e.g. running in Azure Cosmos DB) then deployment will be *much* quicker as no VNet will be created and no MongoDB container deployed.
+If you set `externalMongoDbURI` to point to an existing MongoDB (e.g. running in Azure Cosmos DB) then deployment will be _much_ quicker as no VNet will be created and no MongoDB container deployed.

@@ -3,26 +3,52 @@
 // NanoMon Frontend
 // ----------------------------------------------------------------------------
 
+import { APIClient } from '../lib/api-client.mjs'
 import { getStatusFields, niceDate, monitorIcon, isEmpty } from '../lib/utils.mjs'
 
+/**
+ * @param {APIClient} api
+ * @param {*} userAccount
+ */
 export const monitorComponent = (api, userAccount) => ({
+  /** @type Nanomon.ResultExtended[] */
   results: [],
+
+  /** @type Nanomon.Monitor */
   monitor: null,
+
+  /** @type Nanomon.MonitorStatus */
   status: null,
-  results: [],
+
+  /** @type string */
   error: '',
+
+  /** @type string */
   updatedDate: '',
+
+  /** @type string */
   lastResultDate: '',
+
+  /** @type string */
   icon: '',
-  getStatusFields: getStatusFields,
+
+  /** @type function */
+  getStatusFields,
+
+  /** @type function */
   isEmpty,
-  userAccount: userAccount,
-  output: '',
+
+  /** @type any */
+  userAccount,
+
+  /** @type Nanomon.Output */
+  output: {},
 
   async init() {
     this.shown = false
 
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
+      /** @type string */
       const view = e.detail
 
       if (!view || !view.startsWith('#monitor')) {
@@ -37,11 +63,12 @@ export const monitorComponent = (api, userAccount) => ({
       this.loadMonitor(monId)
     })
 
-    window.addEventListener('user-changed', (e) => {
+    window.addEventListener('user-changed', (/** @type CustomEvent */ e) => {
       this.userAccount = e.detail
     })
   },
 
+  /** @param {string} monId */
   async loadMonitor(monId) {
     this.monitor = null
     this.results = []
@@ -51,7 +78,7 @@ export const monitorComponent = (api, userAccount) => ({
 
     try {
       this.monitor = await api.getMonitor(monId)
-      this.results = await api.getResultsForMonitor(monId, 50)
+      this.results = /** @type Nanomon.ResultExtended[] */ (await api.getResultsForMonitor(monId, 50))
 
       this.updatedDate = niceDate(this.monitor.updated)
       this.icon = monitorIcon(this.monitor)
@@ -61,11 +88,14 @@ export const monitorComponent = (api, userAccount) => ({
         this.lastResultDate = niceDate(this.results[0]?.date)
       }
 
+      /** @type number[] */
       const resultValues = []
+
+      /** @type string[] */
       const resultLabels = []
+
       for (let i = this.results.length - 1; i >= 0; i--) {
         const r = this.results[i]
-
         this.results[i].dateNice = new Date(r.date).toLocaleString()
         this.results[i].statusDetails = getStatusFields(r.status)
 
@@ -102,6 +132,8 @@ export const monitorComponent = (api, userAccount) => ({
         })
       }
     } catch (err) {
+      console.error(err)
+
       this.monitor = null
       this.error = err
     }

@@ -6,21 +6,38 @@
 import { config } from '../app.mjs'
 import { getStatusFields, monitorIcon } from '../lib/utils.mjs'
 
+/** @type Record<string, Chart> */
 const charts = {}
 const CHART_SIZE = 20
 
+/** @param {import("../lib/api-client.mjs").APIClient} api */
 export const homeComponent = (api) => ({
+  /** @type Nanomon.Monitor[] */
   monitors: [],
+
+  /** @type string */
   error: '',
+
+  /** @type number */
   autoUpdate: config.refreshTime,
+
+  /** @type Date */
   updated: new Date(),
+
+  /** @type number */
   intervalToken: null,
+
+  /** @type boolean */
   loading: true,
+
+  /** @type string */
   updateText: 'Never updated',
+
+  /** @type boolean */
   paused: false,
 
   async init() {
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
       const view = e.detail
 
       // If we're not the active view stop the refresh
@@ -53,11 +70,12 @@ export const homeComponent = (api) => ({
       return
     }
 
+    /** @type Nanomon.MonitorExtended[] */
     let monitorsNew = []
     this.loading = true
 
     try {
-      monitorsNew = await api.getMonitors()
+      monitorsNew = /** @type Nanomon.MonitorExtended[] */ (await api.getMonitors())
       this.error = ''
     } catch (err) {
       this.error = err.message
@@ -67,6 +85,7 @@ export const homeComponent = (api) => ({
     this.updateText = new Date().toLocaleTimeString()
 
     // Collect all results for all monitors, needed for charts
+    /** @type Record<string, Nanomon.Result[]> */
     const allResults = {}
 
     for (const m of monitorsNew) {
@@ -88,12 +107,16 @@ export const homeComponent = (api) => ({
     await this.updateCharts(allResults)
   },
 
+  /** @param {Record<string, Nanomon.Result[]>} allResults */
   async updateCharts(allResults) {
     for (const m of this.monitors) {
       const results = allResults[m.id]
 
       // Build data arrays for chart
+
+      /** @type number[] */
       const resultValues = []
+      /** @type string[] */
       const resultLabels = []
       for (let i = results.length - 1; i >= 0; i--) {
         const r = results[i]

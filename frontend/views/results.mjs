@@ -6,19 +6,37 @@
 import { config } from '../app.mjs'
 import { getStatusFields } from '../lib/utils.mjs'
 
+/** @param {import("../lib/api-client.mjs").APIClient} api */
 export const resultsComponent = (api) => ({
+  /** @type Nanomon.ResultExtended[] */
   results: [],
+
+  /** @type string */
   error: '',
+
+  /** @type number */
   autoUpdate: config.refreshTime,
+
+  /** @type Date */
   updated: new Date(),
+
+  /** @type number */
   intervalToken: null,
+
+  /** @type boolean */
   loading: true,
+
+  /** @type string */
   updateText: 'Never updated',
+
+  /** @type boolean */
   paused: false,
-  output: '',
+
+  /** @type Nanomon.Output */
+  output: null,
 
   async init() {
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
       const view = e.detail
 
       // If we're not the active view stop the refresh
@@ -45,17 +63,19 @@ export const resultsComponent = (api) => ({
       return
     }
 
+    /** @type Nanomon.ResultExtended[] */
     let results = []
     this.loading = true
 
     try {
-      results = await api.getResults(100)
+      results = /** @type Nanomon.ResultExtended[] */ (await api.getResults(100))
       this.error = ''
     } catch (err) {
       this.error = err.message
       return
     }
 
+    // Enhance results with nice date and status details
     for (const result of results) {
       result.dateNice = new Date(result.date).toLocaleString()
       result.statusDetails = getStatusFields(result.status)

@@ -24,7 +24,7 @@
   <li x-html="`<b>Build Info:</b> ${buildInfo}`"></li>
 </ul>
 
-<template x-if="userAccount?.name">
+<template x-if="userAccount?.name && userAccount?.name !== 'AUTH_DISABLED'">
   <div>
     <h4><i class="fa fa-fw fa-user"></i> Logged In User</h4>
     <ul>

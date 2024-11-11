@@ -5,10 +5,9 @@
 
 import Alpine from 'https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js'
 import { AuthProviderMSAL } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/auth-provider-msal.mjs'
-
-import { APIClient } from './lib/api-client.mjs'
 import { showToast } from 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/toast.mjs'
 
+import { APIClient } from './lib/api-client.mjs'
 import { homeComponent } from './views/home.mjs'
 import { monitorComponent } from './views/monitor.mjs'
 import { editComponent } from './views/edit.mjs'
@@ -17,8 +16,13 @@ import { resultsComponent } from './views/results.mjs'
 import { aboutComponent } from './views/about.mjs'
 import { adminComponent } from './views/admin.mjs'
 
-export let config = {}
+/** @type Nanomon.Config */
+export let config = null
+
+/** @type AuthProviderMSAL */
 let authProvider = null
+
+/** @type string[] */
 let scopes = []
 
 // This scope is used to validate access to the API. The app registration must
@@ -33,7 +37,8 @@ Alpine.data('app', () => ({
   // API client passed to some views
   api: null,
 
-  // User account object, will be a string if auth is disabled
+  // User account object
+  /** @type {import("https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/auth-provider-msal.mjs").UserAccount} */
   userAccount: null,
 
   // This is called after Alpine.start()
@@ -50,7 +55,7 @@ Alpine.data('app', () => ({
       }
     } else {
       // Set a string value as the user account to indicate auth is disabled
-      this.userAccount = 'AUTH_DISABLED'
+      this.userAccount = { name: 'AUTH_DISABLED' }
     }
 
     // Create the API client, passing in the auth provider, which can be null
@@ -175,15 +180,15 @@ async function startApp() {
     config = {
       API_ENDPOINT: 'http://localhost:8000/api',
       AUTH_CLIENT_ID: '',
+      AUTH_TENANT: '',
       VERSION: '__DEFAULT__',
       BUILD_INFO: '__DEFAULT__',
+      refreshTime: 15,
     }
   }
 
+  config.refreshTime = config.refreshTime || 15
   console.log(`### Config: ${JSON.stringify(config)}`)
-
-  // These are sort of hard coded as I'm lazy
-  config.refreshTime = 15 // Seconds between refreshes
 
   Alpine.start()
 }

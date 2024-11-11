@@ -3,6 +3,16 @@
 // NanoMon Frontend - Monitor definitions, used by edit.mjs
 // ----------------------------------------------------------------------------
 
+/**
+ * @typedef MonitorDefinition
+ * @property {string} ruleHint
+ * @property {string[]} allowedProps
+ * @property {Nanomon.Monitor} template
+ */
+
+/**
+ * @type Record<string, MonitorDefinition>
+ */
 export const definitions = {
   http: {
     ruleHint: 'Properties: <b>respTime, status, body, bodyLen, certExpiryDays, regexMatch</b>',
@@ -15,6 +25,7 @@ export const definitions = {
       target: 'http://example.net',
       rule: 'status == 200 && respTime < 1200',
       properties: {},
+      updated: null,
     },
   },
 
@@ -31,6 +42,7 @@ export const definitions = {
       properties: {
         timeout: '500ms',
       },
+      updated: null,
     },
   },
 
@@ -47,6 +59,7 @@ export const definitions = {
       properties: {
         timeout: '500ms',
       },
+      updated: null,
     },
   },
 
@@ -63,6 +76,7 @@ export const definitions = {
       properties: {
         timeout: '500ms',
       },
+      updated: null,
     },
   },
 }

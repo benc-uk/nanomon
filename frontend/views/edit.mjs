@@ -6,25 +6,40 @@
 import { definitions } from '../definitions.mjs'
 import { monitorIcon } from '../lib/utils.mjs'
 
+/** @param {import("../lib/api-client.mjs").APIClient} api */
 export const editComponent = (api) => ({
+  /** @type string */
   error: '',
+
+  /** @type {Nanomon.Monitor} */
   monitor: null,
-  types: ['http', 'ping', 'tcp', 'dns'],
+
+  /** @type string[] */
+  types: [],
+
+  /** @type string */
   monId: null,
+
+  /** @type boolean */
   rulePop: false,
-  def: definitions,
+
+  /** @type boolean */
   saving: false,
+
   monitorIcon,
 
   async init() {
     this.shown = false
 
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
       const view = e.detail
 
       if (!view || !view.startsWith('#edit')) {
         return
       }
+
+      // Populate types using keys from definitions
+      this.types = Object.keys(definitions)
 
       this.error = ''
       this.saving = false
@@ -56,9 +71,11 @@ export const editComponent = (api) => ({
       target: '',
       rule: '',
       properties: {},
+      updated: null,
     }
   },
 
+  /** @param string */
   newFromTemplate(monType) {
     this.monitor = definitions[monType].template
   },
@@ -86,7 +103,10 @@ export const editComponent = (api) => ({
     }
   },
 
-  // Simple form validator
+  /**
+   * Simple form validation
+   * @returns boolean
+   */
   canSave() {
     let ok = this.monitor.name !== '' && this.monitor.type !== '' && this.monitor.interval !== '' && this.monitor.target !== ''
 
@@ -99,11 +119,10 @@ export const editComponent = (api) => ({
     return ok
   },
 
-  // Not used
-  appendRule(propName) {
-    this.monitor.rule += ` && ${propName} == 'some value'`
-  },
-
+  /**
+   * Get the title for the edit view depending on new or existing monitor
+   * @returns string
+   */
   title() {
     let title = this.monId === 'new' ? 'Create New Monitor' : 'Update Monitor'
     title += `<span class='float-end'>` + monitorIcon(this.monitor) + '</span>'

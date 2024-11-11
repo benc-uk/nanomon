@@ -5,13 +5,19 @@
 
 import { config } from '../app.mjs'
 
+/** @param {import("../lib/api-client.mjs").APIClient} api */
 export const adminComponent = (api) => ({
+  /** @type string */
   apiEndpoint: config.API_ENDPOINT,
+
+  /** @type string */
   message: '',
+
+  /** @type string */
   error: '',
 
   async init() {
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
       const view = e.detail
 
       if (!view || !view.startsWith('#admin')) {
@@ -53,9 +59,9 @@ export const adminComponent = (api) => ({
     }
 
     const reader = new FileReader()
-    reader.onload = async (e) => {
+    reader.onload = async (/** @type {ProgressEvent<FileReader>} */ e) => {
       try {
-        const data = JSON.parse(e.target.result)
+        const data = JSON.parse(/** @type string */ (e.target.result))
         await api.importMonitors(data)
 
         this.message = `Import from '${file.name}' successful. ${data.length} monitor(s) were imported`

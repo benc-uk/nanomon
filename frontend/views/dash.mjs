@@ -17,7 +17,7 @@ export const dashComponent = (api) => ({
   paused: false,
 
   async init() {
-    window.addEventListener('view-changed', async (e) => {
+    window.addEventListener('view-changed', async (/** @type CustomEvent */ e) => {
       const view = e.detail
 
       // If we're not the active view stop the refresh

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NanoMon</title>
 
+    <!-- Chart.js is stuck in the past, couldn't get it working in no-bundle way other than this bullshit -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -17,6 +18,7 @@
 
     <link rel="shortcut icon" href="static/icon.png" type="image/png" />
   </head>
+
   <body>
     <div id="app" x-data="app">
       <nav class="navbar navbar-expand navbar-dark bg-primary sticky-top">
@@ -62,7 +64,7 @@
                 <span class="d-none d-md-inline">LOGIN</span>
               </a>
             </li>
-            <li class="nav-item m-1" x-show="userAccount && userAccount !== 'AUTH_DISABLED'" x-cloak>
+            <li class="nav-item m-1" x-show="userAccount && userAccount.name !== 'AUTH_DISABLED'" x-cloak>
               <a class="nav-link navbtn-user fs-6 text-white" @click="confirm('Are you sure you want to logout?') ? logout() : null">
                 <i class="fa fa-fw fa-right-from-bracket"></i>
                 <span class="d-none d-md-inline">LOGOUT</span>

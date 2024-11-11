@@ -31,6 +31,7 @@ GOLINT_PATH := $(REPO_DIR)/.tools/golangci-lint
 AIR_PATH := $(REPO_DIR)/.tools/air
 VITE_PATH := $(REPO_DIR)/.tools/node_modules/.bin/vite
 ESLINT_PATH := $(REPO_DIR)/.tools/node_modules/.bin/eslint
+TSC_PATH := $(REPO_DIR)/.tools/node_modules/.bin/tsc
 PRETTIER_PATH := $(REPO_DIR)/.tools/node_modules/.bin/prettier
 HTTPYAC_PATH := $(REPO_DIR)/.tools/node_modules/.bin/httpyac
 
@@ -50,11 +51,15 @@ install-tools: ## 🔮 Install dev tools into project tools directory
 	@$(ESLINT_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools eslint
 	@$(PRETTIER_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools prettier
 	@$(HTTPYAC_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools httpyac
+	@$(TSC_PATH) -v > /dev/null 2>&1 || npm install --prefix ./.tools typescript
 	
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
-	@$(ESLINT_PATH) -c frontend/eslint.config.mjs ./frontend/
+	@$(ESLINT_PATH) -c frontend/eslint.config.mjs ./frontend
 	@$(PRETTIER_PATH) ./frontend --check
+	@echo "Checking types in Frontend JS"
+	@$(TSC_PATH) -p ./frontend
+	@echo "Linting Go code"
 	$(GOLINT_PATH) run
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code

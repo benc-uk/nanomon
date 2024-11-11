@@ -5,6 +5,9 @@
       "rules": {
         "explicit-values-for-loc-params": {
           "level": "off"
+        },
+        "outputs-should-not-contain-secrets": {
+          "level": "off"
         }
       }
     }

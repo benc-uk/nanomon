@@ -3,7 +3,13 @@
 // NanoMon Frontend - Some view helpers
 // ----------------------------------------------------------------------------
 
+/**
+ *
+ * @param {number} statusCode
+ * @returns {Nanomon.MonitorStatus}
+ */
 export function getStatusFields(statusCode) {
+  /** @type Nanomon.MonitorStatus */
   const status = {
     code: statusCode,
   }
@@ -42,13 +48,23 @@ export function getStatusFields(statusCode) {
   return status
 }
 
-export function niceDate(d) {
-  if (!d) {
+/**
+ * Makes date strings more readable
+ * @param {string} dateString
+ * @returns string
+ */
+export function niceDate(dateString) {
+  if (!dateString) {
     return ''
   }
-  return d.replace('T', ' ').split('.')[0]
+  return dateString.replace('T', ' ').split('.')[0]
 }
 
+/**
+ * Get a font-awesome icon for a monitor based on type
+ * @param {Nanomon.Monitor} monitor
+ * @returns string
+ */
 export function monitorIcon(monitor) {
   switch (monitor.type) {
     case 'http':
@@ -65,6 +81,11 @@ export function monitorIcon(monitor) {
   }
 }
 
+/**
+ * Check if an object is empty
+ * @param {object} obj
+ * @returns boolean
+ */
 export function isEmpty(obj) {
   if (obj === undefined || obj === null) {
     return true

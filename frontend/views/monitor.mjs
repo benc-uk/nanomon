@@ -6,6 +6,8 @@
 import { APIClient } from '../lib/api-client.mjs'
 import { getStatusFields, niceDate, monitorIcon, isEmpty } from '../lib/utils.mjs'
 
+import { Chart } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.6/+esm'
+
 /**
  * @param {APIClient} api
  * @param {*} userAccount
@@ -109,7 +111,7 @@ export const monitorComponent = (api, userAccount) => ({
       }
 
       if (this.results.length > 0) {
-        const ctx = document.getElementById('graph')
+        const ctx = /** @type HTMLCanvasElement */ (document.getElementById('graph'))
         new Chart(ctx, {
           type: 'line',
           data: {

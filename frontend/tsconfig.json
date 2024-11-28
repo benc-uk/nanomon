@@ -1,5 +1,5 @@
 //
-//
+// We're not using TypeScript, but we can still use the TypeScript compiler to type-check our JavaScript files via JSDoc
 //
 
 {

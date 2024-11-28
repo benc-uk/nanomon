@@ -16,6 +16,9 @@ import { resultsComponent } from './views/results.mjs'
 import { aboutComponent } from './views/about.mjs'
 import { adminComponent } from './views/admin.mjs'
 
+import { Chart, registerables } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.6/+esm'
+Chart.register(...registerables) // This magic is required, this guy figured it out: https://t.ly/lxwT5
+
 /** @type Nanomon.Config */
 export let config = null
 

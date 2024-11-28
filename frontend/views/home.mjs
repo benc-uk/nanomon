@@ -6,7 +6,9 @@
 import { config } from '../app.mjs'
 import { getStatusFields, monitorIcon } from '../lib/utils.mjs'
 
-/** @type Record<string, Chart> */
+import { Chart } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.6/+esm'
+
+/** @type {Record<string, import('https://cdn.jsdelivr.net/npm/chart.js').Chart>} */
 const charts = {}
 const CHART_SIZE = 20
 
@@ -134,7 +136,7 @@ export const homeComponent = (api) => ({
 
       // Create new chart otherwise
       this.$nextTick(() => {
-        const ctx = document.getElementById(`chart_${m.id}`)
+        const ctx = /** @type HTMLCanvasElement */ (document.getElementById(`chart_${m.id}`))
         charts[m.id] = new Chart(ctx, {
           type: 'line',
           data: {

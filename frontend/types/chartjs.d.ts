@@ -1,16 +1,21 @@
 //
-// This is a stub of a type definition file for Chart.js.
-// It is not complete but should be enough to suppress TypeScript errors when using the global Chart lib
+// This is a shallow stub of a Chart.js type definition
+// It is a tiny fraction of what Chart.js provides
 //
 
-declare class Chart {
-  constructor(ctx: HTMLElement, config: any)
-  destroy(): void
-  update(string): void
+declare module 'https://cdn.jsdelivr.net/npm/chart.js*' {
+  class Chart {
+    constructor(ctx: HTMLElement, config: any)
+    destroy(): void
+    update(string): void
+    static register(...args: any[]): void
 
-  data: any
-}
+    data: any
+  }
 
-declare namespace Chart {
-  function getChart(id: string): any
+  const registerables: any[]
+
+  namespace Chart {
+    function getChart(id: string): any
+  }
 }

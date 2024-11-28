@@ -1,5 +1,5 @@
 //
-// As remote type definitions are not supported
+// As remote type definitions are not supported by TypeScript, we need to declare them here locally
 //
 
 declare module 'https://cdn.jsdelivr.net/gh/benc-uk/js-library@main/api-client.mjs' {

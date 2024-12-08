@@ -13,6 +13,7 @@ GET {{endpoint}}/monitors
 
 ### Create a HTTP monitor
 # @name createMon
+# @title Create a HTTP monitor
 POST {{endpoint}}/monitors
 Content-Type: application/json
 

@@ -50,6 +50,6 @@ install-npm package cmd path="./.tools":
   if [ -x "$(command -v {{ path }}/node_modules/.bin/{{ cmd }})" ]; then
     echo "{{ ok + cmd }} already installed"
   else
-    npm install --silent --prefix {{ path }}  {{ package }}
+    npm install --silent --prefix {{ path }} {{ package }}
     echo "{{ done + cmd }} installed"
   fi

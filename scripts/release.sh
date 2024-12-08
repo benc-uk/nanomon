@@ -2,7 +2,7 @@
 VERSION=$1
 PREV_VERSION=$2
 
-# **** Used for project maintence only ****
+# **** Used for project maintenance only ****
 # Script used to release to GitHub 
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

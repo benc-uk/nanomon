@@ -82,17 +82,16 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
 
-Pre-reqs:
-
-- Linux system like Ubuntu (WSL2 was used for development), MacOs might work
-- Docker engine & CLI
-- Go SDK & toolchain
-- [Just](https://just.systems) task runner and make replacement
-  - If you're not keen on installing another binary on your system, run `./scripts/install-just.sh` which puts the binary into a project `.tools/` folder, then you can run `.tools/just`
-
 ### Local Dev Quick Start
 
-When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
+Pre-reqs:
+
+- Linux system like Ubuntu (WSL2 was used for development), MacOS might work 🤷‍♂️
+- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
+- [Go SDK & toolchain](https://go.dev/doc/install)
+- [Just](https://just.systems) task runner and make replacement
+  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.tools/`), then you can run `.tools/just`
+  - When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
 
 To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
 

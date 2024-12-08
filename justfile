@@ -83,7 +83,7 @@ run-frontend:
 run-db:
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
     docker rm -f mongo || true
-    docker run --rm -it -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
+    docker run --rm -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
      -e MONGODB_REPLICA_SET_MODE=primary \
      -e MONGODB_ADVERTISED_HOSTNAME=localhost \
      -e ALLOW_EMPTY_PASSWORD=yes \
@@ -91,11 +91,17 @@ run-db:
 
 # 🚀 Run all services locally with hot-reload, plus MongoDB
 run-all:
-    scripts/run-all.sh
+    #!/bin/env bash
+    trap "echo -e '\n⛔ Removing MongoDB container' && docker rm -f mongo" EXIT
+    if ! docker ps | grep -q mongo; then {{ just_executable() }} run-db & fi
+    sleep 3 && {{ just_executable() }} run-runner &
+    sleep 3 && {{ just_executable() }} run-api &
+    sleep 3 && {{ just_executable() }} run-frontend &
+    wait
 
 # 🧪 Run all unit tests
 test:
-    @ALERT_SMTP_TO= go test -v ./... 
+    ALERT_SMTP_TO= go test -v ./... 
 
 # 🔬 Run API integration tests, using HttpYac
 test-api report="false":
@@ -114,6 +120,8 @@ generate-specs:
   cp tsp-output/@typespec/json-schema/*.json ..
 
 # 🧹 Clean up, remove dev data and files
+[confirm('Are you sure you want to clean up?')]
 clean:
 	rm -rf tmp bin .tools frontend/config api/node_modules frontend/.vite *.xml
 	docker volume rm nm-mongo-data || true
+

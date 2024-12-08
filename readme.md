@@ -82,14 +82,22 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
 
+Pre-reqs:
+
+- Linux system like Ubuntu (WSL2 was used for development), MacOs might work
+- Docker engine & CLI
+- Go SDK & toolchain
+- [Just](https://just.systems) task runner and make replacement
+  - If you're not keen on installing another binary on your system, run `./scripts/install-just.sh` which puts the binary into a project `.tools/` folder, then you can run `.tools/just`
+
 ### Local Dev Quick Start
 
 When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
 
 To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
 
-- Run `make install-tools`
-- Run `make run-all`
+- Run `just install`
+- Run `just run-all`
 - The frontend should automatically open in your browser.
 
 ### Run Standalone Image
@@ -140,7 +148,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Vite is used but just as a dev-server for serving the site locally
 - Configuration is fetched from the URL `/config` at start up.
   - When hosted by the frontend-host this allows for values to be dynamically passed to the frontend at runtime.
-  - When running locally the makefile target `make run-frontend` builds a static config file to "fake" this config API.
+  - When running locally the makefile target `just run-frontend` builds a static config file to "fake" this config API.
 - By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser)
 
 ### Frontend Host
@@ -150,26 +158,25 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Listens on port 8001 by default.
 - Provides a single special API endpoint served at `/config` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
-## Makefile Reference
+## Just Reference
 
 ```text
-build                🔨 Build all binaries into ./bin/ directory, not really needed
-clean                🧹 Clean up, remove dev data and files
-generate-specs       🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
-help                 💬 This help message :)
-image-standalone     📦 Build the standalone image
-images               📦 Build all container images
-install-tools        🔮 Install dev tools into project tools directory
-lint-fix             📝 Lint & format, attempts to fix errors & modify code
-lint                 🔍 Lint & format check only, sets exit code on error for CI
-push                 📤 Push all container images
-run-all              🚀 Run all everything locally, including DB with hot-reload
-run-api              🎯 Run API service locally with hot-reload
-run-db               🍃 Run MongoDB in container (needs Docker)
-run-frontend         🌐 Run frontend with dev HTTP server & hot-reload
-run-runner           🏃 Run monitor runner locally with hot-reload
-test-api             🔬 Run API integration tests, using HttpYac
-test                 🧪 Run all unit tests
+ 🔸build                   # 🔨 Build all binaries into ./bin/ directory, not really needed
+ 🔸clean                   # 🧹 Clean up, remove dev data and files
+ 🔸format                  # 📝 Format source files and fix linting problems
+ 🔸generate-specs          # 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
+ 🔸image-standalone        # 📦 Build the special standalone all-in-one image
+ 🔸images                  # 📦 Build all container images, using Docker compose
+ 🔸install                 # 🔮 Install dev tools into project tools directory
+ 🔸lint fix="false"        # 🔍 Lint & format, default is to run lint check only and set exit code
+ 🔸push                    # 📤 Push all container images
+ 🔸run-all                 # 🚀 Run all services locally with hot-reload, plus MongoDB
+ 🔸run-api                 # 🎯 Run the API service locally, with hot reloading
+ 🔸run-db                  # 🍃 Run MongoDB in container (needs Docker)
+ 🔸run-frontend            # 🌐 Run frontend with Vite dev HTTP server & hot-reload
+ 🔸run-runner              # 🏃 Run the runner service locally, with hot reloading
+ 🔸test                    # 🧪 Run all unit tests
+ 🔸test-api report="false" # 🔬 Run API integration tests, using HttpYac
 ```
 
 ## Configuration Reference
@@ -257,7 +264,7 @@ Each time a TCP monitor runs it attempts to open a TCP connection to given host 
 
 This monitor will send one or more ICMP ping packets to the given host or IP address, it will return failed status in the event of network/connection failure, unable to resolve name with DNS Otherwise it will return OK.
 
-Note. As this monitor needs to send ICMP packets, the runner process needs certain OS privileges to do that otherwise you will see `socket: operation not permitted` errors. When running inside a container it runs as root so there is no issue. When running locally if you want to use this monitor type, build the runner binary with `make build` then start the runner process with sudo e.g. `sudo ./bin/runner`
+Note. As this monitor needs to send ICMP packets, the runner process needs certain OS privileges to do that otherwise you will see `socket: operation not permitted` errors. When running inside a container it runs as root so there is no issue. When running locally if you want to use this monitor type, build the runner binary with `just build` then start the runner process with sudo e.g. `sudo ./bin/runner`
 
 - **Target:** A hostname or IP address.
 - **Value:** Average round trip time in milliseconds.
@@ -317,7 +324,7 @@ Security is enabled using the Microsoft Identity Platform (now called Microsoft 
 A basic guide to set this up:
 
 - Register a new app in Microsoft Entra ID, his needs to have the API scope `system.admin` exposed, and also be set with the correct SPA redirect URLs. To simplify this creation, use the provided bash script: `./scripts/aad-app-reg.sh`, or use [the portal](https://entra.microsoft.com/#home).
-- Test locally - Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then (re)start the frontend and API with `make run-api` and frontend with `make run-frontend`. You should see a login button on the page, and no way to create or edit monitors until you sign-in.
+- Test locally - Put the provided client id as the `AUTH_CLIENT_ID`, in your `.env` file, then (re)start the frontend and API with `just run-api` and frontend with `just run-frontend`. You should see a login button on the page, and no way to create or edit monitors until you sign-in.
 - For deploying elsewhere:
   - Get the frontend URL of the deployed running instance.
   - Add this URL to the SPA redirect URIs in the app registration. It's probably easiest doing this in the Azure Portal.

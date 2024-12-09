@@ -31,11 +31,14 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install just
+        uses: taiki-e/install-action@just
+
       - name: Install tools
-        run: make install-tools
+        run: just install
 
       - name: Linting & formatting
-        run: make lint
+        run: just lint
 
       # Run tests and filter the output to JUnit format
       - name: Run unit tests
@@ -54,9 +57,9 @@ jobs:
       # Run API integration tests with output in JUnit format
       - name: Run API integration tests
         run: |
-          make run-all PROMETHEUS_ENABLED=1 &
+          just run-all PROMETHEUS_ENABLED=1 &
           sleep 20
-          make test-api TEST_REPORT=1
+          just test-api TEST_REPORT=1
 
       - name: Test Report (Integration)
         uses: phoenix-actions/test-reporting@v8
@@ -67,7 +70,7 @@ jobs:
           reporter: java-junit
 
       - name: Check the build
-        run: make build
+        run: just build
 
   image-build:
     name: Build and push images
@@ -81,10 +84,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install just
+        uses: taiki-e/install-action@just
+
       - name: Build images
-        run: make images
+        run: just images
 
       - name: Push images
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
-          make push
+          just push

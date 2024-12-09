@@ -119,9 +119,9 @@ generate-specs:
   cp tsp-output/@typespec/openapi3/openapi.yaml ../openapi.yaml
   cp tsp-output/@typespec/json-schema/*.json ..
 
-# 🧹 Clean up, remove dev data and files
+# 🧹 Clean up, remove dev data and temp files
 [confirm('Are you sure you want to clean up?')]
 clean:
-	rm -rf tmp bin .tools frontend/config api/node_modules frontend/.vite *.xml
+	rm -rf tmp bin .tools frontend/config api/**/node_modules api/**/tsp-output frontend/.vite *.xml
 	docker volume rm nm-mongo-data || true
 

@@ -9,4 +9,4 @@ The API specs for the Nanomon API resides here
 
 The API is described using [TypeSpec](https://typespec.io/), see [typespec/main.tsp](typespec/main.tsp)
 
-To build and generate the OpenAPI output run `make generate-specs`
+To build and generate the OpenAPI output run `just generate-specs`

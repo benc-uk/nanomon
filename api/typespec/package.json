@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@typespec/compiler": "latest",
-    "@typespec/openapi3": "latest",
-    "@typespec/json-schema": "latest"
+    "@typespec/compiler": "0.62.0",
+    "@typespec/openapi3": "0.62.0",
+    "@typespec/json-schema": "0.62.0"
   }
 }

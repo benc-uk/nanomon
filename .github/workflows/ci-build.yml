@@ -61,7 +61,7 @@ jobs:
           API_ENDPOINT: http://localhost:8000/api
         run: |
           just run-all &
-          sleep 40
+          sleep 25
           just test-api true
 
       - name: Test Report (Integration)
@@ -73,6 +73,12 @@ jobs:
           reporter: java-junit
 
       - name: Check the build
+        env:
+          VERSION: dev
+          BUILD_INFO: "ignore me"
+          IMAGE_REG: ignored
+          IMAGE_NAME: ignored
+          IMAGE_TAG: ignored
         run: just build
 
   image-build:

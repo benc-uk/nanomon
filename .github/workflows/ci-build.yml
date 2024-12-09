@@ -61,7 +61,7 @@ jobs:
           API_ENDPOINT: http://localhost:8000/api
         run: |
           just run-all &
-          sleep 20
+          sleep 40
           just test-api true
 
       - name: Test Report (Integration)

@@ -94,9 +94,12 @@ run-all:
     #!/bin/env bash
     trap "echo -e '\n⛔ Removing MongoDB container' && docker rm -f mongo" EXIT
     if ! docker ps | grep -q mongo; then {{ just_executable() }} run-db & fi
-    sleep 10 && {{ just_executable() }} run-runner &
-    sleep 10 && {{ just_executable() }} run-api &
-    sleep 10 && {{ just_executable() }} run-frontend &
+    sleep 10 
+    {{ just_executable() }} run-runner &
+    sleep 10
+    {{ just_executable() }} run-api &
+    sleep 10
+    {{ just_executable() }} run-frontend &
     wait
 
 # 🧪 Run all unit tests

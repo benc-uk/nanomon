@@ -56,10 +56,12 @@ jobs:
 
       # Run API integration tests with output in JUnit format
       - name: Run API integration tests
+        env:
+          PROMETHEUS_ENABLED: "1"
         run: |
-          just run-all PROMETHEUS_ENABLED=1 &
+          just run-all &
           sleep 20
-          just test-api TEST_REPORT=1
+          just test-api true
 
       - name: Test Report (Integration)
         uses: phoenix-actions/test-reporting@v8

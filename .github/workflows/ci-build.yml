@@ -19,6 +19,12 @@ permissions:
   packages: write
   checks: write
 
+env:
+  IMAGE_REG: ghcr.io
+  IMAGE_NAME: bencuk/nanomon
+  IMAGE_TAG: dev
+  VERSION: dev
+
 jobs:
   lint-test:
     name: Testing & Linting
@@ -61,7 +67,7 @@ jobs:
           API_ENDPOINT: http://localhost:8000/api
         run: |
           just run-all &
-          sleep 25
+          sleep 40
           just test-api true
 
       - name: Test Report (Integration)
@@ -74,19 +80,13 @@ jobs:
 
       - name: Check the build
         env:
-          VERSION: dev
           BUILD_INFO: "ignore me"
-          IMAGE_REG: ignored
-          IMAGE_NAME: ignored
-          IMAGE_TAG: ignored
         run: just build
 
   image-build:
     name: Build and push images
     if: github.ref == 'refs/heads/main'
     env:
-      IMAGE_TAG: dev
-      VERSION: dev
       BUILD_INFO: "CI build, SHA:${{ github.sha }}"
     runs-on: ubuntu-latest
     needs: lint-test

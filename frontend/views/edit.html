@@ -17,8 +17,14 @@
       <form>
         <div class="form-group mb-2">
           <label for="name">Name</label>
-          <input type="text" x-model="monitor.name" class="form-control" id="name"
-            placeholder="Enter name for this monitor" autocomplete="new-password" />
+          <input
+            type="text"
+            x-model="monitor.name"
+            class="form-control"
+            id="name"
+            placeholder="Enter name for this monitor"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="d-flex w-100 mb-2">
@@ -33,29 +39,52 @@
 
           <div class="form-group me-3">
             <label for="interval">Interval</label>
-            <input type="text" x-model="monitor.interval" class="form-control" id="interval"
-              placeholder="Interval, e.g. 20s or 5m or 1.5h" autocomplete="new-password" />
+            <input
+              type="text"
+              x-model="monitor.interval"
+              class="form-control"
+              id="interval"
+              placeholder="Interval, e.g. 20s or 5m or 1.5h"
+              autocomplete="new-password"
+            />
           </div>
 
           <div class="form-group flex-grow-1">
             <label for="group">Group</label>
-            <input type="text" x-model="monitor.group" class="form-control" id="group" placeholder="Optional group name"
-              autocomplete="new-password" />
+            <input
+              type="text"
+              x-model="monitor.group"
+              class="form-control"
+              id="group"
+              placeholder="Optional group name"
+              autocomplete="new-password"
+            />
           </div>
         </div>
 
         <div class="form-group mb-2">
           <label for="interval">Target</label>
-          <input type="text" x-model="monitor.target" class="form-control" id="interval"
+          <input
+            type="text"
+            x-model="monitor.target"
+            class="form-control"
+            id="interval"
             :placeholder="monitor.type == 'http' ? 'Target URL to be monitored' : 'Target hostname, or IP address (add :port for TCP)'"
-            autocomplete="new-password" />
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="form-group">
           <label for="interval">Rule</label>
           <div class="d-flex">
-            <input type="text" x-model="monitor.rule" class="form-control" id="interval"
-              placeholder="Status rule expression" autocomplete="new-password" />
+            <input
+              type="text"
+              x-model="monitor.rule"
+              class="form-control"
+              id="interval"
+              placeholder="Status rule expression"
+              autocomplete="new-password"
+            />
 
             <div class="popWrap">
               <a class="btn btn-secondary ms-4" @click="rulePop = !rulePop">
@@ -75,8 +104,7 @@
       <div class="d-flex align-items-baseline">
         <h4 class="mt-4">Properties</h4>
         <div class="dropdown ms-auto">
-          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-            aria-expanded="false">Add Property</button>
+          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add Property</button>
           <ul class="dropdown-menu">
             <template x-for="prop of monitorDefs[monitor.type].allowedProps">
               <li><a class="dropdown-item notexttransform" @click="monitor.properties[prop]=''" x-text="prop"></a></li>
@@ -114,8 +142,7 @@
         <i class="fa fa-fw fa-check"></i> <span x-text="monId == 'new' ? 'CREATE' : 'UPDATE'"></span>
       </button>
 
-      <a :href="monId== 'new' ? '#home':`#monitor/${monId}`" class="btn btn-warning wide"><i
-          class="fa fa-fw fa-xmark"></i> Cancel</a>
+      <a :href="monId== 'new' ? '#home':`#monitor/${monId}`" class="btn btn-warning wide"><i class="fa fa-fw fa-xmark"></i> Cancel</a>
     </div>
 
     <template x-if="saving">

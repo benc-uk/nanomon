@@ -28,6 +28,8 @@ export const editComponent = (api) => ({
 
   monitorIcon,
 
+  monitorDefs: definitions,
+
   async init() {
     this.shown = false
 
@@ -75,7 +77,7 @@ export const editComponent = (api) => ({
     }
   },
 
-  /** @param string */
+  /** @param {string} monType */
   newFromTemplate(monType) {
     this.monitor = definitions[monType].template
   },

@@ -81,20 +81,21 @@ run-frontend:
 
 # 🍃 Run MongoDB in container (needs Docker)
 run-db:
+    echo -e "🍃 Starting MongoDB...\nNote: You will not see any logs"
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
     docker rm -f mongo || true
     docker run --rm -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
      -e MONGODB_REPLICA_SET_MODE=primary \
      -e MONGODB_ADVERTISED_HOSTNAME=localhost \
      -e ALLOW_EMPTY_PASSWORD=yes \
-     --name mongo bitnami/mongodb:8.0
+     --name mongo bitnami/mongodb:8.0 >/dev/null 2>&1
 
 # 🚀 Run all services locally with hot-reload, plus MongoDB
 run-all:
     #!/bin/env bash
     trap "echo -e '\n⛔ Removing MongoDB container' && docker rm -f mongo" EXIT
     if ! docker ps | grep -q mongo; then {{ just_executable() }} run-db & fi
-    sleep 20 
+    sleep 15 
     {{ just_executable() }} run-runner &
     sleep 5
     {{ just_executable() }} run-api &

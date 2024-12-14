@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# **** Used for project maintence only ****
+# **** Used for project maintenance only ****
 # Script used to prepare the Helm chart for publishing
 
 which helm-docs > /dev/null || (echo "💥 helm-docs not found. Please install helm-docs, see https://github.com/norwoodj/helm-docs#installation" && exit 1)

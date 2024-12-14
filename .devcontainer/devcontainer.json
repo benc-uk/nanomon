@@ -6,9 +6,10 @@
     },
     "ghcr.io/devcontainers-contrib/features/k6": {},
     "ghcr.io/devcontainers/features/docker-in-docker": {},
-    "ghcr.io/frntn/devcontainers-features/newman": {}
+    "ghcr.io/guiyomh/features/just:0": {}
   },
-  "postCreateCommand": "sudo apt clean && sudo apt update && sudo apt install -yq figlet",
+  "postCreateCommand": "just install",
+  "forwardPorts": [8000, 3000],
   "customizations": {
     "vscode": {
       "settings": {

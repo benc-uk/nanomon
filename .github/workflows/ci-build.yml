@@ -19,6 +19,12 @@ permissions:
   packages: write
   checks: write
 
+env:
+  IMAGE_REG: ghcr.io
+  IMAGE_NAME: bencuk/nanomon
+  IMAGE_TAG: dev
+  VERSION: dev
+
 jobs:
   lint-test:
     name: Testing & Linting
@@ -31,11 +37,14 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install just
+        uses: taiki-e/install-action@just
+
       - name: Install tools
-        run: make install-tools
+        run: just install
 
       - name: Linting & formatting
-        run: make lint
+        run: just lint
 
       # Run tests and filter the output to JUnit format
       - name: Run unit tests
@@ -53,10 +62,13 @@ jobs:
 
       # Run API integration tests with output in JUnit format
       - name: Run API integration tests
+        env:
+          PROMETHEUS_ENABLED: "1"
+          API_ENDPOINT: http://localhost:8000/api
         run: |
-          make run-all PROMETHEUS_ENABLED=1 &
-          sleep 20
-          make test-api TEST_REPORT=1
+          just run-all &
+          sleep 25
+          just test-api true
 
       - name: Test Report (Integration)
         uses: phoenix-actions/test-reporting@v8
@@ -67,24 +79,27 @@ jobs:
           reporter: java-junit
 
       - name: Check the build
-        run: make build
+        env:
+          BUILD_INFO: "ignore me"
+        run: just build
 
   image-build:
     name: Build and push images
     if: github.ref == 'refs/heads/main'
     env:
-      IMAGE_TAG: dev
-      VERSION: dev
       BUILD_INFO: "CI build, SHA:${{ github.sha }}"
     runs-on: ubuntu-latest
     needs: lint-test
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install just
+        uses: taiki-e/install-action@just
+
       - name: Build images
-        run: make images
+        run: just images
 
       - name: Push images
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
-          make push
+          just push

@@ -167,6 +167,10 @@ async function startApp() {
     console.log(`### Fetching config from /config.json, status: ${configResp.status}`)
     if (configResp.ok) {
       config = await configResp.json()
+
+      if (config.API_ENDPOINT === null || config.API_ENDPOINT === '' || !config.API_ENDPOINT) {
+        throw new Error('Config was provided, but API_ENDPOINT is not set')
+      }
     } else {
       throw new Error('Unable to fetch config')
     }

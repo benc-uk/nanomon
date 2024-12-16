@@ -66,8 +66,10 @@ jobs:
           PROMETHEUS_ENABLED: "1"
           API_ENDPOINT: http://localhost:8000/api
         run: |
+          pwd
+          ls
           just run-all &
-          sleep 25
+          sleep 35
           just test-api true
 
       - name: Test Report (Integration)

@@ -96,10 +96,8 @@ jobs:
       - name: Install just
         uses: taiki-e/install-action@just
 
-      - name: Build images
-        run: just images
-
-      - name: Push images
+      - name: Build & push images
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+          just images
           just --yes push

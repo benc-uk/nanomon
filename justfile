@@ -19,7 +19,8 @@ default:
 
 # 🔮 Install dev tools into project tools directory
 install:
-    {{ just_executable() }} install-air {{ tools_dir }}
+    # Note: Temporary version fixing to 1.61.3 see https://github.com/air-verse/air/issues/718
+    {{ just_executable() }} install-air {{ tools_dir }} v1.61.3
     {{ just_executable() }} install-golangcilint {{ tools_dir }}
     {{ just_executable() }} install-npm prettier prettier {{ tools_dir }}
     {{ just_executable() }} install-npm eslint eslint {{ tools_dir }}
@@ -66,11 +67,11 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
-    {{ tools_dir + '/air' }} -c  {{ justfile_directory() }}/services/runner/.air.toml
+    {{ tools_dir + '/air' }} -c  ./services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
-    {{ tools_dir + '/air' }} -c  {{ justfile_directory() }}/services/api/.air.toml
+    {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
 
 # 🌐 Run frontend with Vite dev HTTP server & hot-reload
 run-frontend:

@@ -66,8 +66,6 @@ jobs:
           PROMETHEUS_ENABLED: "1"
           API_ENDPOINT: http://localhost:8000/api
         run: |
-          pwd
-          ls
           just run-all &
           sleep 35
           just test-api true
@@ -104,4 +102,4 @@ jobs:
       - name: Push images
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
-          just push
+          just --yes push

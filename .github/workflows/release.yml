@@ -52,4 +52,4 @@ jobs:
           IMAGE_TAG: latest
         run: |
           just images 
-          just push --yes
+          just --yes push

@@ -66,11 +66,11 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
-    {{ tools_dir + '/air' }} -c services/runner/.air.toml
+    {{ tools_dir + '/air' }} -c  {{ justfile_directory() }}/services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
-    {{ tools_dir + '/air' }} -c services/api/.air.toml
+    {{ tools_dir + '/air' }} -c  {{ justfile_directory() }}/services/api/.air.toml
 
 # 🌐 Run frontend with Vite dev HTTP server & hot-reload
 run-frontend:

@@ -53,7 +53,6 @@ build: (check-env needed_vars)
 
 # 📦 Build all container images, using Docker compose
 images: (check-env needed_vars) (print-vars needed_vars)
-    sleep 5
     docker compose -f build/compose.yaml build
 
 # 📦 Build the special standalone all-in-one image

@@ -6,6 +6,7 @@ bin/
 .tools/
 tmp/
 frontend/config*
+react-fe/**/config*
 release-notes.md
 my-*.yaml
 my-*.bicepparam

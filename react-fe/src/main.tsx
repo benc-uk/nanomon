@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 
 import './index.css'
-import App from './App.tsx'
+import App from './components/App.tsx'
 
-import { newConfigProvider, newServicesProvider } from './providers.tsx'
-import { AppConfig } from './lib/types.ts'
-import { AuthProviderMSAL } from './lib/auth-msal.ts'
+import { createConfigProvider, createServicesProvider } from './providers.tsx'
+import { AppConfig } from './types'
+import { AuthProviderMSAL } from './auth-msal'
 
 let config: AppConfig
 let authProvider: AuthProviderMSAL
@@ -56,8 +56,8 @@ async function startApp() {
   config.REFRESH_TIME = config.REFRESH_TIME || 15
   console.log(`### Config: ${JSON.stringify(config)}`)
 
-  const ServicesProvider = newServicesProvider(config)
-  const ConfigProvider = newConfigProvider(config)
+  const ServicesProvider = createServicesProvider(config)
+  const ConfigProvider = createConfigProvider(config)
 
   createRoot(document.getElementById('root')!).render(
     // <StrictMode>

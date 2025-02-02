@@ -61,7 +61,12 @@ a {
 }
 
 .code {
-  font-family: "Consolas", "Courier New", Courier, monospace;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+}
+
+.big-spinner {
+  width: 5rem;
+  height: 5rem;
 }
 
 .valign-middle {
@@ -162,4 +167,16 @@ summary:hover {
 
 .wide-button {
   width: 20rem;
+}
+
+.table-outs {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 7px;
+  padding: 15px;
+  padding-left: 35px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3) inset;
+}
+
+summary:hover {
+  color: rgb(27, 27, 27);
 }

@@ -1,6 +1,10 @@
 import { Route, Routes, NavLink } from 'react-router'
-import MonitorsHome from './MonitorsHome'
+
+// Components
+import Monitors from './Monitors'
 import About from './About'
+import Dashboard from './Dashboard'
+import Monitor from './Monitor'
 
 function App() {
   return (
@@ -19,9 +23,9 @@ function App() {
               </NavLink>
             </li>
             <li className="nav-item m-1">
-              <a className="nav-link navbtn-main fs-6 text-dark" href="#dash">
+              <NavLink className="nav-link navbtn-main fs-6 text-dark" to="/dashboard">
                 <i className="fa fa-fw fa-eye"></i> <span className="d-none d-md-inline">Dashboard</span>
-              </a>
+              </NavLink>
             </li>
             <li className="nav-item m-1">
               <a className="nav-link navbtn-main fs-6 text-dark" href="#results">
@@ -64,8 +68,10 @@ function App() {
 
       <div className="container pt-3">
         <Routes>
-          <Route path="/" element={<MonitorsHome />} />
-          <Route path="/monitors" element={<MonitorsHome />} />
+          <Route path="/" element={<Monitors />} />
+          <Route path="/monitors" element={<Monitors />} />
+          <Route path="/monitor/:id" element={<Monitor />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </div>

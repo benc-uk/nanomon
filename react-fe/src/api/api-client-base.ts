@@ -13,10 +13,19 @@ interface SuccessFunction {
 }
 
 interface APIConfig {
+  /** Extra verbose logging */
   verbose?: false
+
+  /** Custom headers to add to every request */
   headers?: Headers
+
+  /** Fake network delay in milliseconds */
   delay?: number
+
+  /** Auth provider to use for authentication */
   authProvider?: AuthProvider | null
+
+  /** Success function to determine if a response is considered successful */
   success?: SuccessFunction
 }
 /**
@@ -31,6 +40,8 @@ export class APIClientBase {
     headers: {} as Headers,
     delay: 0,
     authProvider: null,
+
+    // Default success function, checks the response status code is 2xx
     success: (response) => response.ok,
   }
 
@@ -98,7 +109,7 @@ export class APIClientBase {
     }
 
     // All responses are checked via the success function
-    // check function exists and return value is false
+    // - check function exists & it returns false
     if (this.config.success !== undefined && !this.config.success(response)) {
       // Check if there is a JSON error object in the response
       let errorData = null

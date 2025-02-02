@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------------------------------------------------
 
 import * as msal from '@azure/msal-browser'
-import { AuthProvider } from './api-client-base'
+import { AuthProvider } from './api/api-client-base'
 
 export class AuthProviderMSAL implements AuthProvider {
   msalApp = null as msal.PublicClientApplication | null

@@ -8,7 +8,7 @@ export interface AppConfig {
 }
 
 export interface Monitor {
-  id?: string
+  id: string
   name: string
   type: string
   interval: string
@@ -52,8 +52,8 @@ export interface ResultExtended extends Result {
 }
 
 export interface MonitorExtended extends Monitor {
-  message: string
-  lastRan: string
+  message?: string
+  lastRan?: string
   status: MonitorStatus
   icon: string
 }

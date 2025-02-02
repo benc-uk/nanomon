@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react'
-import { ConfigContext, ServicesContext } from './providers'
-import { Monitor, MonitorExtended, Result } from './lib/types'
-import { getStatusFields, monitorIcon } from './lib/utils'
+import { ConfigContext, ServicesContext } from '../providers'
+import { Monitor, MonitorExtended, Result } from '../types'
+import { getMonitorStatus, monitorIcon } from '../utils'
 import { NavLink } from 'react-router'
 
 import { Chart, registerables } from 'chart.js'
@@ -11,43 +11,51 @@ const CHART_SIZE = 20
 let timeoutId: number
 const chartCache = {} as Record<string, Chart>
 
-export default function MonitorsHome() {
+export default function Monitors() {
   const api = useContext(ServicesContext).api
   const config = useContext(ConfigContext)
 
   const [monitors, setMonitors] = useState<MonitorExtended[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [updateText, setUpdateText] = useState<string>('Never updated')
+  const [updateText, setUpdateText] = useState<string>('Loading, please wait... ')
   const [paused, setPaused] = useState<boolean>(false)
   const [chartData, setChartData] = useState<Record<string, Result[]>>({})
+  const [error, setError] = useState<string>('')
 
   async function fetchMonitors(repeat = true) {
-    const monitorsLatest: Monitor[] = await api.getMonitors()
+    setLoading(true)
+    let fetchedMonitors: Monitor[] = []
+    try {
+      fetchedMonitors = await api.getMonitors()
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      }
+      console.error(err)
+    }
+
+    const chartData = {} as Record<string, Result[]>
     const newMonitors: MonitorExtended[] = []
-    setUpdateText(new Date().toLocaleTimeString())
 
-    // Collect all results for all monitors, needed for charts
-    /** @type Record<string, Nanomon.Result[]> */
-    const allResults = {} as Record<string, Result[]>
-
-    for (const m of monitorsLatest) {
-      const results = await api.getResultsForMonitor(m.id || '', CHART_SIZE)
+    for (const mon of fetchedMonitors) {
+      const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
       const last = new Date(results[0]?.date)
 
-      allResults[m.id!] = results
+      chartData[mon.id] = results
 
       newMonitors.push({
-        ...m,
+        ...mon,
         message: results[0]?.message,
         lastRan: results[0]?.date ? last.toLocaleString() : 'Never',
-        status: getStatusFields(m.enabled ? results[0]?.status : -1),
-        icon: monitorIcon(m),
+        status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
+        icon: monitorIcon(mon),
       })
     }
 
+    setUpdateText(new Date().toLocaleTimeString())
     setMonitors(newMonitors)
     setLoading(false)
-    setChartData(allResults)
+    setChartData(chartData)
 
     if (!paused && repeat) {
       timeoutId = setTimeout(fetchMonitors, config.REFRESH_TIME * 1000)
@@ -101,18 +109,11 @@ export default function MonitorsHome() {
         type: 'line',
         data: {
           labels: resultLabels,
-          datasets: [
-            {
-              label: 'Response time',
-              data: resultValues,
-            },
-          ],
+          datasets: [{ label: 'Response time', data: resultValues }],
         },
         options: {
           plugins: {
-            legend: {
-              display: false,
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function (context) {
@@ -122,17 +123,29 @@ export default function MonitorsHome() {
             },
           },
           scales: {
-            y: {
-              beginAtZero: true,
-            },
-            x: {
-              display: false,
-            },
+            y: { beginAtZero: true },
+            x: { display: false },
           },
         },
       })
     }
   }, [chartData])
+
+  if (error) {
+    return (
+      <div className="alert alert-warning" role="alert">
+        {error}
+      </div>
+    )
+  }
+
+  if (monitors.length === 0 && !loading) {
+    return (
+      <div className="alert alert-light" role="alert">
+        Create some monitors to get started 😀
+      </div>
+    )
+  }
 
   function showSpinner() {
     if (loading) {
@@ -145,7 +158,7 @@ export default function MonitorsHome() {
   }
 
   return (
-    <div>
+    <>
       {monitors.map((m) => (
         <div className={`card shadow mb-4`} key={m.id}>
           <NavLink to={`/monitor/${m.id}`}>
@@ -163,7 +176,7 @@ export default function MonitorsHome() {
                 </span>
               </div>
               <div className="mini-graph">
-                <NavLink to="'monitor/'+m.id">
+                <NavLink to={`/monitor/${m.id}`}>
                   <canvas id={`chart_${m.id}`}></canvas>
                 </NavLink>
               </div>
@@ -175,13 +188,13 @@ export default function MonitorsHome() {
       ))}
 
       <div className="footer text-muted">
-        {showSpinner()}
-        <span>{updateText}</span>
-        &mdash; <span x-text="">{paused ? 'Auto update paused' : 'Auto update every ' + config.REFRESH_TIME + ' seconds '}</span> &mdash;
+        {showSpinner()}&nbsp;
+        <span>🕒 {updateText}</span>
+        &mdash; <span>{paused ? 'Auto update paused' : 'Auto update every ' + config.REFRESH_TIME + ' seconds '}</span> &mdash;
         <a className="badge rounded-pill text-bg-light" type="button" onClick={paused ? () => setPaused(false) : () => setPaused(true)}>
           {paused ? 'UNPAUSE' : 'PAUSE'}
         </a>
       </div>
-    </div>
+    </>
   )
 }

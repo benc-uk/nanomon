@@ -5,7 +5,7 @@
 
 import { Monitor, MonitorStatus } from './types'
 
-export function getStatusFields(statusCode: number) {
+export function getMonitorStatus(statusCode: number) {
   const status = {
     code: statusCode,
   } as MonitorStatus
@@ -44,13 +44,20 @@ export function getStatusFields(statusCode: number) {
   return status
 }
 
+/**
+ * Nice-ify a date string
+ */
 export function niceDate(dateString: string) {
   if (!dateString) {
     return ''
   }
+
   return dateString.replace('T', ' ').split('.')[0]
 }
 
+/**
+ * Get the icon class for a monitor type
+ */
 export function monitorIcon(monitor: Monitor) {
   switch (monitor.type) {
     case 'http':
@@ -69,16 +76,18 @@ export function monitorIcon(monitor: Monitor) {
 
 /**
  * Check if an object is empty
- * @param {object} obj
- * @returns boolean
  */
 export function isEmpty(obj: object) {
   if (obj === undefined || obj === null) {
     return true
   }
+
   return Object.keys(obj).length === 0
 }
 
+/**
+ * Sleep function for delaying async operations
+ */
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }

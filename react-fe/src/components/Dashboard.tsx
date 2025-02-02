@@ -95,9 +95,7 @@ export default function Dashboard() {
             to={`/monitor/${mon.id}`}
             key={mon.id}
           >
-            <div className="fs-1">
-              <i className={`fa-fw ${mon.icon}`}></i>
-            </div>
+            <div className="fs-1">{mon.icon}</div>
             <div className="dash-name">{mon.name}</div>
           </NavLink>
         ))}

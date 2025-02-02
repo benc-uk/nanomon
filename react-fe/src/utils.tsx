@@ -5,6 +5,19 @@
 
 import { Monitor, MonitorStatus } from './types'
 
+import {
+  faGlobe,
+  faSatelliteDish,
+  faQuestionCircle,
+  faPlug,
+  faAddressCard,
+  faCheckCircle,
+  faTriangleExclamation,
+  faBolt,
+  faBan,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
+
 export function getMonitorStatus(statusCode: number) {
   const status = {
     code: statusCode,
@@ -14,31 +27,31 @@ export function getMonitorStatus(statusCode: number) {
     case 0:
       status.text = 'Good'
       status.class = 'bg-success text-light'
-      status.icon = 'far fa-square-check'
+      status.icon = <Fa icon={faCheckCircle} fixedWidth={true} />
       break
 
     case 1:
       status.text = 'Error'
       status.class = 'bg-warning text-dark'
-      status.icon = 'fas fa-exclamation-triangle'
+      status.icon = <Fa icon={faTriangleExclamation} fixedWidth={true} />
       break
 
     case 2:
       status.text = 'Failure'
       status.class = 'bg-danger text-light'
-      status.icon = 'fas fa-bomb'
+      status.icon = <Fa icon={faBolt} fixedWidth={true} />
       break
 
     case -1:
       status.text = 'Disabled'
       status.class = 'bg-dark text-light'
-      status.icon = 'fas fa-ban'
+      status.icon = <Fa icon={faBan} fixedWidth={true} />
       break
 
     default:
       status.text = 'Unknown'
       status.class = 'bg-secondary text-light'
-      status.icon = 'far fa-circle-question'
+      status.icon = <Fa icon={faQuestionCircle} fixedWidth={true} />
   }
 
   return status
@@ -56,21 +69,21 @@ export function niceDate(dateString: string) {
 }
 
 /**
- * Get the icon class for a monitor type
+ * Get the monitor type icon for a given monitor
  */
 export function monitorIcon(monitor: Monitor) {
   switch (monitor.type) {
     case 'http':
-      return 'fas fa-globe'
+      return <Fa icon={faGlobe} fixedWidth={true} />
     case 'ping':
-      return 'fas fa-satellite-dish'
+      return <Fa icon={faSatelliteDish} fixedWidth={true} />
     case 'tcp':
-      return 'fas fa-plug'
+      return <Fa icon={faPlug} fixedWidth={true} />
     case 'dns':
-      return 'fas d fa-address-card'
+      return <Fa icon={faAddressCard} fixedWidth={true} />
 
     default:
-      return 'far fa-circle-question'
+      return <Fa icon={faQuestionCircle} fixedWidth={true} />
   }
 }
 

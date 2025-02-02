@@ -2,9 +2,15 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 
-import './index.css'
-import App from './components/App.tsx'
+// Use the bootswatch Sandstone theme
+import 'bootswatch/dist/sandstone/bootstrap.min.css'
 
+// Boostrap JS needed for modal dialogs
+import 'bootstrap/dist/js/bootstrap.bundle.min'
+
+import './index.css'
+
+import App from './components/App.tsx'
 import { createConfigProvider, createServicesProvider } from './providers.tsx'
 import { AppConfig } from './types'
 import { AuthProviderMSAL } from './auth-msal'

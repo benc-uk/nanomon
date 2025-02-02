@@ -6,6 +6,9 @@ import About from './About'
 import Dashboard from './Dashboard'
 import Monitor from './Monitor'
 
+import { faChartLine, faEye, faList, faWrench, faEdit, faInfoCircle, faRightFromBracket, faKey } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
+
 function App() {
   return (
     <>
@@ -19,32 +22,32 @@ function App() {
           <ul className="navbar-nav me-auto">
             <li className="nav-item m-1">
               <NavLink className="nav-link fs-6 navbtn-main text-dark" to="/monitors">
-                <i className="fa fa-fw fa-line-chart"></i> <span className="d-none d-md-inline">Monitors</span>
+                <Fa icon={faChartLine} fixedWidth={true} /> <span className="d-none d-md-inline">Monitors</span>
               </NavLink>
             </li>
             <li className="nav-item m-1">
               <NavLink className="nav-link navbtn-main fs-6 text-dark" to="/dashboard">
-                <i className="fa fa-fw fa-eye"></i> <span className="d-none d-md-inline">Dashboard</span>
+                <Fa icon={faEye} fixedWidth={true} /> <span className="d-none d-md-inline">Dashboard</span>
               </NavLink>
             </li>
             <li className="nav-item m-1">
               <a className="nav-link navbtn-main fs-6 text-dark" href="#results">
-                <i className="fa fa-fw fa-list-alt"></i> <span className="d-none d-md-inline">Results</span>
+                <Fa icon={faList} fixedWidth={true} /> <span className="d-none d-md-inline">Results</span>
               </a>
             </li>
             <li className="nav-item m-1">
               <a className="nav-link navbtn-main fs-6 text-dark" href="#edit/new">
-                <i className="fa fa-fw fa-edit"></i> <span className="d-none d-md-inline">New</span>
+                <Fa icon={faEdit} fixedWidth={true} /> <span className="d-none d-md-inline">New</span>
               </a>
             </li>
             <li className="nav-item m-1">
               <a className="nav-link navbtn-main fs-6 text-dark" href="#admin">
-                <i className="fa fa-fw fa-wrench"></i> <span className="d-none d-md-inline">Admin</span>
+                <Fa icon={faWrench} fixedWidth={true} /> <span className="d-none d-md-inline">Admin</span>
               </a>
             </li>
             <li className="nav-item m-1">
               <NavLink className="nav-link navbtn-main fs-6 text-dark" to="/about">
-                <i className="fa fa-fw fa-info-circle"></i> <span className="d-none d-md-inline">About</span>
+                <Fa icon={faInfoCircle} fixedWidth={true} /> <span className="d-none d-md-inline">About</span>
               </NavLink>
             </li>
           </ul>
@@ -52,14 +55,12 @@ function App() {
           <ul className="navbar-nav ms-auto">
             <li className="nav-item m-1">
               <a className="nav-link navbtn-user fs-6 text-white">
-                <i className="fa fa-fw fa-user"></i>
-                <span className="d-none d-md-inline">LOGIN</span>
+                <Fa icon={faKey} fixedWidth={true} /> <span className="d-none d-md-inline">LOGIN</span>
               </a>
             </li>
             <li className="nav-item m-1">
               <a className="nav-link navbtn-user fs-6 text-white">
-                <i className="fa fa-fw fa-right-from-bracket"></i>
-                <span className="d-none d-md-inline">LOGOUT</span>
+                <Fa icon={faRightFromBracket} fixedWidth={true} /> <span className="d-none d-md-inline">LOGOUT</span>
               </a>
             </li>
           </ul>

@@ -1,11 +1,13 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
 import { MonitorExtended, Monitor as MonitorType, ResultExtended } from '../types'
 import { getMonitorStatus, monitorIcon, niceDate } from '../utils'
 import { ServicesContext } from '../providers'
 
-import { Chart, registerables } from 'chart.js'
-Chart.register(...registerables)
+import { faRefresh, faCheckSquare, faCircleXmark, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
+import { Line } from 'react-chartjs-2'
+import { ChartData } from 'chart.js'
 
 const MAX_RESULTS = 50
 
@@ -19,8 +21,7 @@ export default function Monitor() {
   const [updatedDate, setUpdatedDate] = useState<string>('')
   const [lastResultDate, setLastResultDate] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
-
-  const chartRef = useRef(null)
+  const [chartData, setChartData] = useState<ChartData<'line'>>({ datasets: [], labels: [] })
 
   // Fetch monitor and its results from the API
   const loadMonitor = useCallback(async () => {
@@ -58,6 +59,20 @@ export default function Monitor() {
       statusDetails: getMonitorStatus(result.status),
     })) as ResultExtended[]
 
+    const chartValues: number[] = []
+    const chartLabels: string[] = []
+
+    for (let i = extendedResults.length - 1; i >= 0; i--) {
+      const r = extendedResults[i]
+      chartValues.push(r.value)
+      chartLabels.push(r.date.replace('T', ' ').split('.')[0])
+    }
+
+    setChartData({
+      labels: chartLabels,
+      datasets: [{ label: 'Value', data: chartValues, tension: 0.2 }],
+    })
+
     setResults(extendedResults)
     setUpdatedDate(niceDate(mon.updated))
     setLastResultDate(fetchedResults[0]?.date ? niceDate(fetchedResults[0]?.date) : '')
@@ -79,40 +94,6 @@ export default function Monitor() {
   useEffect(() => {
     loadMonitor()
   }, [loadMonitor])
-
-  // Create chart when results change
-  useEffect(() => {
-    /** @type number[] */
-    const resultValues = []
-
-    /** @type string[] */
-    const resultLabels = []
-
-    for (let i = results.length - 1; i >= 0; i--) {
-      const r = results[i]
-      resultValues.push(r.value)
-      resultLabels.push(r.date.replace('T', ' ').split('.')[0])
-    }
-
-    const chartStatus = Chart.getChart('graph')
-    if (chartStatus !== undefined) {
-      chartStatus.destroy()
-    }
-
-    if (results.length > 0) {
-      new Chart(chartRef.current!, {
-        type: 'line',
-        data: {
-          labels: resultLabels,
-          datasets: [{ label: 'Result Value', data: resultValues }],
-        },
-        options: {
-          plugins: {},
-          scales: { y: { beginAtZero: false } },
-        },
-      })
-    }
-  }, [results])
 
   if (error) {
     return (
@@ -149,11 +130,11 @@ export default function Monitor() {
       <div className="card shadow mb-4">
         <div className={`card-header fs-3 d-flex justify-content-between ${monitor.status?.class || 'bg-secondary'}`}>
           <div>
-            <i className={`fa-fw ${monitor.icon}`}></i>&nbsp;
+            {monitor.icon}&nbsp;
             {monitor.name}
           </div>
           <button className="btn btn-light btn-sm" onClick={loadMonitor}>
-            <i className="fas fa-refresh fa-fw"></i> REFRESH
+            <Fa icon={faRefresh} fixedWidth={true} /> REFRESH
           </button>
         </div>
         <div className="card-body">
@@ -162,13 +143,13 @@ export default function Monitor() {
               <tr>
                 <td>Type:</td>
                 <td>
-                  <i className={`fa-fw ${monitor.icon}`}></i> {monitor.type}
+                  {monitor.icon} {monitor.type}
                 </td>
               </tr>
               <tr>
                 <td>Status:</td>
                 <td>
-                  <i className={monitor.status?.icon}></i> {monitor.status?.text || 'None'}
+                  {monitor.status?.icon} {monitor.status?.text}
                 </td>
               </tr>
               <tr>
@@ -192,7 +173,9 @@ export default function Monitor() {
               </tr>
               <tr>
                 <td>Enabled:</td>
-                <td>{monitor.enabled ? <i className="fa fa-check-circle text-success"></i> : <i className="fa fa-circle-xmark text-danger"></i>}</td>
+                <td>
+                  {monitor.enabled ? <Fa icon={faCheckSquare} className="text-success" /> : <Fa icon={faCircleXmark} className="text-danger" />}
+                </td>
               </tr>
               <tr className={monitor.rule ? '' : 'd-none'}>
                 <td>Rule(s):</td>
@@ -230,16 +213,16 @@ export default function Monitor() {
           <div>
             <hr />
             <NavLink className="btn btn-info wide" to={`/edit/${monitor.id}`}>
-              <i className="fas fa-edit fa-fw"></i> MODIFY
+              <Fa icon={faEdit} fixedWidth={true} /> MODIFY
             </NavLink>
             <button className="mx-3 btn btn-warning wide" data-bs-toggle="modal" data-bs-target="#deleteModal">
-              <i className="fas fa-trash fa-fw"></i> DELETE
+              <Fa icon={faTrash} fixedWidth={true} /> DELETE
             </button>
           </div>
         </div>
       </div>
 
-      {results.length > 0 && <canvas ref={chartRef}></canvas>}
+      {results.length > 0 && <Line data={chartData} />}
 
       {results.length > 0 && (
         <>
@@ -262,7 +245,7 @@ export default function Monitor() {
                       <td className={result.statusDetails.class}>{result.dateNice}</td>
                       <td className={result.statusDetails.class}>
                         <span className={`badge ${result.statusDetails.class}`}>
-                          <i className={result.statusDetails.icon}></i> {result.statusDetails.text}
+                          {result.statusDetails.icon} {result.statusDetails.text}
                         </span>
                       </td>
                       <td className={result.statusDetails.class}>{result.value}</td>

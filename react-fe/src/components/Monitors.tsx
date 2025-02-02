@@ -170,10 +170,10 @@ export default function Monitors() {
               <div className="p-2">
                 <h5 className="card-subtitle mb-2 target fs-4">{m.target}</h5>
                 <span className="fs-1 valign-middle" title={m.type}>
-                  <i className={m.icon}></i>
+                  {m.icon}
                 </span>
                 <span className={`badge mx-3 p-2 fs-6 ${m.status.class}`}>
-                  <i className={m.status.icon}></i>&nbsp;&nbsp;{m.status.text || 'None'}
+                  {m.status.icon}&nbsp;&nbsp;{m.status.text || 'None'}
                 </span>
               </div>
               <div className="mini-graph">

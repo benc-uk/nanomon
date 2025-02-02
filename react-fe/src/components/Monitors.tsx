@@ -1,15 +1,22 @@
 import { useEffect, useState, useContext } from 'react'
 import { ConfigContext, ServicesContext } from '../providers'
-import { Monitor, MonitorExtended, Result } from '../types'
+import { Monitor, MonitorExtended } from '../types'
 import { getMonitorStatus, monitorIcon } from '../utils'
 import { NavLink } from 'react-router'
 
-import { Chart, registerables } from 'chart.js'
-Chart.register(...registerables)
+import { ChartData, Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
+import { Line } from 'react-chartjs-2'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
 const CHART_SIZE = 20
+const CHART_OPTIONS = {
+  scales: {
+    x: { display: false },
+    y: { beginAtZero: true },
+  },
+}
 let timeoutId: number
-const chartCache = {} as Record<string, Chart>
 
 export default function Monitors() {
   const api = useContext(ServicesContext).api
@@ -20,7 +27,7 @@ export default function Monitors() {
   const [loading, setLoading] = useState<boolean>(true)
   const [updateText, setUpdateText] = useState<string>('Loading, please wait... ')
   const [paused, setPaused] = useState<boolean>(false)
-  const [chartData, setChartData] = useState<Record<string, Result[]>>({})
+  const [chartData, setChartData] = useState<Record<string, ChartData<'line'>>>({})
   const [error, setError] = useState<string>('')
 
   useEffect(() => {
@@ -36,14 +43,27 @@ export default function Monitors() {
         console.error(err)
       }
 
-      const chartData = {} as Record<string, Result[]>
+      // This is a map of monitor ID to chart data
+      const chartData = {} as Record<string, ChartData<'line'>>
       const newMonitors: MonitorExtended[] = []
 
       for (const mon of fetchedMonitors) {
         const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
         const last = new Date(results[0]?.date)
 
-        chartData[mon.id] = results
+        const chartValues: number[] = []
+        const chartLabels: string[] = []
+
+        for (let i = results.length - 1; i >= 0; i--) {
+          const r = results[i]
+          chartValues.push(r.value)
+          chartLabels.push(r.date.replace('T', ' ').split('.')[0])
+        }
+
+        chartData[mon.id] = {
+          datasets: [{ label: 'Value', data: chartValues, tension: 0.3, borderColor: 'rgb(46, 113, 214)', fill: true }],
+          labels: chartLabels,
+        } as ChartData<'line'>
 
         newMonitors.push({
           ...mon,
@@ -54,10 +74,10 @@ export default function Monitors() {
         })
       }
 
+      setChartData(chartData)
       setUpdateText(new Date().toLocaleTimeString())
       setMonitors(newMonitors)
       setLoading(false)
-      setChartData(chartData)
 
       if (!paused && repeat) {
         timeoutId = setTimeout(fetchMonitors, refreshTime)
@@ -71,66 +91,6 @@ export default function Monitors() {
 
     return () => clearTimeout(timeoutId)
   }, [paused, api, refreshTime])
-
-  useEffect(() => {
-    // Cleanup any existing charts
-    for (const c in chartCache) {
-      chartCache[c].destroy()
-      delete chartCache[c]
-    }
-  }, [])
-
-  useEffect(() => {
-    // Update the charts
-    for (const [id, results] of Object.entries(chartData)) {
-      const ctx = document.getElementById(`chart_${id}`) as HTMLCanvasElement
-      if (!ctx) {
-        continue
-      }
-
-      const resultValues = []
-      const resultLabels = []
-      for (let i = results.length - 1; i >= 0; i--) {
-        const r = results[i]
-        resultValues.push(r.value)
-        resultLabels.push(r.date.replace('T', ' ').split('.')[0])
-      }
-
-      // Update existing chart data if it exists
-      if (chartCache[id]) {
-        chartCache[id].data.datasets[0].data = resultValues
-        chartCache[id].data.labels = resultLabels
-        chartCache[id].update('none')
-
-        continue
-      }
-
-      // Otherwise create a new chart
-      chartCache[id] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: resultLabels,
-          datasets: [{ label: 'Response time', data: resultValues }],
-        },
-        options: {
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return `${context.parsed.y} ms`
-                },
-              },
-            },
-          },
-          scales: {
-            y: { beginAtZero: true },
-            x: { display: false },
-          },
-        },
-      })
-    }
-  }, [chartData])
 
   if (error) {
     return (
@@ -178,7 +138,7 @@ export default function Monitors() {
               </div>
               <div className="mini-graph">
                 <NavLink to={`/monitor/${m.id}`}>
-                  <canvas id={`chart_${m.id}`}></canvas>
+                  <Line data={chartData[m.id]} options={CHART_OPTIONS} />
                 </NavLink>
               </div>
             </div>

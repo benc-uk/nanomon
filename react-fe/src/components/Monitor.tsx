@@ -6,9 +6,9 @@ import { ServicesContext } from '../providers'
 
 import { faRefresh, faCheckSquare, faCircleXmark, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
+
+import { ChartData } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { ChartData, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Chart as ChartJS, Filler } from 'chart.js'
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
 const MAX_RESULTS = 50
 

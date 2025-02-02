@@ -15,6 +15,10 @@ import { createConfigProvider, createServicesProvider } from './providers.tsx'
 import { AppConfig } from './types'
 import { AuthProviderMSAL } from './auth-msal'
 
+// Register the required components for Chart.js
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
+
 let config: AppConfig
 let authProvider: AuthProviderMSAL
 let scopes: string[]

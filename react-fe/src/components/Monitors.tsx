@@ -4,10 +4,8 @@ import { Monitor, MonitorExtended } from '../types'
 import { getMonitorStatus, monitorIcon } from '../utils'
 import { NavLink } from 'react-router'
 
-import { ChartData, Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
+import { ChartData } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
 const CHART_SIZE = 20
 const CHART_OPTIONS = {

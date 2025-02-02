@@ -14,7 +14,7 @@ interface SuccessFunction {
 
 interface APIConfig {
   /** Extra verbose logging */
-  verbose?: false
+  verbose?: boolean
 
   /** Custom headers to add to every request */
   headers?: Headers

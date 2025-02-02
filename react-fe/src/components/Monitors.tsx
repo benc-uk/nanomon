@@ -14,6 +14,7 @@ const chartCache = {} as Record<string, Chart>
 export default function Monitors() {
   const api = useContext(ServicesContext).api
   const config = useContext(ConfigContext)
+  const refreshTime = config.REFRESH_TIME * 1000
 
   const [monitors, setMonitors] = useState<MonitorExtended[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -22,54 +23,54 @@ export default function Monitors() {
   const [chartData, setChartData] = useState<Record<string, Result[]>>({})
   const [error, setError] = useState<string>('')
 
-  async function fetchMonitors(repeat = true) {
-    setLoading(true)
-    let fetchedMonitors: Monitor[] = []
-    try {
-      fetchedMonitors = await api.getMonitors()
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      }
-      console.error(err)
-    }
-
-    const chartData = {} as Record<string, Result[]>
-    const newMonitors: MonitorExtended[] = []
-
-    for (const mon of fetchedMonitors) {
-      const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
-      const last = new Date(results[0]?.date)
-
-      chartData[mon.id] = results
-
-      newMonitors.push({
-        ...mon,
-        message: results[0]?.message,
-        lastRan: results[0]?.date ? last.toLocaleString() : 'Never',
-        status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
-        icon: monitorIcon(mon),
-      })
-    }
-
-    setUpdateText(new Date().toLocaleTimeString())
-    setMonitors(newMonitors)
-    setLoading(false)
-    setChartData(chartData)
-
-    if (!paused && repeat) {
-      timeoutId = setTimeout(fetchMonitors, config.REFRESH_TIME * 1000)
-    }
-  }
-
   useEffect(() => {
+    async function fetchMonitors(repeat = true) {
+      setLoading(true)
+      let fetchedMonitors: Monitor[] = []
+      try {
+        fetchedMonitors = await api.getMonitors()
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message)
+        }
+        console.error(err)
+      }
+
+      const chartData = {} as Record<string, Result[]>
+      const newMonitors: MonitorExtended[] = []
+
+      for (const mon of fetchedMonitors) {
+        const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
+        const last = new Date(results[0]?.date)
+
+        chartData[mon.id] = results
+
+        newMonitors.push({
+          ...mon,
+          message: results[0]?.message,
+          lastRan: results[0]?.date ? last.toLocaleString() : 'Never',
+          status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
+          icon: monitorIcon(mon),
+        })
+      }
+
+      setUpdateText(new Date().toLocaleTimeString())
+      setMonitors(newMonitors)
+      setLoading(false)
+      setChartData(chartData)
+
+      if (!paused && repeat) {
+        timeoutId = setTimeout(fetchMonitors, refreshTime)
+      }
+    }
+
     if (!paused) {
       fetchMonitors(false)
-      timeoutId = setTimeout(fetchMonitors, config.REFRESH_TIME * 1000)
+      timeoutId = setTimeout(fetchMonitors, refreshTime)
     }
 
     return () => clearTimeout(timeoutId)
-  }, [paused])
+  }, [paused, api, refreshTime])
 
   useEffect(() => {
     // Cleanup any existing charts

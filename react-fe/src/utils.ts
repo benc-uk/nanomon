@@ -77,7 +77,7 @@ export function monitorIcon(monitor: Monitor) {
 /**
  * Check if an object is empty
  */
-export function isEmpty(obj: object) {
+export function isEmpty(obj: object | null | undefined) {
   if (obj === undefined || obj === null) {
     return true
   }

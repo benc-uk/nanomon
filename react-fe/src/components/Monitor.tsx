@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
 import { MonitorExtended, Monitor as MonitorType, ResultExtended } from '../types'
 import { getMonitorStatus, monitorIcon, niceDate } from '../utils'
@@ -23,7 +23,7 @@ export default function Monitor() {
   const chartRef = useRef(null)
 
   // Fetch monitor and its results from the API
-  async function loadMonitor() {
+  const loadMonitor = useCallback(async () => {
     if (!id) {
       return
     }
@@ -63,7 +63,7 @@ export default function Monitor() {
     setLastResultDate(fetchedResults[0]?.date ? niceDate(fetchedResults[0]?.date) : '')
     setError('')
     setLoading(false)
-  }
+  }, [api, id])
 
   function deleteMonitor() {
     if (!id) {
@@ -78,8 +78,7 @@ export default function Monitor() {
   // Fetch monitor on mount
   useEffect(() => {
     loadMonitor()
-    return () => {}
-  }, [])
+  }, [loadMonitor])
 
   // Create chart when results change
   useEffect(() => {

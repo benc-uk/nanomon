@@ -27,7 +27,7 @@ async function startApp() {
     if (configResp.ok) {
       config = (await configResp.json()) as AppConfig
 
-      if (config.API_ENDPOINT === null || config.API_ENDPOINT === '' || !config.API_ENDPOINT) {
+      if (config.API_ENDPOINT === '' || !config.API_ENDPOINT) {
         throw new Error('Config was provided, but API_ENDPOINT is not set')
       }
     } else {

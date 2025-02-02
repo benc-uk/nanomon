@@ -10,6 +10,7 @@ export class APIClient extends APIClientBase {
   constructor(apiEndpoint: string) {
     super(apiEndpoint || '/api', {
       delay: 0,
+      verbose: true,
     })
   }
 

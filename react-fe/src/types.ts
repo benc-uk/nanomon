@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-
 export interface AppConfig {
   API_ENDPOINT: string
   AUTH_CLIENT_ID: string
@@ -45,7 +43,6 @@ export interface MonitorStatus {
   code: number
   text?: string
   class?: string
-  icon?: ReactNode
 }
 
 export interface ResultExtended extends Result {
@@ -57,5 +54,4 @@ export interface MonitorExtended extends Monitor {
   message?: string
   lastRan?: string
   status: MonitorStatus
-  icon: ReactNode
 }

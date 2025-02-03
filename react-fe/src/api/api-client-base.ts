@@ -37,7 +37,7 @@ export class APIClientBase {
   // Default config
   config: APIConfig = {
     verbose: false,
-    headers: {} as Headers,
+    headers: new Headers(),
     delay: 0,
     authProvider: null,
 
@@ -59,10 +59,11 @@ export class APIClientBase {
   }
 
   // All requests go through this, it handles serialization, auth etc
-  protected async request(path: string, method = 'GET', payload: BodyInit = '', auth = false, reqHeaders = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected async request(path: string, method = 'GET', payload: any = '', auth = false, reqHeaders = new Headers()) {
     this.debug(`### API request: ${method} ${this.endpoint}/${path}`)
 
-    const headers = {} as Headers
+    const headers = new Headers()
     let body = null as BodyInit | null
 
     if (payload) {
@@ -94,12 +95,33 @@ export class APIClientBase {
       }
     }
 
+    // Merge in headers
+    if (this.config.headers) {
+      for (const [key, value] of this.config.headers.entries()) {
+        headers.set(key, value)
+      }
+    }
+
+    if (reqHeaders) {
+      for (const [key, value] of reqHeaders.entries()) {
+        headers.set(key, value)
+      }
+    }
+
     // Make the actual HTTP request
-    const response = await fetch(`${this.endpoint}/${path}`, {
+    const reqOptions = {
       method,
       body,
-      headers: { ...headers, ...reqHeaders, ...this.config.headers },
-    })
+      headers,
+    }
+
+    if (this.config.verbose) {
+      for (const [key, value] of headers.entries()) {
+        this.debug(`### API request header: ${key}: ${value}`)
+      }
+    }
+
+    const response = await fetch(`${this.endpoint}/${path}`, reqOptions)
 
     this.debug(`### API response: ${response.status} ${response.statusText}`)
 

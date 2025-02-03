@@ -1,14 +1,16 @@
-import { useEffect, useState, useContext } from 'react'
-import { ConfigContext, ServicesContext } from '../providers'
+import { useEffect, useState } from 'react'
 import { Monitor, MonitorExtended } from '../types'
-import { getMonitorStatus, monitorIcon } from '../utils'
+import { getMonitorStatus } from '../utils'
 import { NavLink } from 'react-router'
+import MonitorIcon from '../components/MonitorIcon'
+import { useAPI, useConfig } from '../providers'
+import Footer from '../components/Footer'
 
 let timeoutId: number
 
 export default function Dashboard() {
-  const api = useContext(ServicesContext).api
-  const config = useContext(ConfigContext)
+  const api = useAPI()
+  const config = useConfig()
   const refreshTime = config.REFRESH_TIME * 1000
 
   const [monitors, setMonitors] = useState<MonitorExtended[]>([])
@@ -39,7 +41,6 @@ export default function Dashboard() {
         newMonitors.push({
           ...mon,
           status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
-          icon: monitorIcon(mon),
         })
       }
 
@@ -76,16 +77,6 @@ export default function Dashboard() {
     )
   }
 
-  function showSpinner() {
-    if (loading) {
-      return (
-        <div className="spinner-border spinner-border-sm text-info" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      )
-    }
-  }
-
   return (
     <>
       <div className="d-flex flex-wrap justify-content-center">
@@ -95,20 +86,15 @@ export default function Dashboard() {
             to={`/monitor/${mon.id}`}
             key={mon.id}
           >
-            <div className="fs-1">{mon.icon}</div>
+            <div className="fs-1">
+              <MonitorIcon monitor={mon} />
+            </div>
             <div className="dash-name">{mon.name}</div>
           </NavLink>
         ))}
       </div>
 
-      <div className="footer text-muted">
-        {showSpinner()}&nbsp;
-        <span>🕒 {updateText}</span>
-        &mdash; <span>{paused ? 'Auto update paused' : 'Auto update every ' + config.REFRESH_TIME + ' seconds '}</span> &mdash;
-        <a className="badge rounded-pill text-bg-light" type="button" onClick={paused ? () => setPaused(false) : () => setPaused(true)}>
-          {paused ? 'UNPAUSE' : 'PAUSE'}
-        </a>
-      </div>
+      <Footer refreshTime={refreshTime} loading={loading} updateText={updateText} paused={paused} setPaused={setPaused} />
     </>
   )
 }

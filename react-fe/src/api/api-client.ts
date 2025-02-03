@@ -3,19 +3,20 @@
 // NanoMon Frontend - API client for calling the backend NanoMon API
 // ----------------------------------------------------------------------------
 
-import { APIClientBase } from './api-client-base'
+import { APIClientBase, AuthProvider } from './api-client-base'
 import { Monitor, Result } from '../types'
 
 export class APIClient extends APIClientBase {
-  constructor(apiEndpoint: string) {
+  constructor(apiEndpoint: string, authProvider: AuthProvider | null) {
     super(apiEndpoint || '/api', {
       delay: 0,
       verbose: false,
+      authProvider,
     })
   }
 
   async getMonitors(): Promise<Monitor[]> {
-    return this.request('monitors')
+    return this.request('monitors', 'GET')
   }
 
   async getMonitor(monitorID: string): Promise<Monitor> {
@@ -23,10 +24,26 @@ export class APIClient extends APIClientBase {
   }
 
   async deleteMonitor(monitorID: string): Promise<void> {
-    return this.request(`monitors/${monitorID}`, 'DELETE')
+    return this.request(`monitors/${monitorID}`, 'DELETE', null, true)
   }
 
-  async getResultsForMonitor(monitorID: string, max = 10): Promise<Result[]> {
+  async deleteAllMonitors(): Promise<void> {
+    return this.request('monitors', 'DELETE', null, true)
+  }
+
+  async deleteAllResults(): Promise<void> {
+    return this.request('results', 'DELETE', null, true)
+  }
+
+  async getResultsForMonitor(monitorID: string, max = 20): Promise<Result[]> {
     return this.request(`monitors/${monitorID}/results?max=${max}`)
+  }
+
+  async getResults(max = 100): Promise<Result[]> {
+    return this.request(`results?max=${max}`)
+  }
+
+  async importMonitors(monitors: Monitor[]): Promise<void> {
+    return this.request('monitors/import', 'POST', monitors, true)
   }
 }

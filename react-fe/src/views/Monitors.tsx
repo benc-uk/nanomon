@@ -1,11 +1,15 @@
-import { useEffect, useState, useContext } from 'react'
-import { ConfigContext, ServicesContext } from '../providers'
-import { Monitor, MonitorExtended } from '../types'
-import { getMonitorStatus, monitorIcon } from '../utils'
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
+
+import { Monitor, MonitorExtended } from '../types'
+import { getMonitorStatus } from '../utils'
+import MonitorIcon from '../components/MonitorIcon'
 
 import { ChartData } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import StatusPill from '../components/StatusPill'
+import { useAPI, useConfig } from '../providers'
+import Footer from '../components/Footer'
 
 const CHART_SIZE = 20
 const CHART_OPTIONS = {
@@ -17,8 +21,8 @@ const CHART_OPTIONS = {
 let timeoutId: number
 
 export default function Monitors() {
-  const api = useContext(ServicesContext).api
-  const config = useContext(ConfigContext)
+  const api = useAPI()
+  const config = useConfig()
   const refreshTime = config.REFRESH_TIME * 1000
 
   const [monitors, setMonitors] = useState<MonitorExtended[]>([])
@@ -31,6 +35,7 @@ export default function Monitors() {
   useEffect(() => {
     async function fetchMonitors(repeat = true) {
       setLoading(true)
+      setError('')
       let fetchedMonitors: Monitor[] = []
       try {
         fetchedMonitors = await api.getMonitors()
@@ -68,7 +73,6 @@ export default function Monitors() {
           message: results[0]?.message,
           lastRan: results[0]?.date ? last.toLocaleString() : 'Never',
           status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
-          icon: monitorIcon(mon),
         })
       }
 
@@ -106,54 +110,36 @@ export default function Monitors() {
     )
   }
 
-  function showSpinner() {
-    if (loading) {
-      return (
-        <div className="spinner-border spinner-border-sm text-info" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      )
-    }
-  }
-
   return (
     <>
-      {monitors.map((m) => (
-        <div className={`card shadow mb-4`} key={m.id}>
-          <NavLink to={`/monitor/${m.id}`}>
-            <div className={`card-header fs-3 ${m.status.class}`}>{m.name}</div>
+      {monitors.map((mon) => (
+        <div className={`card shadow mb-4`} key={mon.id}>
+          <NavLink to={`/monitor/${mon.id}`}>
+            <div className={`card-header fs-3 ${mon.status.class}`}>{mon.name}</div>
           </NavLink>
           <div className="card-body">
             <div className="d-flex justify-content-between">
               <div className="p-2">
-                <h5 className="card-subtitle mb-2 target fs-4">{m.target}</h5>
-                <span className="fs-1 valign-middle" title={m.type}>
-                  {m.icon}
+                <h5 className="card-subtitle mb-2 target fs-4">{mon.target}</h5>
+                <span className="fs-1 valign-middle" title={mon.type}>
+                  <MonitorIcon monitor={mon} />
                 </span>
-                <span className={`badge mx-3 p-2 fs-6 ${m.status.class}`}>
-                  {m.status.icon}&nbsp;&nbsp;{m.status.text || 'None'}
-                </span>
+
+                <StatusPill statusCode={mon.status.code} large className="mx-3" />
               </div>
               <div className="mini-graph">
-                <NavLink to={`/monitor/${m.id}`}>
-                  <Line data={chartData[m.id]} options={CHART_OPTIONS} />
+                <NavLink to={`/monitor/${mon.id}`}>
+                  <Line data={chartData[mon.id]} options={CHART_OPTIONS} />
                 </NavLink>
               </div>
             </div>
           </div>
 
-          <div className="card-footer bg-light">{`Last run: ${m.lastRan || 'never'}`}</div>
+          <div className="card-footer bg-light">{`Last run: ${mon.lastRan || 'never'}`}</div>
         </div>
       ))}
 
-      <div className="footer text-muted">
-        {showSpinner()}&nbsp;
-        <span>🕒 {updateText}</span>
-        &mdash; <span>{paused ? 'Auto update paused' : 'Auto update every ' + config.REFRESH_TIME + ' seconds '}</span> &mdash;
-        <a className="badge rounded-pill text-bg-light" type="button" onClick={paused ? () => setPaused(false) : () => setPaused(true)}>
-          {paused ? 'UNPAUSE' : 'PAUSE'}
-        </a>
-      </div>
+      <Footer refreshTime={refreshTime} loading={loading} updateText={updateText} paused={paused} setPaused={setPaused} />
     </>
   )
 }

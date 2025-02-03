@@ -2,26 +2,25 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 
-// Use the bootswatch Sandstone theme
 import 'bootswatch/dist/sandstone/bootstrap.min.css'
-
-// Boostrap JS needed for modal dialogs
 import 'bootstrap/dist/js/bootstrap.bundle.min'
-
 import './index.css'
 
-import App from './components/App.tsx'
+import App from './App.tsx'
 import { createConfigProvider, createServicesProvider } from './providers.tsx'
 import { AppConfig } from './types'
-import { AuthProviderMSAL } from './auth-msal'
 
 // Register the required components for Chart.js
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
+import { PublicClientApplication } from '@azure/msal-browser'
+import { MsalProvider } from '@azure/msal-react'
+import { AuthProviderMSAL } from './api/auth-provider-msal.ts'
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
+let msalApp: PublicClientApplication
+let authProvider: AuthProviderMSAL | null = null
 let config: AppConfig
-let authProvider: AuthProviderMSAL
-let scopes: string[]
+
 // This scope is used to validate access to the API. The app registration must
 // - be configured to allow & expose this scope. Also see services/api/server.go
 const APP_SCOPE = 'system.admin'
@@ -45,10 +44,22 @@ async function startApp() {
     }
 
     if (config.AUTH_CLIENT_ID) {
-      // Create the auth provider, this is a wrapper around MSAL
-      scopes = [`api://${config.AUTH_CLIENT_ID}/${APP_SCOPE}`]
-      authProvider = new AuthProviderMSAL(config.AUTH_CLIENT_ID, scopes, config.AUTH_TENANT)
-      await authProvider.initialize()
+      console.log(`### Enabling MSAL auth for clientId: ${config.AUTH_CLIENT_ID}`)
+
+      msalApp = new PublicClientApplication({
+        auth: {
+          clientId: config.AUTH_CLIENT_ID,
+          redirectUri: window.location.origin,
+          authority: `https://login.microsoftonline.com/${config.AUTH_TENANT}`,
+        },
+        cache: {
+          cacheLocation: 'localStorage',
+        },
+      })
+      await msalApp.initialize()
+
+      // Auth provider, is a wrapper around MSAL for our API client & token acquisition
+      authProvider = new AuthProviderMSAL(msalApp, [`api://${config.AUTH_CLIENT_ID}/${APP_SCOPE}`])
     }
   } catch (err) {
     console.warn('### Config error: ' + err)
@@ -66,19 +77,23 @@ async function startApp() {
   config.REFRESH_TIME = config.REFRESH_TIME || 15
   console.log(`### Config: ${JSON.stringify(config)}`)
 
-  const ServicesProvider = createServicesProvider(config)
+  const ServicesProvider = createServicesProvider(config, authProvider)
   const ConfigProvider = createConfigProvider(config)
 
   createRoot(document.getElementById('root')!).render(
-    // <StrictMode>
     <BrowserRouter>
       <ServicesProvider>
         <ConfigProvider>
-          <App />
+          {msalApp ? (
+            <MsalProvider instance={msalApp}>
+              <App />
+            </MsalProvider>
+          ) : (
+            <App />
+          )}
         </ConfigProvider>
       </ServicesProvider>
     </BrowserRouter>
-    /* </StrictMode> */
   )
 }
 

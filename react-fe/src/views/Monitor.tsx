@@ -1,20 +1,23 @@
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
 import { MonitorExtended, Monitor as MonitorType, ResultExtended } from '../types'
-import { getMonitorStatus, monitorIcon, niceDate } from '../utils'
-import { ServicesContext } from '../providers'
+import { getMonitorStatus, niceDate } from '../utils'
+import MonitorIcon from '../components/MonitorIcon'
+import StatusPill from '../components/StatusPill'
+import { useAPI } from '../providers'
 
 import { faRefresh, faCheckSquare, faCircleXmark, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
 
 import { ChartData } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import ResultTable from '../components/ResultTable'
 
 const MAX_RESULTS = 50
 
-export default function Monitor() {
+export default function Monitor({ isAuth }: { isAuth: boolean }) {
   const { id } = useParams()
-  const api = useContext(ServicesContext).api
+  const api = useAPI()
 
   const [monitor, setMonitor] = useState<MonitorExtended | null>(null)
   const [error, setError] = useState<string>('')
@@ -48,7 +51,6 @@ export default function Monitor() {
     setMonitor({
       ...mon,
       status: getMonitorStatus(mon.enabled ? fetchedResults[0]?.status : -1),
-      icon: monitorIcon(mon),
       lastRan: fetchedResults[0]?.date ? new Date(fetchedResults[0].date).toLocaleString() : '',
       message: fetchedResults[0]?.message,
     })
@@ -131,7 +133,8 @@ export default function Monitor() {
       <div className="card shadow mb-4">
         <div className={`card-header fs-3 d-flex justify-content-between ${monitor.status?.class || 'bg-secondary'}`}>
           <div>
-            {monitor.icon}&nbsp;
+            <MonitorIcon monitor={monitor} />
+            &nbsp;
             {monitor.name}
           </div>
           <button className="btn btn-light btn-sm" onClick={loadMonitor}>
@@ -144,13 +147,13 @@ export default function Monitor() {
               <tr>
                 <td>Type:</td>
                 <td>
-                  {monitor.icon} {monitor.type}
+                  <MonitorIcon monitor={monitor} /> {monitor.type}
                 </td>
               </tr>
               <tr>
                 <td>Status:</td>
                 <td>
-                  {monitor.status?.icon} {monitor.status?.text}
+                  <StatusPill statusCode={monitor.status.code} />
                 </td>
               </tr>
               <tr>
@@ -211,7 +214,7 @@ export default function Monitor() {
             </div>
           )}
 
-          <div>
+          <div className={isAuth ? '' : 'd-none'}>
             <hr />
             <NavLink className="btn btn-info wide" to={`/edit/${monitor.id}`}>
               <Fa icon={faEdit} fixedWidth={true} /> MODIFY
@@ -230,43 +233,7 @@ export default function Monitor() {
           <div className="card shadow mt-4 mb-4">
             <div className="card-header fs-3">Last 50 results</div>
             <div className="card-body">
-              <table className="table table-hover">
-                <thead className="table-primary">
-                  <tr>
-                    <th scope="col">Time</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Value</th>
-                    <th scope="col">Message</th>
-                    <th scope="col">Output</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((result) => (
-                    <tr key={result.monitor_id + result.date}>
-                      <td className={result.statusDetails.class}>{result.dateNice}</td>
-                      <td className={result.statusDetails.class}>
-                        <span className={`badge ${result.statusDetails.class}`}>
-                          {result.statusDetails.icon} {result.statusDetails.text}
-                        </span>
-                      </td>
-                      <td className={result.statusDetails.class}>{result.value}</td>
-                      <td className={result.statusDetails.class}>{result.message}</td>
-                      <td className={result.statusDetails.class}>
-                        <details className={result.outputs ? '' : 'd-none'}>
-                          <summary>Click to see output</summary>
-                          <ul className="table-outs">
-                            {Object.entries(result.outputs || {}).map(([key, value]) => (
-                              <li key={key}>
-                                <strong>{key}:</strong> {value}
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <ResultTable results={results} />
             </div>
           </div>
         </>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
 
 import { Monitor, MonitorExtended } from '../types'
-import { getMonitorStatus } from '../utils'
+import { getStatus } from '../utils'
 import MonitorIcon from '../components/MonitorIcon'
 
 import { ChartData } from 'chart.js'
@@ -72,7 +72,7 @@ export default function Monitors() {
           ...mon,
           message: results[0]?.message,
           lastRan: results[0]?.date ? last.toLocaleString() : 'Never',
-          status: getMonitorStatus(mon.enabled ? results[0]?.status : -1),
+          status: getStatus(mon.enabled ? results[0]?.status : -1),
         })
       }
 

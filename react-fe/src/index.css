@@ -180,3 +180,25 @@ summary:hover {
 summary:hover {
   color: rgb(27, 27, 27);
 }
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-container input[type='checkbox'] {
+  margin-left: 10px;
+  height: 1.2rem;
+  width: 1.2rem;
+  cursor: pointer;
+}
+
+.checkbox-container label {
+  margin: 0;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
+::-webkit-input-placeholder {
+  color: #bbb !important;
+}

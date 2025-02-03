@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
 import { MonitorExtended, Monitor as MonitorType, ResultExtended } from '../types'
-import { getMonitorStatus, niceDate } from '../utils'
+import { getStatus, niceDate } from '../utils'
 import MonitorIcon from '../components/MonitorIcon'
 import StatusPill from '../components/StatusPill'
 import { useAPI } from '../providers'
@@ -46,11 +46,11 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
       return
     }
 
-    const fetchedResults = await api.getResultsForMonitor(mon.id, MAX_RESULTS)
+    const fetchedResults = await api.getResultsForMonitor(mon.id!, MAX_RESULTS)
 
     setMonitor({
       ...mon,
-      status: getMonitorStatus(mon.enabled ? fetchedResults[0]?.status : -1),
+      status: getStatus(mon.enabled ? fetchedResults[0]?.status : -1),
       lastRan: fetchedResults[0]?.date ? new Date(fetchedResults[0].date).toLocaleString() : '',
       message: fetchedResults[0]?.message,
     })
@@ -59,7 +59,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
     const extendedResults = fetchedResults.map((result) => ({
       ...result,
       dateNice: new Date(result.date).toLocaleString(),
-      statusDetails: getMonitorStatus(result.status),
+      statusDetails: getStatus(result.status),
     })) as ResultExtended[]
 
     const chartValues: number[] = []
@@ -77,7 +77,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
     })
 
     setResults(extendedResults)
-    setUpdatedDate(niceDate(mon.updated))
+    setUpdatedDate(niceDate(mon.updated!))
     setLastResultDate(fetchedResults[0]?.date ? niceDate(fetchedResults[0]?.date) : '')
     setError('')
     setLoading(false)

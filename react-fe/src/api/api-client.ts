@@ -9,7 +9,7 @@ import { Monitor, Result } from '../types'
 export class APIClient extends APIClientBase {
   constructor(apiEndpoint: string, authProvider: AuthProvider | null) {
     super(apiEndpoint || '/api', {
-      delay: 0,
+      delay: 20,
       verbose: false,
       authProvider,
     })
@@ -45,5 +45,13 @@ export class APIClient extends APIClientBase {
 
   async importMonitors(monitors: Monitor[]): Promise<void> {
     return this.request('monitors/import', 'POST', monitors, true)
+  }
+
+  async createMonitor(monitor: Monitor): Promise<Monitor> {
+    return this.request('monitors', 'POST', monitor, true)
+  }
+
+  async updateMonitor(monitor: Monitor): Promise<void> {
+    return this.request(`monitors/${monitor.id}`, 'PUT', monitor, true)
   }
 }

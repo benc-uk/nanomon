@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import ResultTable from '../components/ResultTable'
 import { useAPI, useConfig } from '../providers'
 import { Result, ResultExtended } from '../types'
-import { getMonitorStatus, niceDate } from '../utils'
+import { getStatus, niceDate } from '../utils'
 import Footer from '../components/Footer'
 
 let timeoutId: number
@@ -33,7 +33,7 @@ export default function Results() {
 
       const results = fetchedResults.map((result) => ({
         ...result,
-        statusDetails: getMonitorStatus(result.status),
+        statusDetails: getStatus(result.status),
         dateNice: niceDate(result.date),
       })) as ResultExtended[]
 

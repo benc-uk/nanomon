@@ -46,7 +46,7 @@ export class APIClientBase {
   }
 
   constructor(endpoint: string, config?: APIConfig) {
-    // Trim any trailing slash from the endpoint
+    // Trim any trailing slash from the endpoint, for consistency
     this.endpoint = endpoint.replace(/\/$/, '')
 
     this.config = { ...this.config, ...config }
@@ -95,7 +95,7 @@ export class APIClientBase {
       }
     }
 
-    // Merge in headers
+    // Merge headers together
     if (this.config.headers) {
       for (const [key, value] of this.config.headers.entries()) {
         headers.set(key, value)

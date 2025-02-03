@@ -3,12 +3,12 @@
 // NanoMon Frontend - Some view helpers
 // ----------------------------------------------------------------------------
 
-import { MonitorStatus } from './types'
+import { Status } from './types'
 
-export function getMonitorStatus(statusCode: number) {
+export function getStatus(statusCode: number) {
   const status = {
     code: statusCode,
-  } as MonitorStatus
+  } as Status
 
   switch (statusCode) {
     case 0:
@@ -48,22 +48,4 @@ export function niceDate(dateString: string) {
   }
 
   return dateString.replace('T', ' ').split('.')[0]
-}
-
-/**
- * Check if an object is empty
- */
-export function isEmpty(obj: object | null | undefined) {
-  if (obj === undefined || obj === null) {
-    return true
-  }
-
-  return Object.keys(obj).length === 0
-}
-
-/**
- * Sleep function for delaying async operations
- */
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }

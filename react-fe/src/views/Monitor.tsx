@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
+
 import { MonitorExtended, MonitorFromDB, ResultExtended } from '../types'
 import { getStatus, niceDate } from '../utils'
 import MonitorIcon from '../components/MonitorIcon'
 import StatusPill from '../components/StatusPill'
+import ResultTable from '../components/ResultTable'
 import { useAPI } from '../providers'
 
 import { faRefresh, faCheckSquare, faCircleXmark, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
-
 import { ChartData } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import ResultTable from '../components/ResultTable'
 
 const MAX_RESULTS = 50
 

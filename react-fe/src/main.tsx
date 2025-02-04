@@ -1,14 +1,10 @@
-// import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 
+// CSS
 import 'bootswatch/dist/sandstone/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 import './index.css'
-
-import App from './App.tsx'
-import { createConfigProvider, createServicesProvider } from './providers.tsx'
-import { AppConfig } from './types'
 
 // Register the required components for Chart.js
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
@@ -16,6 +12,10 @@ import { PublicClientApplication } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
 import { AuthProviderMSAL } from './api/auth-provider-msal.ts'
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
+
+import App from './App.tsx'
+import { createConfigProvider, createServicesProvider } from './providers.tsx'
+import { AppConfig } from './types'
 
 let msalApp: PublicClientApplication
 let authProvider: AuthProviderMSAL | null = null

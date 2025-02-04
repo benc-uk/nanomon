@@ -22,10 +22,6 @@ install:
     # Note: Temporary version fixing to 1.61.3 see https://github.com/air-verse/air/issues/718
     {{ just_executable() }} install-air {{ tools_dir }} v1.61.3
     {{ just_executable() }} install-golangcilint {{ tools_dir }}
-    {{ just_executable() }} install-npm prettier prettier {{ tools_dir }}
-    {{ just_executable() }} install-npm eslint eslint {{ tools_dir }}
-    {{ just_executable() }} install-npm typescript tsc {{ tools_dir }}
-    {{ just_executable() }} install-npm vite vite {{ tools_dir }}
     {{ just_executable() }} install-npm httpyac httpyac {{ tools_dir }}
 
 # 🔍 Lint & format, default is to run lint check only and set exit code
@@ -38,9 +34,6 @@ lint fix="false":
     prettier_args={{ if fix != "false" { "--write" } else { "--check" } }}
     golangci_args={{ if fix != "false" { "--fix" } else { "" } }}
 
-    {{ npm_dir + '/eslint' }} -c frontend/eslint.config.mjs ./frontend $eslint_args
-    {{ npm_dir + '/prettier' }} $prettier_args ./frontend 
-    {{ npm_dir + '/tsc' }} -p ./frontend
     {{ tools_dir + '/golangci-lint' }} run ./... $golangci_args
 
 # 📝 Format source files and fix linting problems
@@ -75,9 +68,16 @@ run-api:
 # 🌐 Run frontend with Vite dev HTTP server & hot-reload
 run-frontend:
     # Creating JSON config file for frontend, this is ONLY used for local dev work
-    @jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config.json
+    jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config.json
     # Starting Vite to serve
     {{ tools_dir + '/node_modules/.bin/vite' }} ./frontend
+
+# 🌐 Run React frontend with Vite dev HTTP server & hot-reload
+run-frontend-new:
+    #!/bin/env bash
+    jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > react-fe/public/config.json
+    cd react-fe
+    npm run dev
 
 # 🍃 Run MongoDB in container (needs Docker)
 run-db:

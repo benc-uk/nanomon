@@ -1,6 +1,5 @@
 .env
 node_modules/
-package-lock.json
 _data/
 bin/
 .tools/

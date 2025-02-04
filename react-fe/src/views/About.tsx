@@ -25,7 +25,7 @@ export default function About() {
         workshops in order to demonstrate Kubernetes & container concepts.
       </p>
       <a href="https://github.com/benc-uk/nanomon" target="_blank" className="btn btn-dark fs-5">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" style={{ height: '20px' }}></img> GitHub project
+        <img src="/github.svg" style={{ height: '20px' }}></img> GitHub project
       </a>
       <hr />
       <h4>

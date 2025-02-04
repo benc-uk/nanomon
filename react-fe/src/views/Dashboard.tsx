@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Monitor, MonitorExtended } from '../types'
+import { MonitorFromDB, MonitorExtended } from '../types'
 import { getStatus } from '../utils'
 import { NavLink } from 'react-router'
 import MonitorIcon from '../components/MonitorIcon'
@@ -23,7 +23,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchMonitors(repeat = true) {
       setLoading(true)
-      let fetchedMonitors: Monitor[] = []
+      let fetchedMonitors: MonitorFromDB[] = []
       try {
         fetchedMonitors = await api.getMonitors()
       } catch (err) {
@@ -45,6 +45,8 @@ export default function Dashboard() {
         newMonitors.push({
           ...mon,
           status: getStatus(mon.enabled ? results[0]?.status : -1),
+          lastRan: '', // Not shown on dashboard
+          message: '', // Not shown on dashboard
         })
       }
 

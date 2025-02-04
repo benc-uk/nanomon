@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 
 import { APIClientBase, AuthProvider } from './api-client-base'
-import { Monitor, Result } from '../types'
+import { Monitor, MonitorFromDB, Result } from '../types'
 
 export class APIClient extends APIClientBase {
   constructor(apiEndpoint: string, authProvider: AuthProvider | null) {
@@ -15,11 +15,11 @@ export class APIClient extends APIClientBase {
     })
   }
 
-  async getMonitors(): Promise<Monitor[]> {
+  async getMonitors(): Promise<MonitorFromDB[]> {
     return this.request('monitors', 'GET')
   }
 
-  async getMonitor(monitorID: string): Promise<Monitor> {
+  async getMonitor(monitorID: string): Promise<MonitorFromDB> {
     return this.request(`monitors/${monitorID}`)
   }
 
@@ -47,11 +47,11 @@ export class APIClient extends APIClientBase {
     return this.request('monitors/import', 'POST', monitors, true)
   }
 
-  async createMonitor(monitor: Monitor): Promise<Monitor> {
+  async createMonitor(monitor: Monitor): Promise<MonitorFromDB> {
     return this.request('monitors', 'POST', monitor, true)
   }
 
-  async updateMonitor(monitor: Monitor): Promise<void> {
+  async updateMonitor(monitor: MonitorFromDB): Promise<void> {
     return this.request(`monitors/${monitor.id}`, 'PUT', monitor, true)
   }
 }

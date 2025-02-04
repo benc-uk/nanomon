@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
-import { MonitorExtended, Monitor as MonitorType, ResultExtended } from '../types'
+import { MonitorExtended, MonitorFromDB, ResultExtended } from '../types'
 import { getStatus, niceDate } from '../utils'
 import MonitorIcon from '../components/MonitorIcon'
 import StatusPill from '../components/StatusPill'
@@ -35,7 +35,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
 
     setLoading(true)
 
-    let mon: MonitorType
+    let mon: MonitorFromDB
     try {
       mon = await api.getMonitor(id)
     } catch (err) {
@@ -46,7 +46,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
       return
     }
 
-    const fetchedResults = await api.getResultsForMonitor(mon.id!, MAX_RESULTS)
+    const fetchedResults = await api.getResultsForMonitor(mon.id, MAX_RESULTS)
 
     setMonitor({
       ...mon,
@@ -77,7 +77,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
     })
 
     setResults(extendedResults)
-    setUpdatedDate(niceDate(mon.updated!))
+    setUpdatedDate(niceDate(mon.updated))
     setLastResultDate(fetchedResults[0]?.date ? niceDate(fetchedResults[0]?.date) : '')
     setError('')
     setLoading(false)
@@ -213,6 +213,23 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
               </details>
             </div>
           )}
+
+          <table className={`table table-sm table-hover mt-3 ${Object.keys(monitor.properties || {}).length === 0 ? 'd-none' : ''}`}>
+            <thead className="table-primary">
+              <tr>
+                <th scope="col">Property</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(monitor.properties || {}).map(([key, value]) => (
+                <tr key={key}>
+                  <td>{key}</td>
+                  <td>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           <div className={isAuth ? '' : 'd-none'}>
             <hr />

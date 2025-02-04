@@ -19,7 +19,7 @@ export default function StatusPill({ statusCode, large = false, className = '' }
       )
     case 1:
       return (
-        <span className={`badge bg-warning ${fs} ${className}`} title="Error">
+        <span className={`badge bg-warning text-dark ${fs} ${className}`} title="Error">
           <Fa icon={faTriangleExclamation} fixedWidth /> Error
         </span>
       )

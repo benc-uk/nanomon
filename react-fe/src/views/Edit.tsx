@@ -1,9 +1,9 @@
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router'
 import { FontAwesomeIcon as Fa } from '@fortawesome/react-fontawesome'
-import { faCheck, faEdit, faGears, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faEdit, faGears, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons'
 import MonitorIcon from '../components/MonitorIcon'
 import { useEffect, useState } from 'react'
-import { Monitor, MonitorDefinitions } from '../types'
+import { MonitorFromDB, Monitor, MonitorDefinitions, NewEmptyMonitor } from '../types'
 import { useAPI } from '../providers'
 
 export default function Edit() {
@@ -22,7 +22,7 @@ export default function Edit() {
   const [error, setError] = useState('')
   const [firstFetch, setFirstFetch] = useState(true)
 
-  const [monitor, setMonitor] = useState<Monitor>(MonitorDefinitions.http.template)
+  const [monitor, setMonitor] = useState<MonitorFromDB | Monitor>(NewEmptyMonitor)
 
   useEffect(() => {
     async function fetchMonitor() {
@@ -37,7 +37,7 @@ export default function Edit() {
 
     if (isNew) {
       setFirstFetch(false)
-      setMonitor(MonitorDefinitions.http.template)
+      setMonitor(NewEmptyMonitor)
     }
   }, [isNew, editId, api])
 
@@ -47,14 +47,14 @@ export default function Edit() {
 
     try {
       if (isNew) {
-        const createdMon = await api.createMonitor(monitor!)
+        const createdMon = await api.createMonitor(monitor)
         setSaving(false)
         navigate(`/monitor/${createdMon.id}`)
         return
       } else {
-        await api.updateMonitor(monitor!)
+        await api.updateMonitor(monitor as MonitorFromDB)
         setSaving(false)
-        navigate(`/monitor/${monitor.id}`)
+        navigate(`/monitor/${(monitor as MonitorFromDB).id}`)
         return
       }
     } catch (err) {
@@ -91,11 +91,28 @@ export default function Edit() {
   return (
     <>
       {error && <div className="alert alert-warning">{error}</div>}
+
+      <div className={`mb-3 d-flex align-items-center ${!isNew ? 'd-none' : ''}`}>
+        <div className="d-none d-sm-block">Templates&nbsp;</div>
+        <div>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.http.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.http.template} /> HTTP
+          </button>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.tcp.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.tcp.template} /> TCP
+          </button>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.ping.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.ping.template} /> PING
+          </button>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.dns.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.dns.template} /> DNS
+          </button>
+        </div>
+      </div>
+
       <div className="card shadow mb-4">
         <div className="card-header fs-3 bg-info text-light">
-          <Fa icon={faEdit} fixedWidth />
-          &nbsp;
-          {title}
+          <Fa icon={faEdit} fixedWidth /> {title}
           {isNew ? '' : `: ${monitor.name}`}
           <span className="float-end">
             <MonitorIcon monitor={monitor}></MonitorIcon>
@@ -212,13 +229,76 @@ export default function Edit() {
             </div>
           </form>
 
-          <hr />
+          <div className="d-flex align-items-baseline">
+            <h4 className="mt-4">Properties</h4>
+            <div className="dropdown ms-auto">
+              <button className="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Add Property
+              </button>
+              <ul className="dropdown-menu">
+                {MonitorDefinitions[monitor.type].allowedProps.map((prop, index) => (
+                  <li key={index}>
+                    <a
+                      className="dropdown-item case-link"
+                      onClick={() => {
+                        setMonitor({ ...monitor, properties: { ...monitor.properties, [prop]: '' } })
+                      }}
+                    >
+                      {prop}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
+          <table className="table table-sm table-hover mt-3">
+            <thead className="table-primary">
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
+                <th scope="col">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(monitor.properties).map((prop, index) => (
+                <tr key={index}>
+                  <td valign="middle">{prop}</td>
+                  <td>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={monitor.properties[prop]}
+                      onChange={(e) => {
+                        const newProps = { ...monitor.properties }
+                        newProps[prop] = e.target.value
+                        setMonitor({ ...monitor, properties: newProps })
+                      }}
+                      autoComplete="off"
+                    />
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => {
+                        const newProps = { ...monitor.properties }
+                        delete newProps[prop]
+                        setMonitor({ ...monitor, properties: newProps })
+                      }}
+                    >
+                      <Fa icon={faTrash} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <hr />
           <button className="btn btn-success wide" onClick={save} disabled={!canSave()}>
             <Fa icon={faCheck} fixedWidth /> {isNew ? 'CREATE' : 'UPDATE'}
           </button>
-
-          <NavLink to={isNew ? '/' : `/monitor/${monitor.id}`} className="btn btn-warning wide mx-3">
+          <NavLink to={isNew ? '/' : `/monitor/${(monitor as MonitorFromDB).id}`} className="btn btn-warning wide mx-3">
             <Fa icon={faXmark} fixedWidth /> CANCEL
           </NavLink>
         </div>

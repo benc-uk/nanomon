@@ -8,16 +8,19 @@ export interface AppConfig {
 }
 
 export interface Monitor {
-  id?: string
   name: string
   type: string
   interval: string
   target: string
-  rule?: string
-  updated?: string
+  rule: string
   enabled: boolean
   properties: { [key: string]: string }
-  group?: string
+  group: string
+}
+
+export interface MonitorFromDB extends Monitor {
+  id: string
+  updated: string
 }
 
 export const StatusOK = 0
@@ -41,8 +44,8 @@ export interface Result {
 
 export interface Status {
   code: number
-  text?: string
-  class?: string
+  text: string
+  class: string
 }
 
 export interface ResultExtended extends Result {
@@ -50,10 +53,21 @@ export interface ResultExtended extends Result {
   statusDetails: Status
 }
 
-export interface MonitorExtended extends Monitor {
-  message?: string
-  lastRan?: string
+export interface MonitorExtended extends MonitorFromDB {
+  message: string
+  lastRan: string
   status: Status
+}
+
+export const NewEmptyMonitor: Monitor = {
+  name: 'New Monitor',
+  type: 'http',
+  interval: '60s',
+  target: '',
+  enabled: true,
+  properties: {},
+  rule: '',
+  group: '',
 }
 
 type MonitorDefinition = {
@@ -74,6 +88,7 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       target: 'http://example.net',
       rule: 'status == 200 && respTime < 1200',
       properties: {},
+      group: '',
     },
   },
 
@@ -90,6 +105,7 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       properties: {
         timeout: '500ms',
       },
+      group: '',
     },
   },
 
@@ -106,6 +122,7 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       properties: {
         timeout: '500ms',
       },
+      group: '',
     },
   },
 
@@ -122,6 +139,7 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       properties: {
         timeout: '500ms',
       },
+      group: '',
     },
   },
 }

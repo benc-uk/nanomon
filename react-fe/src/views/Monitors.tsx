@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
 
-import { Monitor, MonitorExtended } from '../types'
+import { MonitorFromDB, MonitorExtended } from '../types'
 import { getStatus } from '../utils'
 import MonitorIcon from '../components/MonitorIcon'
 
@@ -36,7 +36,7 @@ export default function Monitors() {
     async function fetchMonitors(repeat = true) {
       setLoading(true)
       setError('')
-      let fetchedMonitors: Monitor[] = []
+      let fetchedMonitors: MonitorFromDB[] = []
       try {
         fetchedMonitors = await api.getMonitors()
       } catch (err) {
@@ -51,6 +51,8 @@ export default function Monitors() {
       const newMonitors: MonitorExtended[] = []
 
       for (const mon of fetchedMonitors) {
+        if (!mon.id) continue
+
         const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
         const last = new Date(results[0]?.date)
 
@@ -128,8 +130,8 @@ export default function Monitors() {
                 <StatusPill statusCode={mon.status.code} large className="mx-3" />
               </div>
               <div className="mini-graph">
-                <NavLink to={`/monitor/${mon.id}`}>
-                  <Line data={chartData[mon.id]} options={CHART_OPTIONS} />
+                <NavLink to={`/monitor/${mon.id || '-1'}`}>
+                  <Line data={chartData[mon.id || '-1']} options={CHART_OPTIONS} />
                 </NavLink>
               </div>
             </div>

@@ -1,0 +1,46 @@
+<div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
+<div class="alert alert-light" role="alert" x-show="!loading && monitors && !error && monitors.length <= 0">
+  Create a new monitor to get started 😀
+</div>
+
+<!-- <div class="d-flex justify-content-center" x-show="loading">
+  <div class="spinner-border fiverem" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div> -->
+
+<template x-for="m of monitors">
+  <div class="card shadow mb-4">
+    <a :href="'#monitor/'+m.id">
+      <div class="card-header fs-3" :class="m.status.class" x-text="m.name"></div>
+    </a>
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <div class="p-2">
+          <h5 class="card-subtitle mb-2 target" x-text="m.target"></h5>
+
+          <span x-html="`${m.icon}&nbsp;&nbsp;`" class="fs-2 valign-middle" :title="m.type"></span>
+          <span class="badge p-2 fs-6" :class="m.status.class" x-html="`<i class='${m.status?.icon}'></i>&nbsp;&nbsp;${m.status?.text || 'None'}`">
+          </span>
+        </div>
+        <div class="mini-graph">
+          <a :href="'#monitor/'+m.id">
+            <canvas :id="`chart_${m.id}`"></canvas>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer bg-light" x-text="`Last run: ${m.lastRan || 'never'}`"></div>
+  </div>
+</template>
+
+<div class="footer text-muted">
+  <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <span x-text="updateText"></span>
+
+  &mdash; <span x-text="paused ? 'Auto update paused': 'Auto update every '+autoUpdate+' seconds '"> </span> &mdash;
+  <a class="badge rounded-pill text-bg-light" type="button" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
+</div>

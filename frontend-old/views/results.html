@@ -1,0 +1,73 @@
+<div class="alert alert-light" role="alert" x-show="!loading && error" x-text="error"></div>
+
+<!-- <div class="d-flex justify-content-center" x-show="loading">
+  <div class="spinner-border fiverem" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div> -->
+
+<table class="table table-hover shadow-lg" x-show="results && results.length > 0">
+  <thead>
+    <tr>
+      <th scope="col">Date</th>
+      <th scope="col">Monitor</th>
+      <th scope="col">Status</th>
+      <th scope="col">Value</th>
+      <th scope="col">Message</th>
+      <th scope="col">Output</th>
+    </tr>
+  </thead>
+  <tbody>
+    <template x-for="r of results">
+      <tr>
+        <td x-text="r.dateNice" :class="r.statusDetails.class"></td>
+        <td x-text="r.monitor_name" :class="r.statusDetails.class"></td>
+        <td x-text="r.statusDetails.text" :class="r.statusDetails.class"></td>
+        <td x-text="r.value" :class="r.statusDetails.class"></td>
+        <td x-text="r.message || '-'" :class="`${r.statusDetails.class} smallfont`"></td>
+        <td :class="r.statusDetails.class">
+          <button x-show="r.outputs" class="btn btn-sm btn-secondary" @click="output = r.outputs" data-bs-toggle="modal" data-bs-target="#outModal">
+            More
+          </button>
+        </td>
+      </tr>
+    </template>
+  </tbody>
+</table>
+
+<div class="footer text-muted mt-4">
+  <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <span x-text="updateText"></span>
+
+  &mdash; <span x-text="paused ? 'Auto update paused': 'Auto update every '+autoUpdate+' seconds '"> </span> &mdash;
+  <a class="badge rounded-pill text-bg-light" type="button" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
+</div>
+
+<!-- Output modal -->
+<div class="modal fade" id="outModal" tabindex="-1" aria-labelledby="outputModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h1 class="modal-title fs-5" id="outputModalLabel">Output Details</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <template x-if="output">
+          <ul>
+            <template x-for="[k, v] in Object.entries(output)">
+              <li x-text="`${k} = ${v}`" x-show="v != ''"></li>
+            </template>
+          </ul>
+        </template>
+        <template x-if="!output">
+          <div>No output for this result</div>
+        </template>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>

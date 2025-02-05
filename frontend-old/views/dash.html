@@ -1,0 +1,34 @@
+<div class="alert alert-warning" role="alert" x-show="error" x-text="error"></div>
+<div class="alert alert-light" role="alert" x-show="!loading && monitors && !error && monitors.length <= 0">
+  Create a new monitor to get started 😀
+</div>
+
+<!-- <div class="d-flex justify-content-center" x-show="loading">
+  <div class="spinner-border fiverem" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div> -->
+
+<div class="d-flex flex-wrap justify-content-center">
+  <template x-for="m of monitors">
+    <div
+      class="dash m-2 p-1 rounded-2 d-flex flex-column justify-content-center"
+      :class="m.status.class"
+      @click="window.location.hash = '#monitor/'+m.id"
+    >
+      <div x-html="m.icon" class="fs-1"></div>
+      <div x-text="m.name" class="dash-name"></div>
+    </div>
+  </template>
+</div>
+
+<div class="footer text-muted mt-4">
+  <div class="spinner-border spinner-border-sm text-info" role="status" x-show="loading">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+
+  <span x-text="updateText"></span>
+
+  &mdash; <span x-text="paused ? 'Auto update paused': 'Auto update every '+autoUpdate+' seconds '"> </span> &mdash;
+  <a class="badge rounded-pill text-bg-light" type="button" @click="paused = !paused" x-text="paused ? 'UNPAUSE' : 'PAUSE'"></a>
+</div>

@@ -29,19 +29,38 @@ RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
   -o frontend nanomon/services/frontend
 
 # ================================================================================================
-# === Stage 2: Get binary into a lightweight container ===========================================
+# === Stage 2: Bundle the frontend app ===========================================================
+# ================================================================================================
+
+FROM node:20-alpine AS node-build
+
+WORKDIR /build
+
+# Copy the frontend app source files
+COPY frontend/package* ./
+
+# Install dependencies
+RUN npm install --silent --ci
+
+# Copy the frontend app source files
+COPY frontend/ .
+RUN rm -rf public/config.json
+
+# Build the frontend app
+RUN npm run build
+
+# ================================================================================================
+# === Stage 3: Create the final image ============================================================
 # ================================================================================================
 FROM scratch
 WORKDIR /app 
 
-# Copy the Go server binary
+# Copy the previous stages' artifacts into this stage
 COPY --from=go-build /build/frontend . 
-
-# Copy the HTML/JS/CSS files for the frontend app into same directory
-COPY frontend/ .
+COPY --from=node-build /build/dist ./dist
 
 ENV PORT=8001
 EXPOSE 8001
 
 # That's it! Just run the server 
-CMD [ "./frontend"]
+CMD [ "./frontend", "-dir", "./dist" ]

@@ -1,0 +1,165 @@
+.navbar-brand img {
+  height: 40px;
+}
+
+.navbar-brand {
+  line-height: 40px;
+}
+
+.mini-graph {
+  width: 250px;
+}
+
+.bg-warning {
+  background-color: #f8a933 !important;
+}
+
+.bg-success,
+.btn-success {
+  background-color: #44a855 !important;
+}
+
+.navbtn-main {
+  background-color: #3ec8ac;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+.navbtn-main:hover {
+  background-color: #2daf94;
+}
+
+.navbtn-user {
+  background-color: #3e91c8;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+.navbtn-user:hover {
+  background-color: #2872a3;
+}
+
+.btn-larger {
+  padding: 0.9rem 1.2rem;
+  font-size: 1.4rem;
+}
+
+a .card-header {
+  color: #fff;
+  text-decoration: none;
+}
+
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.dash {
+  box-shadow: 0px 4px 12px 2px rgba(0, 0, 0, 0.4) !important;
+  width: 8rem;
+  height: 8rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.code {
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+}
+
+.valign-middle {
+  vertical-align: middle;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+.popWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.popup {
+  position: absolute;
+  top: 40px;
+  left: -14rem;
+  z-index: 10000;
+  width: 20rem;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.popup span {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 800px) {
+  .target {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 1400px) {
+  .target {
+    font-size: 1rem;
+  }
+}
+
+.dash-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.4rem;
+  line-height: 1.2rem;
+}
+
+.fiverem {
+  width: 5rem;
+  height: 5rem;
+}
+
+.wide {
+  width: 6rem;
+}
+
+.wider {
+  width: 8rem;
+}
+
+.smallfont {
+  font-size: 0.8rem;
+}
+
+.notexttransform {
+  text-transform: none !important;
+}
+
+.target-url {
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.mini-out-table td {
+  border: 2px solid #eee;
+  padding: 0.2rem;
+  padding-right: 2rem;
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover {
+  color: #2872a3;
+}
+
+.wide-button {
+  width: 20rem;
+}

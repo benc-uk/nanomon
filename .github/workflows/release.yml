@@ -45,7 +45,7 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
           just images
-          just push
+          just --yes push
 
       - name: Build & push images - latest
         env:
@@ -53,4 +53,4 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
           just images
-          just push
+          just --yes push

@@ -1,8 +1,7 @@
-name: nano-realms
-version: "3.9"
+name: nanomon
 
-# Docker compose file for nano-realms
-# Call via the makefile, otherwise you'll need to set all the vars
+# Docker compose file for nanomon
+# Call via make/just, otherwise you'll need to set all the vars manually
 
 services:
   frontend:
@@ -16,7 +15,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      API_ENDPOINT: http://localhost:8000
+      API_ENDPOINT: http://localhost:8000/api
     networks:
       - front
 

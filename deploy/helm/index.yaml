@@ -2,15 +2,30 @@ apiVersion: v1
 entries:
   nanomon:
   - apiVersion: v2
-    appVersion: 0.0.9
-    created: "2023-12-29T15:58:59.969596475Z"
+    appVersion: 0.1.3
+    created: "2025-02-05T21:35:41.074815635Z"
     dependencies:
     - condition: mongodb.enabled
       name: mongodb
       repository: https://charts.bitnami.com/bitnami
       version: 13.x.x
     description: Deploy NanoMon, a HTTP and network monitoring tool
-    digest: 033846643a063be31075313f66a476d7af9b06bca0492a4f075eefd3b0db6f85
+    digest: ff625acc8d4bdeeb253ae5ee86541abd28cb1b5fd74e7d52a2816a2c7b4435ff
+    name: nanomon
+    type: application
+    urls:
+    - nanomon-0.0.7.tgz
+    version: 0.0.7
+  - apiVersion: v2
+    appVersion: 0.1.3
+    created: "2025-02-05T21:35:41.063641564Z"
+    dependencies:
+    - condition: mongodb.enabled
+      name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 13.x.x
+    description: Deploy NanoMon, a HTTP and network monitoring tool
+    digest: 7813ba9d4443268cf60826887c974ae0c3a81202b6e1b6ea7a8fd40115e65de9
     name: nanomon
     type: application
     urls:
@@ -18,7 +33,7 @@ entries:
     version: 0.0.6
   - apiVersion: v2
     appVersion: 0.0.4
-    created: "2023-12-29T15:58:59.963805497Z"
+    created: "2025-02-05T21:35:41.053123663Z"
     dependencies:
     - condition: mongodb.enabled
       name: mongodb
@@ -33,7 +48,7 @@ entries:
     version: 0.0.5
   - apiVersion: v2
     appVersion: 0.0.3
-    created: "2023-12-29T15:58:59.958862518Z"
+    created: "2025-02-05T21:35:41.040065496Z"
     dependencies:
     - condition: mongodb.enabled
       name: mongodb
@@ -46,4 +61,4 @@ entries:
     urls:
     - nanomon-0.0.4.tgz
     version: 0.0.4
-generated: "2023-12-29T15:58:59.952014861Z"
+generated: "2025-02-05T21:35:41.03081408Z"

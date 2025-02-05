@@ -22,7 +22,7 @@ The architecture is a fairly standard design, consisting of four application com
 
 - **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the MongoDB database.
 - **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
-- **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using Alpine.js](https://alpinejs.dev/)
+- **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using [React](https://react.dev) and [Vite](https://vite.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
 - **MongoDB** - Backend data store, this is a vanilla instance of MongoDB. Cloud and hosted services which provide MongoDB compatibility (e.g. Azure Cosmos DB) also work
 
@@ -63,7 +63,7 @@ For more details see the [complete monitor reference](#monitor-reference)
 │   ├── helm        - Helm chart to deploy NanoMon
 │   └── kubernetes  - Example Kubernetes manifests (No Helm)
 ├── etc             - Misc stuff :)
-├── frontend        - The HTML/JS source for the frontend app
+├── frontend        - The source for the frontend React app
 ├── scripts         - Supporting helper bash scripts
 ├── services
 │   ├── api         - Go source for the API service
@@ -142,20 +142,19 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ### Frontend
 
-- Written in "modern" ES6 JavaScript using Alpine.js for reactivity and as a lightweight SPA framework [source code - /frontend](./frontend)
-- No bundling, webpack or Node is required 😊
-- Vite is used but just as a dev-server for serving the site locally
-- Configuration is fetched from the URL `/config` at start up.
+- Written in TypeScript + React v19, using the Vite project scaffolding `npm create vite@latest`, the source code is in [/frontend](./frontend)
+- Vite is used for bundling, and local serving with HMR
+- Configuration is fetched from the URL `/config.json` at start up.
   - When hosted by the frontend-host this allows for values to be dynamically passed to the frontend at runtime.
   - When running locally the makefile target `just run-frontend` builds a static config file to "fake" this config API.
-- By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser)
+- By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser) and [MSAL React](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-react)
 
 ### Frontend Host
 
-- Written in Go, [source code - /services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
+- Written in Go, source code is in[/services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
 - A simple static HTTP server for hosting & serving the content & files of the frontend app
 - Listens on port 8001 by default.
-- Provides a single special API endpoint served at `/config` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
+- Provides a single special API endpoint served at `/config.json` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
 ## Just Reference
 
@@ -196,7 +195,7 @@ All three components (API, runner and frontend host) expect their configuration 
 | MONGO_DB      | Database name to use              | nanomon                   |
 | MONGO_TIMEOUT | Timeout for connecting to MongoDB | 30s                       |
 
-### Variables used by both the API and frontend host:
+### Variables used by _both_ the API and frontend host:
 
 | _Name_         | _Description_                                                                                                  | _Default_   |
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |

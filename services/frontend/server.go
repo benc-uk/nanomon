@@ -37,7 +37,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	// The simple config endpoint, this is a virtual file and is not served from the filesystem
+	// The simple config endpoint, this is a virtual file and doesn't exist on disk
 	r.Get("/config.json", routeConfig)
 
 	// Serve static SPA content using the spaHandler

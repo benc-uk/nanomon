@@ -20,40 +20,35 @@ default:
 # 🔮 Install dev tools into project tools directory
 install:
     # Note: Temporary version fixing to 1.61.3 see https://github.com/air-verse/air/issues/718
-    {{ just_executable() }} install-air {{ tools_dir }} v1.61.3
+    {{ just_executable() }} install-air {{ tools_dir }}
     {{ just_executable() }} install-golangcilint {{ tools_dir }}
-    {{ just_executable() }} install-npm prettier prettier {{ tools_dir }}
-    {{ just_executable() }} install-npm eslint eslint {{ tools_dir }}
-    {{ just_executable() }} install-npm typescript tsc {{ tools_dir }}
-    {{ just_executable() }} install-npm vite vite {{ tools_dir }}
     {{ just_executable() }} install-npm httpyac httpyac {{ tools_dir }}
 
 # 🔍 Lint & format, default is to run lint check only and set exit code
-lint fix="false":
+lint fix="false": npm_install
     #!/bin/env bash
     set -e
     echo {{ if fix != "false" { "Fixing" } else { "Checking" } }} "lint issues..."
 
-    eslint_args={{ if fix != "false" { "--fix" } else { "" } }}
-    prettier_args={{ if fix != "false" { "--write" } else { "--check" } }}
     golangci_args={{ if fix != "false" { "--fix" } else { "" } }}
+    npm_lint_script={{ if fix != "false" { "lint:fix" } else { "lint" } }}
+    npm_format_script={{ if fix != "false" { "format" } else { "format:check" } }}
 
-    {{ npm_dir + '/eslint' }} -c frontend/eslint.config.mjs ./frontend $eslint_args
-    {{ npm_dir + '/prettier' }} $prettier_args ./frontend 
-    {{ npm_dir + '/tsc' }} -p ./frontend
     {{ tools_dir + '/golangci-lint' }} run ./... $golangci_args
+    cd frontend && npm run $npm_lint_script && npm run $npm_format_script 
 
 # 📝 Format source files and fix linting problems
 format: (lint "true")
 
-# 🔨 Build all binaries into ./bin/ directory, not really needed
-build: (check-env needed_vars)
+# 🔨 Build all binaries and bundle the frontend, we don't really use this
+build: (check-env needed_vars) npm_install
     mkdir -p bin
     go build -o bin -ldflags "-X main.version=$VERSION -X \"main.buildInfo=$BUILD_INFO\"" nanomon/services/...
+    cd frontend && npm run build
 
 # 📦 Build all container images, using Docker compose
 images: (check-env needed_vars) (print-vars needed_vars)
-    docker compose -f build/compose.yaml build
+    docker compose -f build/compose.yaml build database api runner frontend
 
 # 📦 Build the special standalone all-in-one image
 image-standalone: (check-env needed_vars) (print-vars needed_vars)
@@ -72,12 +67,12 @@ run-runner:
 run-api:
     {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
 
-# 🌐 Run frontend with Vite dev HTTP server & hot-reload
-run-frontend:
-    # Creating JSON config file for frontend, this is ONLY used for local dev work
-    @jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/config.json
-    # Starting Vite to serve
-    {{ tools_dir + '/node_modules/.bin/vite' }} ./frontend
+# 🌐 Run React frontend with Vite dev HTTP server & hot-reload
+run-frontend: npm_install
+    #!/bin/env bash
+    jq -n 'env | {API_ENDPOINT, AUTH_CLIENT_ID, VERSION, BUILD_INFO, AUTH_TENANT}' > frontend/public/config.json
+    cd frontend
+    npm run dev
 
 # 🍃 Run MongoDB in container (needs Docker)
 run-db:
@@ -129,3 +124,11 @@ clean:
 	rm -rf tmp bin .tools frontend/config api/**/node_modules api/**/tsp-output frontend/.vite *.xml
 	docker volume rm nm-mongo-data || true
 
+[private]
+npm_install:
+    #!/bin/env bash
+    # Only install if not already installed
+    if [[ ! -d frontend/node_modules ]]; then
+        echo "📦 Installing frontend dependencies..."
+        cd frontend && npm install
+    fi

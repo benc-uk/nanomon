@@ -1,11 +1,10 @@
 .env
 node_modules/
-package-lock.json
 _data/
 bin/
 .tools/
 tmp/
-frontend/config*
+frontend/**/config*
 release-notes.md
 my-*.yaml
 my-*.bicepparam

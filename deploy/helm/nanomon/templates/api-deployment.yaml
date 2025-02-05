@@ -53,7 +53,11 @@ spec:
             {{- if .Values.authClientId }}
           - name: AUTH_CLIENT_ID
             value: {{ .Values.authClientId }}
-            {{- end }}                
+            {{- end }}      
+            {{- if .Values.authTenant }}
+          - name: AUTH_TENANT
+            value: {{ .Values.authTenant }}
+            {{- end }}           
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

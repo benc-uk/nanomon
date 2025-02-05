@@ -195,7 +195,7 @@ All three components (API, runner and frontend host) expect their configuration 
 | MONGO_DB      | Database name to use              | nanomon                   |
 | MONGO_TIMEOUT | Timeout for connecting to MongoDB | 30s                       |
 
-### Variables used by both the API and frontend host:
+### Variables used by _both_ the API and frontend host:
 
 | _Name_         | _Description_                                                                                                  | _Default_   |
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |

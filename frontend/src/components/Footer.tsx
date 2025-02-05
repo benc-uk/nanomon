@@ -25,7 +25,7 @@ export default function Footer({ refreshTime, loading, updated, paused, setPause
         type="button"
         onClick={paused ? () => setPaused(false) : () => setPaused(true)}
       >
-        {paused ? 'Auto update paused' : `Auto update every ${refreshTime / 1000} seconds`}
+        {paused ? 'Update paused' : `Update: ${refreshTime / 1000} secs`}
       </a>
     </div>
   )

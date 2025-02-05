@@ -1,16 +1,4 @@
-//
-// We're not using TypeScript, but we can still use the TypeScript compiler to type-check our JavaScript files via JSDoc
-//
-
 {
-  "compilerOptions": {
-    "allowJs": true, // Allows JavaScript files to be included
-    "checkJs": true, // Enables type checking for JavaScript files
-    "noEmit": true, // Prevents TypeScript from emitting compiled files
-    "types": ["./types/nanomon", "./types/remote-modules", "./types/chartjs", "./types/alpinejs"],
-    "moduleResolution": "Node", // Use Node.js module resolution
-    "target": "ESNext",
-    "module": "ESNext" // Use ESNext to support import/export syntax
-  },
-  "include": ["**/*.mjs"] // Ensures all JavaScript files are type-checked
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

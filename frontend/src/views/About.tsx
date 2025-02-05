@@ -74,7 +74,7 @@ export default function About() {
               {userAccount.environment}
             </li>
             <li>
-              <b>Tenant:</b>&nbsp;
+              <b>Home tenant:</b>&nbsp;
               {userAccount.tenantId}
             </li>
           </ul>

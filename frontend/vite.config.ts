@@ -9,8 +9,11 @@ export default defineConfig({
     open: true,
   },
   build: {
+    emptyOutDir: true,
+    // Top-level await please
     target: 'esnext',
     rollupOptions: {
+      external: ['config.json'],
       output: {
         // This is a manual chunk configuration, it's used to split the bundle
         manualChunks: {

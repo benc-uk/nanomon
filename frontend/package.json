@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "rm -rf ./public/config.json && tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",

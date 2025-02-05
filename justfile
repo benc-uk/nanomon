@@ -31,11 +31,11 @@ lint fix="false": npm_install
     echo {{ if fix != "false" { "Fixing" } else { "Checking" } }} "lint issues..."
 
     golangci_args={{ if fix != "false" { "--fix" } else { "" } }}
-    fe_lint_cmd={{ if fix != "false" { "lint:fix" } else { "lint" } }}
-    fe_format_cmd={{ if fix != "false" { "format" } else { "format:check" } }}
+    npm_lint_script={{ if fix != "false" { "lint:fix" } else { "lint" } }}
+    npm_format_script={{ if fix != "false" { "format" } else { "format:check" } }}
 
     {{ tools_dir + '/golangci-lint' }} run ./... $golangci_args
-    cd frontend && npm run $fe_lint_cmd && npm run $fe_format_cmd 
+    cd frontend && npm run $npm_lint_script && npm run $npm_format_script 
 
 # 📝 Format source files and fix linting problems
 format: (lint "true")

@@ -26,11 +26,18 @@ export default function ResultTable({ results }: { results: ResultExtended[] }) 
               <details className={result.outputs ? '' : 'd-none'}>
                 <summary>Click to see output</summary>
                 <ul className="table-outs">
-                  {Object.entries(result.outputs || {}).map(([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}:</strong> {value}
-                    </li>
-                  ))}
+                  {Object.entries(result.outputs || {}).map(([key, value]) => {
+                    // Guard against objects, arrays etc
+                    if (typeof value === 'object' || Array.isArray(value)) {
+                      value = JSON.stringify(value)
+                    }
+
+                    return (
+                      <li key={key}>
+                        <strong>{key}:</strong> {value}
+                      </li>
+                    )
+                  })}
                 </ul>
               </details>
             </td>

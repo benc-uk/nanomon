@@ -203,12 +203,19 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
                       <td>timestamp</td>
                       <td>{lastResultDate}</td>
                     </tr>
-                    {Object.entries(results[0].outputs || {}).map(([key, value]) => (
-                      <tr key={key}>
-                        <td>{key}</td>
-                        <td>{value}</td>
-                      </tr>
-                    ))}
+                    {Object.entries(results[0].outputs || {}).map(([key, value]) => {
+                      // Guard against objects, arrays etc
+                      if (typeof value === 'object' || Array.isArray(value)) {
+                        value = JSON.stringify(value)
+                      }
+
+                      return (
+                        <tr key={key}>
+                          <td>{key}</td>
+                          <td>{value}</td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </details>

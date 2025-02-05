@@ -80,7 +80,7 @@ export default function About() {
           </ul>
         </div>
       )}
-      &copy; Ben Coleman, 2023
+      &copy; Ben Coleman, 2025
     </>
   )
 }

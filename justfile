@@ -48,7 +48,7 @@ build: (check-env needed_vars) npm_install
 
 # 📦 Build all container images, using Docker compose
 images: (check-env needed_vars) (print-vars needed_vars)
-    docker compose -f build/compose.yaml build database api runner frontend
+    docker compose -f build/compose.yaml build
 
 # 📦 Build the special standalone all-in-one image
 image-standalone: (check-env needed_vars) (print-vars needed_vars)

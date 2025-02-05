@@ -8,22 +8,25 @@ image:
   # -- Image pull secrets if needed
   pullSecrets: []
 
-# -- Enable authentication with an Azure AD app id
+# -- Enable authentication with EntraID & a client id
 authClientId:
+
+# -- Optional, set tenant ID for EntraID auth
+authTenant:
 
 api:
   # -- Number of pod replicas for the API
   replicaCount: 1
   # -- Type of service for the API
   serviceType: ClusterIP
-  
+
 runner:
   # -- Number of pod replicas for the runner, best left as 1
   replicaCount: 1
   # -- Set to "true" to using DB polling instead of MongoDB change streams
-  usePolling: 
+  usePolling:
   # -- Only set when using polling, use a duration string, e.g. "5s"
-  pollingInterval: 
+  pollingInterval:
   alerting:
     # -- SMTP password for sending alerts, set to enable alerting
     password:
@@ -48,7 +51,7 @@ frontend:
 
 mongodb:
   # -- Point to an existing MongoDB instance, leave blank when enabled=true
-  connectionURI: 
+  connectionURI:
   # -- Enable deploying MongoDB, leave connectionURI blank if true
   enabled: true
   #@ignored
@@ -81,9 +84,9 @@ ingress:
   # -- Annotations applied to the ingress
   annotations: {}
   # -- Hostname for the ingress rules, strongly recommended to set
-  host: 
+  host:
   # -- TLS cert secret name, leave blank to disable TLS
-  tlsSecret: 
+  tlsSecret:
 
 # -- Annotations applied to all pods
 podAnnotations: {}

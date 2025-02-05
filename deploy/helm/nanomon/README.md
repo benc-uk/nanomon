@@ -17,7 +17,8 @@ Deploy NanoMon, a HTTP and network monitoring tool
 | affinity | object | `{}` | Affinity used by all pods |
 | api.replicaCount | int | `1` | Number of pod replicas for the API |
 | api.serviceType | string | `"ClusterIP"` | Type of service for the API |
-| authClientId | string | `nil` | Enable authentication with an Azure AD app id |
+| authClientId | string | `nil` | Enable authentication with EntraID app id |
+| authTenant | string | `nil` | Optional, set tenant ID for EntraID |
 | frontend.apiEndpoint | string | `nil` | Endpoint to access the deployed API, don't set when using ingress |
 | frontend.replicaCount | int | `1` | Number of pod replicas for the frontend host |
 | frontend.serviceType | string | `"ClusterIP"` | Type of service for the frontend |

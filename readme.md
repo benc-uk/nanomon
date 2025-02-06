@@ -1,12 +1,12 @@
 # NanoMon - Monitoring Tool
 
-NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted any container based system e.g. Kubernetes, or just run locally. It is written in Go and based on the now ubiquitous microservices pattern, so decomposed into several discreet but interlinked components. The features of NanoMon include:
+NanoMon is a lightweight network and HTTP monitoring system, designed to be self hosted any container based system e.g. Kubernetes or various cloud services, or run locally. It is written in Go and based on the now ubiquitous (infamous?) microservices pattern, so is decomposed into several discreet but interlinked components. The features of NanoMon include:
 
 - A range of configurable monitor types
 - Web frontend for viewing results & editing/creating monitors
 - Email alerting
 - Range of deployment options
-- Rules for setting monitor status and evaluating results
+- Rules for setting monitor status on thresolds, or other checks
 - OAuth2 based user sign-in and authentication
 - Exporting of metrics & data to Prometheus
 
@@ -89,6 +89,7 @@ Pre-reqs:
 - Linux system like Ubuntu (WSL2 was used for development), MacOS might work 🤷‍♂️
 - [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
 - [Go SDK & toolchain](https://go.dev/doc/install)
+- [Node.js](https://nodejs.org/en/download)
 - [Just](https://just.systems) task runner and make replacement
   - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.tools/`), then you can run `.tools/just`
   - When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.

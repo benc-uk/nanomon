@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: NanoMon API Service
-  version: 2024-10-17
+  version: '2024-10-17'
   description: The REST API for operating and using NanoMon
 tags:
   - name: Monitors
@@ -59,7 +59,7 @@ paths:
         - Monitors
   /api/monitors/import:
     post:
-      operationId: MonitorAPI_importMonitors
+      operationId: import
       description: Import configuration from a JSON file
       parameters: []
       responses:
@@ -172,7 +172,7 @@ paths:
         - Monitors
   /api/monitors/{id}/results:
     get:
-      operationId: MonitorAPI_getResults
+      operationId: fetchResults
       description: List *Results* for a single monitor. Doesn't require authentication
       parameters:
         - name: id
@@ -206,7 +206,7 @@ paths:
         - Monitors
   /api/results:
     get:
-      operationId: ResultsAPI_getResults
+      operationId: fetchAll
       description: List *Results* for ALL monitors. Doesn't require authentication
       parameters:
         - name: max
@@ -225,6 +225,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Result'
+      tags:
+        - Results
+    delete:
+      operationId: deleteAll
+      description: Delete all *Results*
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
       tags:
         - Results
 security:

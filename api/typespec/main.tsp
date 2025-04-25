@@ -12,7 +12,7 @@ using TypeSpec.OpenAPI;
 @jsonSchema
 
 // Core definitions for the whole API
-@doc("The REST API for operating and using NanoMon")
+@doc("The REST API for managing and using NanoMon")
 @service({
   title: "NanoMon API Service",
 })
@@ -98,6 +98,13 @@ interface ResultsAPI {
   @doc("List *Results* for ALL monitors. Doesn't require authentication")
   @get
   getResults(@query max?: int32): Result[];
+
+  @doc("Delete all *Results*")
+  @delete
+  deleteAll(): void | {
+    @statusCode code: 400;
+    @body _: Problem;
+  };
 }
 
 // ====================================================

@@ -1,7 +1,0 @@
-{
-  "API_ENDPOINT": "http://localhost:8000/api",
-  "AUTH_CLIENT_ID": null,
-  "VERSION": "dev",
-  "BUILD_INFO": "Development build",
-  "AUTH_TENANT": null
-}

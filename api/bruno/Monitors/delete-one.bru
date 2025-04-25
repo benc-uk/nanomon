@@ -1,0 +1,15 @@
+meta {
+  name: Delete One
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/api/monitors/{{monitorId}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 204
+}

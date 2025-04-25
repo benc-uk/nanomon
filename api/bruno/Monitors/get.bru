@@ -1,0 +1,18 @@
+meta {
+  name: Get One
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/monitors/{{monitorId}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq {{monitorId}}
+  res.body.name: isNotEmpty
+  res.body: isJson
+}

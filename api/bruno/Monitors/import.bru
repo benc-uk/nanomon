@@ -1,0 +1,40 @@
+meta {
+  name: Import / Bulk Create
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/monitors/import
+  body: json
+  auth: inherit
+}
+
+body:json {
+  [
+    {
+      "name": "Bruno Test Bulk 1",
+      "type": "http",
+      "interval": "60s",
+      "target": "https://example.net",
+      "properties": {
+        "timeout": "10s"
+      },
+      "enabled": false
+    },
+    {
+      "name": "Bruno Test Bulk 2",
+      "type": "http",
+      "interval": "60s",
+      "target": "https://example.net",
+      "properties": {
+        "timeout": "10s"
+      },
+      "enabled": false
+    }
+  ]
+}
+
+assert {
+  res.status: eq 204
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Get Results
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/monitors/{{monitorId}}/results
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~max: 
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}

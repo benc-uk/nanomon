@@ -1,0 +1,15 @@
+meta {
+  name: Get All
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/results
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~max: 150
+}

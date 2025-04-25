@@ -1,0 +1,33 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/monitors
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Bruno Test",
+    "type": "http",
+    "interval": "60s",
+    "target": "https://example.net",
+    "properties": {
+      "timeout": "10s"
+    },
+    "enabled": true
+  }
+}
+
+vars:post-response {
+  monitorId: res.body.id
+}
+
+assert {
+  res.body.id: matches ^[0-9a-f]{24}$
+  res.status: eq 200
+}

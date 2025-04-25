@@ -1,0 +1,16 @@
+meta {
+  name: List All
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/monitors
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}

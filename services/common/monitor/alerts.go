@@ -55,7 +55,7 @@ func init() {
 	emailTemplate, err = template.ParseFiles("templates/alert.html")
 	if err != nil {
 		log.Printf("### Error loading email template: %s", err)
-		log.Printf("### SEVERE! Email alerting will be disabled!")
+		log.Printf("### Warning! Email alerting will be disabled!")
 	}
 }
 

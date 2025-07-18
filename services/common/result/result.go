@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
-// NanoMon - Shared types mainly for Results
+// NanoMon - Shared data structures for results
 // ----------------------------------------------------------------------------
 
 package result
@@ -23,7 +23,7 @@ type Result struct {
 	MonitorName   string `json:"monitor_name"`
 	MonitorTarget string `json:"monitor_target"`
 
-	Outputs map[string]any `json:"outputs"` // Additional outputs, e.g. for plugins
+	Outputs map[string]any `json:"outputs"`
 }
 
 func NewResult(monName string, monTarget string, monID int) *Result {

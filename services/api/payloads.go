@@ -35,9 +35,9 @@ type MonitorReq struct {
 	Interval   string
 	Target     string
 	Rule       string
+	Updated    time.Time
 	Enabled    bool
 	Properties map[string]string
-	Updated    time.Time
 	Group      string
 }
 

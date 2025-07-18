@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -61,6 +62,17 @@ func main() {
 		log.Fatalln("### Error loading monitors:", err)
 	}
 
+	// Try to watch the database for changes
+	// Listen for notifications on all monitor channels
+	channels := []string{"new_monitor", "monitor_updated", "monitor_deleted"}
+	for _, channel := range channels {
+		err = db.Listener.Listen(channel)
+		if err != nil {
+			log.Fatalf("Failed to start listening on channel %s: %v", channel, err)
+		}
+		log.Printf("### Listening for updates on channel: %s\n", channel)
+	}
+
 	// Optionally start the Prometheus metrics server
 	if env.GetEnvBool("PROMETHEUS_ENABLED", false) {
 		port := env.GetEnvString("PROMETHEUS_PORT", "8080")
@@ -92,17 +104,6 @@ func main() {
 	for i, m := range monitors {
 		// Delay each monitor start by 2 seconds for a staggered start
 		go m.Start(i*2, db)
-	}
-
-	// Try to watch the database for changes
-	// Listen for notifications on all monitor channels
-	channels := []string{"new_monitor", "monitor_updated", "monitor_deleted"}
-	for _, channel := range channels {
-		err = db.Listener.Listen(channel)
-		if err != nil {
-			log.Fatalf("Failed to start listening on channel %s: %v", channel, err)
-		}
-		fmt.Printf("📡 Listening on channel: %s\n", channel)
 	}
 
 	defer db.Listener.Close()
@@ -137,7 +138,7 @@ func handleNotification(notification *pq.Notification) {
 			return
 		}
 
-		log.Printf("🆕 New monitor created: %s", mon.Name)
+		log.Printf("### New monitor created: %s", mon.Name)
 		monitors = append(monitors, mon)
 		go mon.Start(0, db) // Start immediately
 
@@ -145,32 +146,31 @@ func handleNotification(notification *pq.Notification) {
 		updatedMon := &monitor.Monitor{}
 		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
 		if err != nil {
-			log.Println("Error parsing updated monitor JSON:", err)
+			log.Println("### Error parsing updated monitor JSON:", err)
 			return
 		}
 
 		for i, m := range monitors {
 			if m.ID == updatedMon.ID {
-				log.Printf("🔄 Updating monitor: %s", m.Name)
-				log.Printf("### Monitor '%s' updated and restarted", m.Name)
 				monitors[i].Stop()
 				go updatedMon.Start(0, db)
 				monitors[i] = updatedMon
-				log.Printf("🔄 Monitor updated: %s", notification.Extra)
+				log.Printf("### Monitor updated: %s", notification.Extra)
 				return
 			}
 		}
-		log.Printf("🔄 Monitor with ID %d not found for update", updatedMon.ID)
 
-	// case "monitor_deleted":
-	// 	log.Printf("❌ Monitor deleted: %s", notification.Extra)
-	// 	for i, m := range monitors {
-	// 		if m.ID == notification.Extra {
-	// 			m.Stop() // Stop the monitor
-	// 			monitors = append(monitors[:i], monitors[i+1:]...) // Remove from slice
-	// 			break
-	// 		}
-	// 	}
+	case "monitor_deleted":
+		idInt, _ := strconv.Atoi(notification.Extra)
+		for i, m := range monitors {
+			if m.ID == idInt {
+				monitors[i].Stop()
+				monitors = append(monitors[:i], monitors[i+1:]...)
+				log.Printf("### Monitor %d removed from active list", idInt)
+				return
+			}
+		}
+
 	default:
 		log.Println("Unknown notification channel:", notification.Channel)
 	}

@@ -25,19 +25,21 @@ const TypeDNS = "dns"
 var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS}
 
 type Monitor struct {
-	Name         string            // Name
-	Type         string            // Type of monitor, ping, http, tcp
-	Interval     string            // Interval between runs
-	Updated      time.Time         // Last time the monitor was updated
-	Enabled      bool              // Enable or disable the monitor
-	Rule         string            // Rules are run against the monitor result
-	Target       string            // Target is the host to ping, or URL to check
-	Properties   map[string]string // Set of properties varies per monitor type
-	ErrorCount   int               // For alerting, keeping track of non-OK count
-	InErrorState bool              // For alerting, has triggered an alert
+	ID         int
+	Name       string            // Name
+	Type       string            // Type of monitor, ping, http, tcp
+	Interval   string            // Interval between runs
+	Updated    time.Time         // Last time the monitor was updated
+	Enabled    bool              // Enable or disable the monitor
+	Rule       string            // Rules are run against the monitor result
+	Target     string            // Target is the host to ping, or URL to check
+	Properties map[string]string // Set of properties varies per monitor type
 
-	ID int
+	// Used for alerts not stored in the database
+	ErrorCount   int
+	InErrorState bool
 
+	// Prometheus things for this monitor
 	ticker *time.Ticker
 	gauge  *prometheus.GaugeVec
 }
@@ -198,4 +200,15 @@ func (m *Monitor) Stop() {
 	if m.ticker != nil {
 		m.ticker.Stop()
 	}
+}
+
+// Delete all monitors from the database
+func DeleteAll(db *database.DB) error {
+	query := "TRUNCATE TABLE monitors CASCADE"
+	_, err := db.Handle.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

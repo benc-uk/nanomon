@@ -3,7 +3,7 @@
 @num = 216913
 @monName = Test {{ num }}
 @newName = Test Updated {{ num }} 
-@fakeOID = 671232a56e8a5e82420ab2b9
+@fakeID = 4520881
 
 ### Get all monitors
 GET {{endpoint}}/monitors
@@ -29,7 +29,7 @@ Content-Type: application/json
 }
 
 ?? status == 200
-?? body id isString
+?? body id isNumber
 ?? body updated isString
 ?? body name == {{ monName }} HTTP
 
@@ -47,7 +47,7 @@ Content-Type: application/json
 }
 
 ?? status == 200
-?? body id isString
+?? body id isNumber
 ?? body type ping
 ?? body name == {{ monName }} PING
 
@@ -65,7 +65,7 @@ Content-Type: application/json
 }
 
 ?? status == 200
-?? body id isString
+?? body id isNumber
 ?? body type tcp
 ?? body name == {{ monName }} TCP
 
@@ -83,7 +83,7 @@ Content-Type: application/json
 }
 
 ?? status == 200
-?? body id isString
+?? body id isNumber
 ?? body type dns
 ?? body name == {{ monName }} DNS
 
@@ -123,7 +123,7 @@ GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 
 ### Get results for all monitors
-# @sleep 10000
+# @sleep 1000
 GET {{endpoint}}/results?max=10
 
 ?? status == 200
@@ -306,7 +306,7 @@ GET {{endpoint}}/monitors/abc
 
 ### Invalid monitor id not found
 
-GET {{endpoint}}/monitors/{{ fakeOID }}
+GET {{endpoint}}/monitors/{{ fakeID }}
 
 ?? status == 404
 
@@ -320,7 +320,7 @@ GET {{endpoint}}/monitors/abc/results
 
 ### Invalid nonexistent id for results
 
-GET {{endpoint}}/monitors/{{ fakeOID }}/results
+GET {{endpoint}}/monitors/{{ fakeID }}/results
 
 ?? status == 200
 ?? js response.parsedBody.length == 0

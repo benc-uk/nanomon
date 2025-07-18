@@ -80,7 +80,7 @@ run-frontend: npm_install
 
 # 🐘 Run Postgres in container (needs Docker) 
 run-db:
-    echo -e "🐘 Starting Postgres...\nNote: You will not see any logs"
+    echo -e "🐘 Starting Postgres..."
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
     docker rm -f postgres || true
     docker run --rm -p 5432:5432 \
@@ -92,13 +92,9 @@ run-db:
      --name postgres postgres:17
 
 remove-db:
-    echo -e "⛔ Removing Postgres container and data volume"
+    echo -e "⛔ Removing Postgres container and stored data"
     docker rm -f postgres || true
     docker volume rm nanomon-db-data || true
-
-# 👂 Run the monitor listener to watch for new monitors
-run-monitor-listener:
-    go run ./cmd/monitor-listener
 
 # 🚀 Run all services locally with hot-reload, plus Postgres
 run-all:

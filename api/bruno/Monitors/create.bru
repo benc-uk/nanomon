@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{apiEndpoint}}/api/monitors/{{process.env.FOO}}
+  url: {{apiEndpoint}}/api/monitors
   body: json
   auth: inherit
 }
@@ -28,6 +28,6 @@ vars:post-response {
 }
 
 assert {
-  res.body.id: matches ^[0-9a-f]{24}$
+  res.body.id: isNumber
   res.status: eq 200
 }

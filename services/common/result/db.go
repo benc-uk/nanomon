@@ -3,21 +3,15 @@ package result
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"nanomon/services/common/database"
 )
 
 // Store a result in the database
 func (r *Result) Store(db *database.DB) error {
-	// For unit tests
-	if db == nil {
-		return nil
-	}
-
 	// Convert outputs map to JSON
 	outputsJSON, err := json.Marshal(r.Outputs)
 	if err != nil {
-		return fmt.Errorf("failed to marshal outputs: %w", err)
+		return err
 	}
 
 	// Prepare the SQL statement
@@ -42,17 +36,14 @@ func (r *Result) Store(db *database.DB) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to store result: %w", err)
+		return err
 	}
 
 	return nil
 }
 
+// Get results for a specific monitor by ID, limited to max results
 func GetResultsForMonitor(db *database.DB, monitorID int, max int) ([]*Result, error) {
-	if db == nil {
-		return nil, fmt.Errorf("database connection is nil")
-	}
-
 	query := `
 		SELECT date, monitor_id, monitor_name, monitor_target, status, value, message, outputs
 		FROM results
@@ -63,7 +54,7 @@ func GetResultsForMonitor(db *database.DB, monitorID int, max int) ([]*Result, e
 
 	rows, err := db.Handle.Query(query, monitorID, max)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch results: %w", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -75,11 +66,11 @@ func GetResultsForMonitor(db *database.DB, monitorID int, max int) ([]*Result, e
 
 		if err := rows.Scan(&r.Date, &r.MonitorID, &r.MonitorName, &r.MonitorTarget,
 			&r.Status, &r.Value, &r.Message, &outputsJSON); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
 
 		if err := json.Unmarshal([]byte(outputsJSON), &r.Outputs); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal outputs: %w", err)
+			return nil, err
 		}
 
 		results = append(results, &r)
@@ -88,11 +79,8 @@ func GetResultsForMonitor(db *database.DB, monitorID int, max int) ([]*Result, e
 	return results, nil
 }
 
+// Get all results, limited to max results
 func GetResults(db *database.DB, max int) ([]*Result, error) {
-	if db == nil {
-		return nil, fmt.Errorf("database connection is nil")
-	}
-
 	query := `
 		SELECT date, monitor_id, monitor_name, monitor_target, status, value, message, outputs
 		FROM results
@@ -102,7 +90,7 @@ func GetResults(db *database.DB, max int) ([]*Result, error) {
 
 	rows, err := db.Handle.Query(query, max)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch results: %w", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -114,15 +102,26 @@ func GetResults(db *database.DB, max int) ([]*Result, error) {
 
 		if err := rows.Scan(&r.Date, &r.MonitorID, &r.MonitorName, &r.MonitorTarget,
 			&r.Status, &r.Value, &r.Message, &outputsJSON); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
 
 		if err := json.Unmarshal([]byte(outputsJSON), &r.Outputs); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal outputs: %w", err)
+			return nil, err
 		}
 
 		results = append(results, &r)
 	}
 
 	return results, nil
+}
+
+// Delete all results from the database
+func DeleteAll(db *database.DB) error {
+	query := "TRUNCATE TABLE results"
+	_, err := db.Handle.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

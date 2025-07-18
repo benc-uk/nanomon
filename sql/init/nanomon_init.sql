@@ -16,7 +16,7 @@ CREATE TABLE monitors (
 CREATE TABLE results (
   id SERIAL PRIMARY KEY,
   date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  monitor_id INT REFERENCES monitors(id),
+  monitor_id INT REFERENCES monitors(id) ON DELETE CASCADE,
   monitor_name VARCHAR(100) NOT NULL,
   monitor_target VARCHAR(512) NOT NULL,
   status INT NOT NULL,
@@ -80,12 +80,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION notify_monitor_delete()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Send notification with the deleted monitor id as JSON
-    PERFORM pg_notify('monitor_deleted', 
-        json_build_object(
-            'id', OLD.id
-        )::text
-    );
+    -- Send notification with the deleted monitor id as text
+    PERFORM pg_notify('monitor_deleted', OLD.id::text);
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;

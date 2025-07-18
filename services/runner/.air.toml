@@ -2,8 +2,13 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-include_ext = [ "go" ]
-include_dir = [ "services/runner" ]
+include_ext = ["go"]
+include_dir = [
+  "services/runner",
+  "services/common/database",
+  "services/common/monitor",
+  "services/common/result",
+]
 cmd = "go build -o ./tmp/runner nanomon/services/runner"
 bin = "tmp/runner"
 

@@ -61,10 +61,14 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
+    #!/bin/env bash
+    export POSGTGRES_DSN="host=localhost port=5432 user=nanomon password=notsecret123 dbname=nanomon sslmode=disable"
     {{ tools_dir + '/air' }} -c  ./services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
+    #!/bin/env bash
+    export POSGTGRES_DSN="host=localhost port=5432 user=nanomon password=notsecret123 dbname=nanomon sslmode=disable"
     {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
 
 # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
@@ -83,14 +87,14 @@ run-db:
      -e POSTGRES_DB=nanomon \
      -e POSTGRES_USER=nanomon \
      -e POSTGRES_PASSWORD=notsecret123 \
-     -v nm-db-data:/var/lib/postgresql/data \
+     -v nanomon-db-data:/var/lib/postgresql/data \
      -v ./sql/init:/docker-entrypoint-initdb.d \
      --name postgres postgres:17
 
 remove-db:
-    echo -e "⛔ Removing Postgres container and volume..."
+    echo -e "⛔ Removing Postgres container and data volume"
     docker rm -f postgres || true
-    docker volume rm nm-db-data || true
+    docker volume rm nanomon-db-data || true
 
 # 👂 Run the monitor listener to watch for new monitors
 run-monitor-listener:
@@ -133,7 +137,7 @@ generate-specs:
 [confirm('Are you sure you want to clean up?')]
 clean:
 	rm -rf tmp bin .tools frontend/config api/**/node_modules api/**/tsp-output frontend/.vite *.xml
-	docker volume rm nm-mongo-data || true
+	docker volume rm nanomon-db-data || true
 
 [private]
 npm_install:

@@ -1,20 +1,8 @@
--- -- Insert a single monitor into the monitors table
--- INSERT INTO monitors (name,url,check_interval,timeout,is_active 
--- ) VALUES (
---     'Example Website',
---     'https://example.com',
---     60,
---     5,
---     true
--- );
+-- Insert a single monitor into the monitors table
+
+--INSERT INTO monitors (name, type, interval, target, rule, enabled, group_name, properties) 
+--VALUES ('Example Monitor', 'http', '60s', 'https://example.com', 'status == 200', TRUE, 'default', '{"custom_property": "value"}');
 
 -- ---
 
-UPDATE monitors SET
-    name = 'Updated Website',
-    url = 'https://updated-example.com',
-    check_interval = 120,
-    timeout = 10,
-    is_active = false
-WHERE monitor_id = 8;
-
+TRUNCATE monitors CASCADE;

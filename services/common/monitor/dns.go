@@ -9,15 +9,15 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"net"
 	"strings"
 	"time"
 )
 
-func (m *Monitor) runDNS() *types.Result {
+func (m *Monitor) runDNS() *result.Result {
 	log.Printf("### Running DNS monitor '%s' on target %s", m.Name, m.Target)
-	r := types.NewResult(m.Name, m.Target, m.ID)
+	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
 
@@ -30,7 +30,7 @@ func (m *Monitor) runDNS() *types.Result {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -77,7 +77,7 @@ func (m *Monitor) runDNS() *types.Result {
 	case "A":
 		ips, err := resolver.LookupIP(timeoutCtx, networkType, m.Target)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		for _, ip := range ips {
@@ -87,7 +87,7 @@ func (m *Monitor) runDNS() *types.Result {
 	case "CNAME":
 		cname, err := resolver.LookupCNAME(timeoutCtx, m.Target)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		results = append(results, cname)
@@ -95,7 +95,7 @@ func (m *Monitor) runDNS() *types.Result {
 	case "TXT":
 		txts, err := resolver.LookupTXT(timeoutCtx, m.Target)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		results = append(results, txts...)
@@ -103,7 +103,7 @@ func (m *Monitor) runDNS() *types.Result {
 	case "MX":
 		mxs, err := resolver.LookupMX(timeoutCtx, m.Target)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		for _, mx := range mxs {
@@ -113,7 +113,7 @@ func (m *Monitor) runDNS() *types.Result {
 	case "NS":
 		nss, err := resolver.LookupNS(timeoutCtx, m.Target)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		for _, ns := range nss {
@@ -121,7 +121,7 @@ func (m *Monitor) runDNS() *types.Result {
 		}
 
 	default:
-		return types.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("invalid record type: %s", recordType))
+		return result.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("invalid record type: %s", recordType))
 	}
 
 	r.Value = int(time.Since(start).Milliseconds())

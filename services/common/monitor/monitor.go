@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 	"nanomon/services/common/database"
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"os"
 	"time"
 
@@ -36,22 +36,14 @@ type Monitor struct {
 	ErrorCount   int               // For alerting, keeping track of non-OK count
 	InErrorState bool              // For alerting, has triggered an alert
 
-	ID string `bson:"_id"`
+	ID int
 
 	ticker *time.Ticker
-	db     *database.DB
 	gauge  *prometheus.GaugeVec
 }
 
-// Create a new monitor
-func NewMonitor(db *database.DB) *Monitor {
-	return &Monitor{
-		db: db,
-	}
-}
-
 // Start the monitor ticker, to run & execute the monitor on regular interval
-func (m *Monitor) Start(delay int) {
+func (m *Monitor) Start(delay int, db *database.DB) {
 	if m.Enabled {
 		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
 	} else {
@@ -80,19 +72,33 @@ func (m *Monitor) Start(delay int) {
 	m.registerGauge()
 
 	// Run the monitor immediately on start
-	m.run()
+	_, result := m.run()
+	if result != nil && db != nil {
+		log.Printf("### Monitor '%s' initial run result: %d", m.Name, result.Status)
+		err := result.Store(db)
+		if err != nil {
+			log.Printf("### Failed to store initial result for monitor '%s': %v", m.Name, err)
+		}
+	}
 
 	m.ticker = time.NewTicker(intervalDuration)
 
 	// This will block, so Start() should always be called with a goroutine
 	for {
 		<-m.ticker.C
-		_, _ = m.run()
+		_, result = m.run()
+		if result != nil && db != nil {
+			log.Printf("### Monitor '%s' run result: %d", m.Name, result.Status)
+			err := result.Store(db)
+			if err != nil {
+				log.Printf("### Failed to store result for monitor '%s': %v", m.Name, err)
+			}
+		}
 	}
 }
 
 // Internal function to run the monitor each time the ticker ticks
-func (m *Monitor) run() (bool, *types.Result) {
+func (m *Monitor) run() (bool, *result.Result) {
 	if !m.Enabled {
 		return false, nil
 	}
@@ -102,22 +108,22 @@ func (m *Monitor) run() (bool, *types.Result) {
 		return false, nil
 	}
 
-	var result *types.Result
+	var res *result.Result
 
 	log.Printf("### Running monitor '%s' at '%s'", m.Name, m.Target)
 
 	switch m.Type {
 	case TypeHTTP:
-		result = m.runHTTP()
+		res = m.runHTTP()
 
 	case TypePing:
-		result = m.runPing()
+		res = m.runPing()
 
 	case TypeTCP:
-		result = m.runTCP()
+		res = m.runTCP()
 
 	case TypeDNS:
-		result = m.runDNS()
+		res = m.runDNS()
 
 	default:
 		log.Printf("### Unknown monitor type '%s', will be skipped", m.Type)
@@ -125,68 +131,61 @@ func (m *Monitor) run() (bool, *types.Result) {
 	}
 
 	if os.Getenv("DEBUG") == "true" {
-		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, result.Outputs)
+		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, res.Outputs)
 	}
 
 	// Logic block to evaluate the rule and set status & message accordingly
 	// At this stage a result will either be StatusOK or StatusFailed
-	if m.Rule != "" && result.Outputs != nil {
+	if m.Rule != "" && res.Outputs != nil {
 		ruleExp, err := govaluate.NewEvaluableExpression(m.Rule)
 		if err != nil {
-			result.Message = fmt.Sprintf("rule expression error: %s", err.Error())
-			result.Status = types.StatusFailed
+			res.Message = fmt.Sprintf("rule expression error: %s", err.Error())
+			res.Status = result.StatusFailed
 		}
 
 		if ruleExp != nil {
-			ruleResult, err := ruleExp.Evaluate(result.Outputs)
+			ruleResult, err := ruleExp.Evaluate(res.Outputs)
 
 			if err != nil {
-				result.Message = fmt.Sprintf("rule eval error: %s", err.Error())
-				result.Status = types.StatusFailed
+				res.Message = fmt.Sprintf("rule eval error: %s", err.Error())
+				res.Status = result.StatusFailed
 			}
 
 			ruleResultBool, isBool := ruleResult.(bool)
-			if !isBool && result.Status != types.StatusFailed {
-				result.Message = "rule didn't return a bool"
-				result.Status = types.StatusFailed
+			if !isBool && res.Status != result.StatusFailed {
+				res.Message = "rule didn't return a bool"
+				res.Status = result.StatusFailed
 			}
 
 			// Rule can put the result into error status
-			if !ruleResultBool && isBool && result.Status != types.StatusFailed {
-				result.Status = types.StatusError
-				result.Message = fmt.Sprintf("Rule violated: %s", m.Rule)
+			if !ruleResultBool && isBool && res.Status != result.StatusFailed {
+				res.Status = result.StatusError
+				res.Message = fmt.Sprintf("Rule violated: %s", m.Rule)
 			}
 		}
 	}
 
 	// Remove the body from the outputs after rules are checked
 	// TODO: Serious leakiness from HTTP monitor here
-	if result.Outputs["body"] != nil {
-		result.Outputs["body"] = "*** Removed ***"
-	}
-
-	// Finally store the result to the database
-	err := m.db.StoreResult(*result)
-	if err != nil {
-		log.Printf("### Error storing result: %s", err.Error())
-		return false, result
+	if res.Outputs["body"] != nil {
+		res.Outputs["body"] = "*** Removed ***"
 	}
 
 	// Update the values in the Prometheus gauge
-	m.updateGauge(result)
+	m.updateGauge(res)
 
-	if result.Status > types.StatusOK {
+	if res.Status > result.StatusOK {
 		m.ErrorCount++
 
-		checkForAlerts(m, *result)
+		checkForAlerts(m, *res)
 
-		return false, result
+		return false, res
 	} else {
 		m.ErrorCount = 0
 		m.InErrorState = false
 	}
 
-	return true, result
+	return true, res
 }
 
 // Stop the monitor

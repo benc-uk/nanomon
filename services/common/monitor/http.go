@@ -9,7 +9,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,8 +17,8 @@ import (
 	"time"
 )
 
-func (m *Monitor) runHTTP() *types.Result {
-	r := types.NewResult(m.Name, m.Target, m.ID)
+func (m *Monitor) runHTTP() *result.Result {
+	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
 
@@ -35,7 +35,7 @@ func (m *Monitor) runHTTP() *types.Result {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -43,13 +43,13 @@ func (m *Monitor) runHTTP() *types.Result {
 	if validateTLSProp != "" {
 		validateTLS, err = strconv.ParseBool(validateTLSProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
 	req, err := http.NewRequest(method, m.Target, nil)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	if m.Properties["body"] != "" {
@@ -61,7 +61,7 @@ func (m *Monitor) runHTTP() *types.Result {
 
 		err = json.Unmarshal([]byte(m.Properties["headers"]), &headers)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		for k, v := range headers {
@@ -84,7 +84,7 @@ func (m *Monitor) runHTTP() *types.Result {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 	defer resp.Body.Close()
 
@@ -93,7 +93,7 @@ func (m *Monitor) runHTTP() *types.Result {
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	bodyStr := string(body)
@@ -102,7 +102,7 @@ func (m *Monitor) runHTTP() *types.Result {
 	if m.Properties["bodyRegex"] != "" {
 		re, err := regexp.Compile(m.Properties["bodyRegex"])
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 
 		match := re.FindStringSubmatch(bodyStr)

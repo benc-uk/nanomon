@@ -8,7 +8,7 @@ package monitor
 import (
 	"fmt"
 	"log"
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,7 +25,7 @@ func (m *Monitor) registerGauge() {
 		Name: strings.ToLower(strings.ReplaceAll(m.Name, " ", "_")),
 		Help: fmt.Sprintf("%s (%s)", m.Name, m.Type),
 		ConstLabels: prometheus.Labels{
-			"id":   m.ID,
+			"id":   fmt.Sprintf("%d", m.ID),
 			"type": m.Type,
 		},
 		Namespace: "nanomon",
@@ -47,7 +47,7 @@ func (m *Monitor) unregisterGauge() {
 }
 
 // Update the gauge with the given monitor result
-func (m *Monitor) updateGauge(r *types.Result) {
+func (m *Monitor) updateGauge(r *result.Result) {
 	if m.gauge != nil {
 		// Special labels for status and value
 		m.gauge.WithLabelValues("_status").Set(float64(r.Status))

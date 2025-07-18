@@ -6,15 +6,15 @@
 package monitor
 
 import (
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"strconv"
 	"time"
 
 	ping "github.com/prometheus-community/pro-bing"
 )
 
-func (m *Monitor) runPing() *types.Result {
-	r := types.NewResult(m.Name, m.Target, m.ID)
+func (m *Monitor) runPing() *result.Result {
+	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
 
@@ -26,7 +26,7 @@ func (m *Monitor) runPing() *types.Result {
 	if countProp != "" {
 		count, err = strconv.Atoi(countProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -34,7 +34,7 @@ func (m *Monitor) runPing() *types.Result {
 	if intervalProp != "" {
 		interval, err = time.ParseDuration(intervalProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -42,13 +42,13 @@ func (m *Monitor) runPing() *types.Result {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
 	pinger, err := ping.NewPinger(m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	// Means we have to run as root
@@ -60,7 +60,7 @@ func (m *Monitor) runPing() *types.Result {
 
 	err = pinger.Run() // NOTE: Blocks
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	stats := pinger.Statistics()

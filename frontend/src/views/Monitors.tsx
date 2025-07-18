@@ -52,17 +52,15 @@ export default function Monitors() {
 
       for (const mon of fetchedMonitors) {
         if (!mon.id) continue
-
         const results = await api.getResultsForMonitor(mon.id, CHART_SIZE)
         const last = new Date(results[0]?.date)
-
         const chartValues: number[] = []
         const chartLabels: string[] = []
 
         for (let i = results.length - 1; i >= 0; i--) {
           const r = results[i]
           chartValues.push(r.value)
-          chartLabels.push(r.date.replace('T', ' ').split('.')[0])
+          chartLabels.push(r.date)
         }
 
         chartData[mon.id] = {

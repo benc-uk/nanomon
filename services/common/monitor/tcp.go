@@ -6,14 +6,14 @@
 package monitor
 
 import (
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"net"
 	"strings"
 	"time"
 )
 
-func (m *Monitor) runTCP() *types.Result {
-	r := types.NewResult(m.Name, m.Target, m.ID)
+func (m *Monitor) runTCP() *result.Result {
+	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
 
@@ -23,7 +23,7 @@ func (m *Monitor) runTCP() *types.Result {
 	if timeoutProp != "" {
 		timeout, err = time.ParseDuration(timeoutProp)
 		if err != nil {
-			return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+			return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 		}
 	}
 
@@ -32,7 +32,7 @@ func (m *Monitor) runTCP() *types.Result {
 
 	conn, err := dialer.Dial("tcp", m.Target)
 	if err != nil {
-		return types.NewFailedResult(m.Name, m.Target, m.ID, err)
+		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
 	r.Value = int(time.Since(start).Milliseconds())

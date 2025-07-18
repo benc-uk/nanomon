@@ -6,9 +6,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"nanomon/services/common/database"
-	"nanomon/services/runner/monitor"
+	"nanomon/services/common/monitor"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +18,7 @@ import (
 	"time"
 
 	"github.com/benc-uk/go-rest-api/pkg/env"
+	"github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -40,13 +43,6 @@ func main() {
 		shutdown()
 		os.Exit(1)
 	}()
-
-	pollIntervalEnv := os.Getenv("POLLING_INTERVAL")
-	if pollIntervalEnv == "" {
-		pollIntervalEnv = "10s"
-	}
-
-	pollInterval, _ := time.ParseDuration(pollIntervalEnv)
 
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
@@ -95,16 +91,88 @@ func main() {
 	// Note they each run in their own goroutines
 	for i, m := range monitors {
 		// Delay each monitor start by 2 seconds for a staggered start
-		go m.Start(i * 2)
+		go m.Start(i*2, db)
 	}
 
 	// Try to watch the database for changes
-	err = monitor.WatchMonitors(db, monitors)
-	if err != nil {
-		log.Println("### Mongo change stream not supported, falling back to polling every", pollIntervalEnv)
+	// Listen for notifications on all monitor channels
+	channels := []string{"new_monitor", "monitor_updated", "monitor_deleted"}
+	for _, channel := range channels {
+		err = db.Listener.Listen(channel)
+		if err != nil {
+			log.Fatalf("Failed to start listening on channel %s: %v", channel, err)
+		}
+		fmt.Printf("📡 Listening on channel: %s\n", channel)
+	}
 
-		// Fallback to polling
-		pollMonitors(pollInterval)
+	defer db.Listener.Close()
+	defer db.Handle.Close()
+
+	// Main loop
+	for {
+		select {
+		case notification := <-db.Listener.Notify:
+			if notification != nil {
+				handleNotification(notification)
+			}
+		case <-sigChan:
+			fmt.Println("\n👋 Received shutdown signal, exiting...")
+			return
+		case <-time.After(90 * time.Second):
+			// Send a ping to keep the connection alive
+			go func() {
+				db.Listener.Ping()
+			}()
+		}
+	}
+}
+
+func handleNotification(notification *pq.Notification) {
+	switch notification.Channel {
+	case "new_monitor":
+		mon := &monitor.Monitor{}
+		err := json.Unmarshal([]byte(notification.Extra), mon)
+		if err != nil {
+			log.Println("Error parsing new monitor JSON:", err)
+			return
+		}
+
+		log.Printf("🆕 New monitor created: %s", mon.Name)
+		monitors = append(monitors, mon)
+		go mon.Start(0, db) // Start immediately
+
+	case "monitor_updated":
+		updatedMon := &monitor.Monitor{}
+		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
+		if err != nil {
+			log.Println("Error parsing updated monitor JSON:", err)
+			return
+		}
+
+		for i, m := range monitors {
+			if m.ID == updatedMon.ID {
+				log.Printf("🔄 Updating monitor: %s", m.Name)
+				log.Printf("### Monitor '%s' updated and restarted", m.Name)
+				monitors[i].Stop()
+				go updatedMon.Start(0, db)
+				monitors[i] = updatedMon
+				log.Printf("🔄 Monitor updated: %s", notification.Extra)
+				return
+			}
+		}
+		log.Printf("🔄 Monitor with ID %d not found for update", updatedMon.ID)
+
+	// case "monitor_deleted":
+	// 	log.Printf("❌ Monitor deleted: %s", notification.Extra)
+	// 	for i, m := range monitors {
+	// 		if m.ID == notification.Extra {
+	// 			m.Stop() // Stop the monitor
+	// 			monitors = append(monitors[:i], monitors[i+1:]...) // Remove from slice
+	// 			break
+	// 		}
+	// 	}
+	default:
+		log.Println("Unknown notification channel:", notification.Channel)
 	}
 }
 
@@ -114,74 +182,5 @@ func shutdown() {
 
 	for _, m := range monitors {
 		go m.Stop()
-	}
-}
-
-// Used to poll the database for changes when change stream not supported
-func pollMonitors(interval time.Duration) {
-	// Infinite loop to watch monitor changes in the database
-	for {
-		// Blocks for the specified interval
-		time.Sleep(interval)
-
-		// Fetch fresh set from database
-		updatedMonitors, err := monitor.FetchMonitors(db)
-		if err != nil {
-			log.Println("### Error loading monitors:", err)
-			continue
-		}
-
-		if os.Getenv("DEBUG") == "true" {
-			log.Printf("### Checking for changes old len:%d, new len %d", len(monitors), len(updatedMonitors))
-		}
-
-		// First pass to find new & updated monitors
-		for _, newMon := range updatedMonitors {
-			found := false
-
-			for oi, oldMon := range monitors {
-				if oldMon.ID == newMon.ID {
-					found = true
-
-					// Use the timestamp to determine if the monitor has been updated
-					if newMon.Updated.After(oldMon.Updated) {
-						log.Println("### Detected change, updating monitor:", oldMon.Name)
-						oldMon.Stop()
-
-						go newMon.Start(0)
-						monitors[oi] = newMon
-					}
-
-					break
-				}
-			}
-
-			// If the monitor wasn't found, it's new
-			if !found {
-				log.Println("### Detected change, new monitor:", newMon.Name)
-				go newMon.Start(0)
-				monitors = append(monitors, newMon)
-			}
-		}
-
-		// Finding deleted monitors requires a second pass but in different order
-		for oi, oldMon := range monitors {
-			found := false
-
-			for _, newMon := range updatedMonitors {
-				if newMon.ID == oldMon.ID {
-					found = true
-					break
-				}
-			}
-
-			// If the monitor wasn't in newMonitors, it's been deleted
-			if !found {
-				log.Println("### Detected change, deleted monitor:", oldMon.Name)
-				oldMon.Stop()
-
-				monitors = append(monitors[:oi], monitors[oi+1:]...)
-			}
-		}
 	}
 }

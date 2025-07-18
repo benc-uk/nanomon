@@ -9,14 +9,14 @@ import (
 	"slices"
 	"time"
 
-	"nanomon/services/runner/monitor"
+	"nanomon/services/common/monitor"
 
 	"github.com/Knetic/govaluate"
 )
 
 // Output struct for a monitor result
 type MonitorResp struct {
-	ID         string            `bson:"_id" json:"id,omitempty"`
+	ID         int               `json:"id,omitempty"`
 	Name       string            `json:"name"`
 	Type       string            `json:"type"`
 	Interval   string            `json:"interval"`
@@ -81,4 +81,18 @@ func (m MonitorReq) validate() (string, bool) {
 	}
 
 	return "", true
+}
+
+func MonitorToResp(m *monitor.Monitor) MonitorResp {
+	return MonitorResp{
+		ID:         m.ID,
+		Name:       m.Name,
+		Type:       m.Type,
+		Interval:   m.Interval,
+		Target:     m.Target,
+		Rule:       m.Rule,
+		Updated:    m.Updated,
+		Enabled:    m.Enabled,
+		Properties: m.Properties,
+	}
 }

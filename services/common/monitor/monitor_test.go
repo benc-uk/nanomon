@@ -24,11 +24,11 @@ func init() {
 }
 
 func TestMonitorDisabledStart(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test disabled start"
 	m.Enabled = false
 
-	go m.Start(0)
+	go m.Start(0, nil)
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {
@@ -37,11 +37,11 @@ func TestMonitorDisabledStart(t *testing.T) {
 }
 
 func TestMonitorNoIntervalStart(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test no interval start"
 	m.Enabled = true
 
-	go m.Start(0)
+	go m.Start(0, nil)
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {
@@ -50,7 +50,7 @@ func TestMonitorNoIntervalStart(t *testing.T) {
 }
 
 func TestMonitorDisabledRun(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test disabled run"
 
 	ok, _ := m.run()
@@ -60,7 +60,7 @@ func TestMonitorDisabledRun(t *testing.T) {
 }
 
 func TestMonitorNoTarget(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test no target"
 	m.Enabled = true
 
@@ -71,7 +71,7 @@ func TestMonitorNoTarget(t *testing.T) {
 }
 
 func TestMonitorNoType(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test no type"
 	m.Enabled = true
 	m.Target = "http://dummy"
@@ -83,7 +83,7 @@ func TestMonitorNoType(t *testing.T) {
 }
 
 func TestMonitorRuleEval(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
@@ -97,7 +97,7 @@ func TestMonitorRuleEval(t *testing.T) {
 }
 
 func TestMonitorRuleExp(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
@@ -111,7 +111,7 @@ func TestMonitorRuleExp(t *testing.T) {
 }
 
 func TestMonitorRuleNotBool(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Name = "unit test rule bad"
 	m.Enabled = true
 	m.Target = "http://example.net"
@@ -125,14 +125,14 @@ func TestMonitorRuleNotBool(t *testing.T) {
 }
 
 func TestMonitorIntervalBad(t *testing.T) {
-	m := NewMonitor(nil)
+	m := Monitor{}
 	m.Target = "http://dummy"
 	m.Type = "http"
 	m.Name = "unit test interval bad"
 	m.Enabled = true
 	m.Interval = "goat"
 
-	go m.Start(0)
+	go m.Start(0, nil)
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {

@@ -6,75 +6,69 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"log"
-	"nanomon/services/common/types"
+	"nanomon/services/common/monitor"
+	"nanomon/services/common/result"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/benc-uk/go-rest-api/pkg/problem"
 	"github.com/go-chi/chi/v5"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Get all monitors
 func (api API) getMonitors(resp http.ResponseWriter, req *http.Request) {
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	cur, err := api.db.Monitors.Find(timeoutCtx, bson.M{})
+	// Fetch all monitors from the database
+	monitors, err := monitor.FetchMonitors(api.db)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
 		return
 	}
 
-	monitors := make([]*MonitorResp, 0)
-
-	for cur.Next(context.TODO()) {
-		m := &MonitorResp{}
-		if err := cur.Decode(&m); err != nil {
-			problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
-			return
-		}
-
-		monitors = append(monitors, m)
+	monitorResps := make([]MonitorResp, len(monitors))
+	for i, mon := range monitors {
+		monitorResps[i] = MonitorToResp(mon)
 	}
 
-	api.ReturnJSON(resp, monitors)
+	api.ReturnJSON(resp, monitorResps)
 }
 
 // Get a single monitor
 func (api API) getMonitor(resp http.ResponseWriter, req *http.Request) {
-	oidStr := chi.URLParam(req, "id")
-	oid, err := primitive.ObjectIDFromHex(oidStr)
-
+	id := chi.URLParam(req, "id")
+	// Convert to int
+	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)
 		return
 	}
 
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	m := &MonitorResp{}
-
-	err = api.db.Monitors.FindOne(timeoutCtx, bson.M{"_id": oid}).Decode(m)
+	// Fetch the monitor from the database
+	mon, err := monitor.FetchMonitorByID(api.db, idInt)
 	if err != nil {
-		problem.Wrap(404, req.RequestURI, "monitors", err).Send(resp)
+		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+	if mon == nil {
+		problem.Wrap(404, req.RequestURI, "monitors", errors.New("monitor not found")).Send(resp)
 		return
 	}
 
-	api.ReturnJSON(resp, m)
+	api.ReturnJSON(resp, MonitorToResp(mon))
 }
 
 // Get results for monitor with id
 func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
-	oidStr := chi.URLParam(req, "id")
+	id := chi.URLParam(req, "id")
+	// Convert to int
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
 
 	// Url query max param
 	maxStr := req.URL.Query().Get("max")
@@ -93,34 +87,14 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// parse oidstr to oid
-	oid, err := primitive.ObjectIDFromHex(oidStr)
-	if err != nil {
-		problem.Wrap(400, req.RequestURI, "results", err).Send(resp)
-		return
-	}
-
-	options := options.Find().SetSort(bson.M{"date": -1}).SetLimit(int64(max))
-
-	cur, err := api.db.Results.Find(timeoutCtx, bson.M{"monitor_id": oid}, options)
+	results, err := result.GetResultsForMonitor(api.db, idInt, max)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
 		return
 	}
-
-	results := make([]*types.Result, 0)
-
-	for cur.Next(context.TODO()) {
-		r := &types.Result{}
-		if err := cur.Decode(&r); err != nil {
-			problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
-			return
-		}
-
-		results = append(results, r)
+	if results == nil {
+		// return empty array if no results found
+		results = []*result.Result{}
 	}
 
 	api.ReturnJSON(resp, results)
@@ -128,34 +102,28 @@ func (api API) getMonitorResults(resp http.ResponseWriter, req *http.Request) {
 
 // Delete a monitor
 func (api API) deleteMonitor(resp http.ResponseWriter, req *http.Request) {
-	oidStr := chi.URLParam(req, "id")
-
-	oid, err := primitive.ObjectIDFromHex(oidStr)
+	id := chi.URLParam(req, "id")
+	// Convert to int
+	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)
 		return
 	}
 
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	deleteResp, err := api.db.Monitors.DeleteOne(timeoutCtx, bson.M{"_id": oid})
+	// Fetch the monitor from the database
+	err = monitor.DeleteMonitor(idInt, api.db)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
 		return
 	}
 
-	if deleteResp.DeletedCount == 0 {
-		problem.Wrap(404, req.RequestURI, "monitors", errors.New("monitor not found")).Send(resp)
-		return
-	}
+	log.Printf("🗑️ Monitor with ID %d deleted successfully", idInt)
 
-	resp.WriteHeader(204)
+	resp.WriteHeader(http.StatusNoContent) // 204 No Content
 }
 
 // Create a new monitor
 func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
-	// get body and encode to struct
 	m := MonitorReq{}
 
 	err := json.NewDecoder(req.Body).Decode(&m)
@@ -172,18 +140,7 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("### Creating monitor %+v", m)
 	m.Updated = time.Now()
 
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	insertRes, err := api.db.Monitors.InsertOne(timeoutCtx, m)
-	if err != nil {
-		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
-		return
-	}
-
-	oid, _ := insertRes.InsertedID.(primitive.ObjectID)
-	respMonitor := MonitorResp{
-		ID:         oid.Hex(),
+	monitor := &monitor.Monitor{
 		Name:       m.Name,
 		Type:       m.Type,
 		Target:     m.Target,
@@ -192,12 +149,28 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		Updated:    m.Updated,
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
-		Group:      m.Group,
+	}
+	monitor.Store(api.db)
+
+	if err != nil {
+		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
+		return
+	}
+
+	respMonitor := MonitorResp{
+		ID:         monitor.ID,
+		Name:       m.Name,
+		Type:       m.Type,
+		Interval:   m.Interval,
+		Updated:    m.Updated,
+		Enabled:    m.Enabled,
+		Properties: m.Properties,
 	}
 
 	api.ReturnJSON(resp, respMonitor)
 }
 
+/*
 // Update existing monitor with a PUT request and upsert into the DB
 func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
 	oidStr := chi.URLParam(req, "id")
@@ -251,6 +224,7 @@ func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
 
 	api.ReturnJSON(resp, respMonitor)
 }
+*/
 
 // Get results across all monitors
 func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
@@ -270,33 +244,16 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 		problem.Wrap(400, req.RequestURI, "results", errors.New("max must be between 1 and 1000")).Send(resp)
 		return
 	}
-
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	options := options.Find().SetSort(bson.M{"date": -1}).SetLimit(int64(max))
-
-	cur, err := api.db.Results.Find(timeoutCtx, bson.M{}, options)
+	results, err := result.GetResults(api.db, max)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
 		return
 	}
 
-	results := make([]types.Result, 0)
-
-	for cur.Next(context.TODO()) {
-		r := types.Result{}
-		if err := cur.Decode(&r); err != nil {
-			problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
-			return
-		}
-
-		results = append(results, r)
-	}
-
 	api.ReturnJSON(resp, results)
 }
 
+/*
 // Import JSON to bulk configure monitors
 func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("### Importing monitors")
@@ -385,3 +342,4 @@ func (api API) deleteResults(resp http.ResponseWriter, req *http.Request) {
 
 	resp.WriteHeader(204)
 }
+*/

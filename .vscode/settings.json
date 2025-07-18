@@ -18,9 +18,8 @@
       "server": "localhost",
       "password": "",
       "user": "nanomon",
-      "profileName": "nanomon-db",
+      "profileName": "local-postgres",
       "database": "nanomon",
-      "displayName": "nanomon-db",
       "savePassword": true
     }
   ]

@@ -1,144 +1,130 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
-// NanoMon - Base database package for wrapping MongoDB client & collections
+// NanoMon - Base database package for wrapping PostgreSQL client
 // ----------------------------------------------------------------------------
 
 package database
 
 import (
-	"context"
+	"database/sql"
 	"log"
-	"nanomon/services/common/types"
-	"net/url"
 	"os"
+	"regexp"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type DB struct {
-	Timeout time.Duration
-
-	Monitors *mongo.Collection
-	Results  *mongo.Collection
-	client   *mongo.Client
-
-	healthy bool
+	Handle   *sql.DB
+	Timeout  time.Duration // Timeout for database operations
+	Listener *pq.Listener  // Optional listener for notifications
+	Healthy  bool
 }
 
 // Open and connect to the database based on env vars
 func ConnectToDB() *DB {
 	db := &DB{}
+	db.Healthy = true
 
-	timeoutEnv := os.Getenv("MONGO_TIMEOUT")
-	if timeoutEnv == "" {
-		timeoutEnv = "30s"
+	// Get connection string from environment variables
+	dsn := os.Getenv("POSGTGRES_DSN")
+	if dsn == "" {
+		log.Fatal("### POSGTGRES_DSN environment variable is not set")
 	}
 
-	db.Timeout, _ = time.ParseDuration(timeoutEnv)
-
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		mongoURI = "mongodb://localhost:27017"
+	host := regexp.MustCompile(`host=([^ ]+)`).FindStringSubmatch(dsn)
+	if len(host) < 2 {
+		log.Fatal("### POSGTGRES_DSN does not contain a valid host")
 	}
 
+	dnsParsed, _ := ParseDSN(dsn)
+	log.Printf("### Connecting to %s:%s as user %s to database: %s", dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
+
+	// Connect to the database
 	var err error
-
-	url, err := url.Parse(mongoURI)
-	if err == nil {
-		log.Printf("### Connecting to: %s:%s", url.Hostname(), url.Port())
-	}
-
-	mongoDB := os.Getenv("MONGO_DB")
-	if mongoDB == "" {
-		mongoDB = "nanomon"
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	db.client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalln("### FATAL! MongoDB client error", err.Error())
+		log.Fatalf("### Failed to open database: %v", err)
 	}
 
-	err = db.client.Ping(ctx, readpref.Primary())
+	// Ping the database in a loop until we connect or give up
+	for i := 0; i < 6; i++ {
+		err = db.Handle.Ping()
+		if err == nil {
+			log.Println("### Connected to database successfully!")
+			err = nil
+			break
+		}
+		log.Println("### Failed to connect to database, retrying in 10 seconds...")
+		time.Sleep(10 * time.Second)
+	}
 	if err != nil {
-		log.Fatalln("### FATAL! Failed to open MongoDB: ", err)
-	} else {
-		log.Println("### Connected to MongoDB ok!")
+		log.Fatalf("### Failed to connect to database after retries: %v", err)
 	}
 
-	_ = db.client.Database(mongoDB).CreateCollection(ctx, "monitors")
-	_ = db.client.Database(mongoDB).CreateCollection(ctx, "results")
+	// Kick off background ping to keep the connection alive
+	go func() {
+		for {
+			_ = db.Ping(nil)
+			time.Sleep(15 * time.Second) // Ping every 15 seconds
+		}
+	}()
 
-	db.Monitors = db.client.Database(mongoDB).Collection("monitors")
-	db.Results = db.client.Database(mongoDB).Collection("results")
+	// Create listener
+	db.Listener = pq.NewListener(dsn, 10*time.Second, time.Minute, func(ev pq.ListenerEventType, err error) {
+		if err != nil {
+			log.Println("Listener error:", err)
+		}
+	})
+	//defer db.Listener.Close()
 
-	db.healthy = true
-
+	db.Timeout = 30 * time.Second // Default timeout for operations
 	return db
+}
+
+func (db *DB) Close() {
+	if db.Handle != nil {
+		log.Println("### Closing database connection")
+		err := db.Handle.Close()
+		if err != nil {
+			log.Println("### Error closing database connection:", err)
+		} else {
+			log.Println("### Database connection closed successfully")
+		}
+	}
+	if db.Listener != nil {
+		log.Println("### Closing database listener")
+		err := db.Listener.Close()
+		if err != nil {
+			log.Println("### Error closing database listener:", err)
+		} else {
+			log.Println("### Database listener closed successfully")
+		}
+	}
 }
 
 // Check the database is alive
 func (db *DB) Ping(healthCallback func(healthy bool)) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
-	defer cancel()
+	if db.Handle == nil {
+		return nil // No connection, nothing to ping
+	}
 
-	err := db.client.Ping(ctx, readpref.Primary())
+	err := db.Handle.Ping()
 	if err != nil {
-		if db.healthy {
-			log.Printf("### 🚨 DB connection lost: %v", err)
-			healthCallback(false)
+		log.Println("### Warning! Database ping failed:", err)
+		db.Healthy = false
+	} else {
+		if !db.Healthy {
+			log.Println("### Database connection restored")
 		}
-
-		db.healthy = false
-
-		return err
+		db.Healthy = true
 	}
 
-	if !db.healthy {
-		log.Printf("### 🥳 DB connection re-established, wow!")
-		healthCallback(true)
+	if healthCallback != nil {
+		healthCallback(db.Healthy)
 	}
-
-	db.healthy = true
-
-	return nil
-}
-
-// Close the database connection
-func (db DB) Close() {
-	if db.client == nil {
-		return
-	}
-
-	err := db.client.Disconnect(context.TODO())
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// Store a result in the database
-func (db *DB) StoreResult(r types.Result) error {
-	// For unit tests
-	if db == nil {
-		return nil
-	}
-
-	msg := ""
-	if r.Message != "" {
-		msg = "; msg:" + r.Message
-	}
-
-	log.Printf("###   Storing result, status:%d%s", r.Status, msg)
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	_, err := db.Results.InsertOne(ctx, r)
 
 	return err
 }

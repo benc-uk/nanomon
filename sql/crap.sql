@@ -1,1 +1,1 @@
-SELECT * from monitors;
+SELECT * from results;

@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"nanomon/services/common/types"
+	"nanomon/services/common/result"
 	"net/smtp"
 	"os"
 	"strconv"
@@ -59,7 +59,7 @@ func init() {
 	}
 }
 
-func checkForAlerts(m *Monitor, r types.Result) {
+func checkForAlerts(m *Monitor, r result.Result) {
 	maxFailCount := 3
 	maxFailCountEnv := os.Getenv("ALERT_FAIL_COUNT")
 
@@ -71,7 +71,7 @@ func checkForAlerts(m *Monitor, r types.Result) {
 
 	alertData := struct {
 		Monitor *Monitor
-		Result  types.Result
+		Result  result.Result
 		LinkURL string
 	}{
 		Monitor: m,

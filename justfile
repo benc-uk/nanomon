@@ -74,22 +74,33 @@ run-frontend: npm_install
     cd frontend
     npm run dev
 
-# 🍃 Run MongoDB in container (needs Docker)
+# 🐘 Run Postgres in container (needs Docker) 
 run-db:
-    echo -e "🍃 Starting MongoDB...\nNote: You will not see any logs"
+    echo -e "🐘 Starting Postgres...\nNote: You will not see any logs"
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
-    docker rm -f mongo || true
-    docker run --rm -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
-     -e MONGODB_REPLICA_SET_MODE=primary \
-     -e MONGODB_ADVERTISED_HOSTNAME=localhost \
-     -e ALLOW_EMPTY_PASSWORD=yes \
-     --name mongo bitnami/mongodb:8.0 >/dev/null 2>&1
+    docker rm -f postgres || true
+    docker run --rm -p 5432:5432 \
+     -e POSTGRES_DB=nanomon \
+     -e POSTGRES_USER=nanomon \
+     -e POSTGRES_PASSWORD=notsecret123 \
+     -v nm-db-data:/var/lib/postgresql/data \
+     -v ./sql/init:/docker-entrypoint-initdb.d \
+     --name postgres postgres:17
 
-# 🚀 Run all services locally with hot-reload, plus MongoDB
+remove-db:
+    echo -e "⛔ Removing Postgres container and volume..."
+    docker rm -f postgres || true
+    docker volume rm nm-db-data || true
+
+# 👂 Run the monitor listener to watch for new monitors
+run-monitor-listener:
+    go run ./cmd/monitor-listener
+
+# 🚀 Run all services locally with hot-reload, plus Postgres
 run-all:
     #!/bin/env bash
-    trap "echo -e '\n⛔ Removing MongoDB container' && docker rm -f mongo" EXIT
-    if ! docker ps | grep -q mongo; then {{ just_executable() }} run-db & fi
+    trap "echo -e '\n⛔ Removing Postgres container' && docker rm -f postgres" EXIT
+    if ! docker ps | grep -q postgres; then {{ just_executable() }} run-db & fi
     sleep 15 
     {{ just_executable() }} run-runner &
     sleep 5

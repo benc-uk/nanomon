@@ -4,12 +4,12 @@
 # ==============================================================================
 
 set shell := ['bash', '-c']
-set dotenv-load := true
+set dotenv-path := '.dev/.env'
 set quiet := true
 
-import 'etc/common.just'
+import '.dev/common.just'
 
-tools_dir := join(`pwd`, '.tools')
+tools_dir := join(`pwd`, '.dev')
 npm_dir := join(tools_dir, 'node_modules', '.bin')
 needed_vars := "VERSION BUILD_INFO IMAGE_REG IMAGE_NAME IMAGE_TAG"
 
@@ -18,10 +18,8 @@ default:
     {{ just_executable() }} --list --list-prefix ' 🔸'
 
 # 🔮 Install dev tools into project tools directory
-install:
-    # Note: Temporary version fixing to 1.61.3 see https://github.com/air-verse/air/issues/718
-    {{ just_executable() }} install-air {{ tools_dir }}
-    {{ just_executable() }} install-golangcilint {{ tools_dir }}
+dev-tools:
+    go mod tidy -modfile=.dev/tools.mod
     {{ just_executable() }} install-npm httpyac httpyac {{ tools_dir }}
 
 # 🔍 Lint & format, default is to run lint check only and set exit code
@@ -34,7 +32,7 @@ lint fix="false": npm_install
     npm_lint_script={{ if fix != "false" { "lint:fix" } else { "lint" } }}
     npm_format_script={{ if fix != "false" { "format" } else { "format:check" } }}
 
-    {{ tools_dir + '/golangci-lint' }} run ./... $golangci_args
+    go tool -modfile=.dev/tools.mod golangci-lint run -c .dev/golangci.yaml ./... $golangci_args
     cd frontend && npm run $npm_lint_script && npm run $npm_format_script 
 
 # 📝 Format source files and fix linting problems
@@ -57,11 +55,11 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
-    {{ tools_dir + '/air' }} -c  ./services/runner/.air.toml
+    go tool -modfile=.dev/tools.mod air -c ./services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
-    {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
+    go tool -modfile=.dev/tools.mod air -c ./services/api/.air.toml
 
 # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
 run-frontend: npm_install
@@ -83,6 +81,7 @@ run-db:
      -v ./sql/init:/docker-entrypoint-initdb.d \
      --name postgres postgres:17
 
+# 🌊 Remove Postgres container and its data volume
 remove-db:
     echo -e "⛔ Removing Postgres container and stored data"
     docker rm -f postgres || true

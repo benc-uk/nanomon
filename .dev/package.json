@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "httpyac": "^6.16.7"
+  }
+}

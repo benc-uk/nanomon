@@ -21,27 +21,6 @@ print-vars list:
   done
 
 [private]
-install-air path="./.tools" ver="":
-  mkdir -p {{ path }}
-  if {{ path_exists(join(path, 'air')) }}; then \
-    echo "{{ok}}air already installed"; \
-  else \
-    curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b {{ path }} {{ ver }}; \
-    echo "{{ done }}air installed {{ NORMAL }}"; \
-  fi
-
-[private]
-install-golangcilint path="./.tools":
-  mkdir -p {{ path }}
-  if {{ path_exists(join(path, 'golangci-lint')) }}; then \
-    echo "{{ok}}golangci-lint already installed"; \
-  else \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b {{ path }}; \
-    echo "{{ done }}golangci-lint installed {{ NORMAL }}"; \
-  fi
-
-
-[private]
 install-npm package cmd path="./.tools":
   #!/usr/bin/env bash
   set -eou pipefail

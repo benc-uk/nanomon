@@ -12,20 +12,18 @@ spec:
         app: nanomon-front
     spec:
       containers:
-      - name: nanomon-front
-        image: ghcr.io/benc-uk/nanomon-frontend:latest
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        env:
-          - name: API_ENDPOINT
-            value: /api
-          - name: AUTH_CLIENT_ID
-            value: 1751320d-d880-4d1c-92d5-d41eacef87bc
-        ports:
-          - containerPort: 8001
+        - name: nanomon-front
+          image: ghcr.io/benc-uk/nanomon-frontend:dev
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          env:
+            - name: API_ENDPOINT
+              value: /api
+          ports:
+            - containerPort: 8001
 ---
 apiVersion: v1
 kind: Service

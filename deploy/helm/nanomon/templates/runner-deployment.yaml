@@ -34,14 +34,14 @@ spec:
               cpu: 100m
               memory: 50Mi
           env:
-          - name: MONGO_URI
-            {{- if .Values.mongodb.connectionURI }}
+          - name: POSTGRES_DSN
+            {{- if .Values.postgresql.connectionDSN }}
             valueFrom:
               secretKeyRef:
                 name: {{ include "nanomon.fullname" . }}
-                key: mongoURI
+                key: connectionDSN
             {{- else }}
-            value: "mongodb://{{ .Release.Name }}-mongodb-headless"
+            value: "host={{ .Release.Name }}-postgresql port=5432 user={{ .Values.postgresql.auth.username }} password={{ .Values.postgresql.auth.password }} dbname={{ .Values.postgresql.auth.database }} sslmode=disable"
             {{- end }}
           {{- if .Values.runner.monitorChangeInterval }}
           - name: MONITOR_CHANGE_INTERVAL

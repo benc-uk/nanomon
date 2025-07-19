@@ -129,8 +129,6 @@ func (api API) deleteMonitor(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("🗑️ Monitor with ID %d deleted successfully", idInt)
-
 	resp.WriteHeader(http.StatusNoContent) // 204 No Content
 }
 

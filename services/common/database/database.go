@@ -28,21 +28,31 @@ func ConnectToDB() *DB {
 	db := &DB{}
 	db.Healthy = true
 
-	// Get connection string from environment variables
-	dsn := os.Getenv("POSGTGRES_DSN")
+	dsn := os.Getenv("POSTGRES_DSN")
 	if dsn == "" {
-		log.Fatal("### POSGTGRES_DSN environment variable is not set")
+		log.Fatal("### POSTGRES_DSN environment variable is not set")
 	}
 
 	host := regexp.MustCompile(`host=([^ ]+)`).FindStringSubmatch(dsn)
 	if len(host) < 2 {
-		log.Fatal("### POSGTGRES_DSN does not contain a valid host")
+		log.Fatal("### POSTGRES_DSN does not contain a valid host")
 	}
 
 	dnsParsed, _ := ParseDSN(dsn)
-	log.Printf("### Connecting to %s:%s as user %s to database: %s", dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
+	log.Printf("### Connecting to Postgres %s:%s with user=%s & database=%s", dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
 
-	// Connect to the database
+	password := os.Getenv("POSTGRES_PASSWORD")
+	if password != "" {
+		// If password is set
+		if !regexp.MustCompile(`password=`).MatchString(dsn) {
+			// If password is not already in DSN, append it
+			dsn += " password=" + password
+		} else {
+			// If password is already in DSN, replace it
+			dsn = regexp.MustCompile(`password=[^ ]+`).ReplaceAllString(dsn, "password="+password)
+		}
+	}
+
 	var err error
 	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {
@@ -57,7 +67,7 @@ func ConnectToDB() *DB {
 			err = nil
 			break
 		}
-		log.Println("### Failed to connect to database, retrying in 10 seconds...")
+		log.Printf("### Failed to connect to database %v, retrying in 10 seconds...", err)
 		time.Sleep(10 * time.Second)
 	}
 	if err != nil {

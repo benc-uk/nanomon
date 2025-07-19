@@ -12,15 +12,18 @@ spec:
         app: nanomon-runner
     spec:
       containers:
-      - name: nanomon-runner
-        image: ghcr.io/benc-uk/nanomon-runner:latest
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        env:
-          - name: MONGO_URI
-            value: mongodb://mongo:27017
-          - name: MONITOR_CHANGE_INTERVAL
-            value: 20s
+        - name: nanomon-runner
+          image: ghcr.io/benc-uk/nanomon-runner:dev
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          env:
+            - name: POSTGRES_DSN
+              value: "host=postgres port=5432 user=nanomon dbname=nanomon sslmode=disable"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password

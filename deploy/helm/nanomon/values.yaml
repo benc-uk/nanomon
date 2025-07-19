@@ -49,32 +49,22 @@ frontend:
   # -- Endpoint to access the deployed API, don't set when using ingress
   apiEndpoint:
 
-mongodb:
+postgresql:
   # -- Point to an existing MongoDB instance, leave blank when enabled=true
-  connectionURI:
+  connectionDSN:
   # -- Enable deploying MongoDB, leave connectionURI blank if true
   enabled: true
-  #@ignored
-  architecture: replicaset
-  #@ignored
-  replicaCount: 2
-  #@ignored
-  arbiter:
-    #@ignored
-    enabled: false
-  #@ignored
-  useStatefulSet: true
-  persistence:
-    # -- Enable persistence for MongoDB
-    enabled: false
-    # -- Size of the MongoDB persistent volume
-    size: 1Gi
-    # -- Storage class for the MongoDB persistent volume
-    storageClass: default
-  #@ignored
+  #@ignore
   auth:
-    #@ignored
-    enabled: false
+    #@ignore
+    username: nanomon
+    #@ignore
+    database: nanomon
+  primary:
+    #@ignore
+    persistence:
+      #@ignore
+      enabled: false
 
 ingress:
   # -- Use a Ingress, you will need an ingress controller deployed and setup

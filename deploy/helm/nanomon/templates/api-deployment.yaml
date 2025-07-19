@@ -41,14 +41,14 @@ spec:
               path: /api/health
               port: http
           env:
-          - name: MONGO_URI
-            {{- if .Values.mongodb.connectionURI }}
+          - name: POSTGRES_DSN
+            {{- if .Values.postgresql.connectionDSN }}
             valueFrom:
               secretKeyRef:
                 name: {{ include "nanomon.fullname" . }}
-                key: mongoURI
+                key: connectionDSN
             {{- else }}
-            value: "mongodb://{{ .Release.Name }}-mongodb-headless"
+            value: "host=nanomon-postgresql port=5432 user={{ .Values.postgresql.auth.username }} dbname={{ .Values.postgresql.auth.database }} sslmode=disable"
             {{- end }}
             {{- if .Values.authClientId }}
           - name: AUTH_CLIENT_ID

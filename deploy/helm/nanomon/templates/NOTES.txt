@@ -21,7 +21,4 @@ INGRESS_IP=$(kubectl get ingress {{ include "nanomon.fullname" . }} -o jsonpath=
 echo -e "\n\nNanoMon frontend is accessible at {{ $scheme }}://$INGRESS_IP/\n\n"
 {{- end }}
 {{- end }}
-{{- if .Values.mongodb.persistence.enabled }}
 
-NOTE: There might be a delay while MongoDB starts and is assigned a persistent volume 
-{{- end }}

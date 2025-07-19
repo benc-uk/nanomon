@@ -50,10 +50,6 @@ build: (check-env needed_vars) npm_install
 images: (check-env needed_vars) (print-vars needed_vars)
     docker compose -f build/compose.yaml build
 
-# 📦 Build the special standalone all-in-one image
-image-standalone: (check-env needed_vars) (print-vars needed_vars)
-    docker compose -f build/compose.yaml build standalone
-
 # 📤 Push all container images
 [confirm('Are you sure you want to push all images?')]
 push: (check-env needed_vars)
@@ -61,14 +57,10 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
-    #!/bin/env bash
-    export POSGTGRES_DSN="host=localhost port=5432 user=nanomon password=notsecret123 dbname=nanomon sslmode=disable"
     {{ tools_dir + '/air' }} -c  ./services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
-    #!/bin/env bash
-    export POSGTGRES_DSN="host=localhost port=5432 user=nanomon password=notsecret123 dbname=nanomon sslmode=disable"
     {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
 
 # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
@@ -86,7 +78,7 @@ run-db:
     docker run --rm -p 5432:5432 \
      -e POSTGRES_DB=nanomon \
      -e POSTGRES_USER=nanomon \
-     -e POSTGRES_PASSWORD=notsecret123 \
+     -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
      -v nanomon-db-data:/var/lib/postgresql/data \
      -v ./sql/init:/docker-entrypoint-initdb.d \
      --name postgres postgres:17

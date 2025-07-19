@@ -1,11 +1,12 @@
 import { ResultExtended } from '../types'
 import StatusPill from './StatusPill'
 
-export default function ResultTable({ results }: { results: ResultExtended[] }) {
+export default function ResultTable({ results, showName }: { results: ResultExtended[]; showName?: boolean }) {
   return (
     <table className="table table-hover">
       <thead className="table-primary">
         <tr>
+          {showName && <th scope="col">Monitor</th>}
           <th scope="col">Time</th>
           <th scope="col">Status</th>
           <th scope="col">Value</th>
@@ -16,6 +17,7 @@ export default function ResultTable({ results }: { results: ResultExtended[] }) 
       <tbody>
         {results.map((result) => (
           <tr key={result.monitor_id + result.date}>
+            {showName && <td className={result.statusDetails.class}>{result.monitor_name}</td>}
             <td className={result.statusDetails.class}>{result.dateNice}</td>
             <td className={result.statusDetails.class}>
               <StatusPill statusCode={result.status} />

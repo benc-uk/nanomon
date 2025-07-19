@@ -24,9 +24,13 @@ func ParseDSN(dsn string) (*DSN, error) {
 		return nil, fmt.Errorf("invalid DSN: missing host")
 	}
 
+	dnsPort := ""
+
 	port := regexp.MustCompile(`port=([^ ]+)`).FindStringSubmatch(dsn)
 	if len(port) < 2 {
-		return nil, fmt.Errorf("invalid DSN: missing port")
+		dnsPort = "5432" // Default PostgreSQL port
+	} else {
+		dnsPort = port[1]
 	}
 
 	database := regexp.MustCompile(`dbname=([^ ]+)`).FindStringSubmatch(dsn)
@@ -41,7 +45,7 @@ func ParseDSN(dsn string) (*DSN, error) {
 
 	return &DSN{
 		Host:     host[1],
-		Port:     port[1],
+		Port:     dnsPort,
 		Database: database[1],
 		User:     username[1],
 	}, nil

@@ -1,5 +1,9 @@
+# ******************************************************************
+# ***** SPECIAL STANDALONE IMAGE FOR DEVELOPMENT PURPOSES ONLY *****
+# ******************************************************************
+
 # ===================================================================================
-# === Stage 1: Build the API service ================================================
+# === Stage 1: Build the services ===================================================
 # ===================================================================================
 FROM golang:1.24-alpine AS go-build
 
@@ -13,16 +17,29 @@ WORKDIR /build
 # Install system dependencies, if CGO_ENABLED=1
 RUN if [[ $CGO_ENABLED -eq 1 ]]; then apk update && apk add gcc musl-dev; fi
 
+# Without the root certs the runner can't make really make HTTPS calls
+RUN apk add --no-cache ca-certificates
+
 # Fetch and cache Go modules
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
 # Copy in Go source files
-COPY services/frontend/ ./services/frontend/
+COPY services/ ./services/
 
 # Now run the build
 # Inject version and build details, to be available at runtime 
+RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
+  go build \
+  -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
+  -o runner nanomon/services/runner
+
+RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
+  go build \
+  -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
+  -o api nanomon/services/api
+
 RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
   go build \
   -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
@@ -50,17 +67,31 @@ RUN rm -rf public/config.json
 RUN npm run build
 
 # ================================================================================================
-# === Stage 3: Create the final image ============================================================
+# === Stage 3: Munge everything into a single image ==============================================
 # ================================================================================================
-FROM scratch
-WORKDIR /app 
+FROM postgres:17
 
-# Copy the previous stages' artifacts into this stage
-COPY --from=go-build /build/frontend . 
+# Set the working directory
+WORKDIR /app
+
+# Copy the previous stage's artifacts into this stage
+COPY --from=go-build /build/runner .
+COPY --from=go-build /build/api .
+COPY --from=go-build /build/frontend .  
 COPY --from=node-build /build/dist ./dist
 
-ENV PORT=8001
-EXPOSE 8001
+# Templates are needed just for the runner
+COPY ./templates ./templates/
 
-# That's it! Just run the server 
-CMD [ "./frontend", "-dir", "./dist" ]
+# Copy SQL initialization scripts
+COPY ./sql/init/* /docker-entrypoint-initdb.d/
+
+# Main startup script
+COPY build/standalone.sh .
+
+ENV POSTGRES_DSN="host=localhost dbname=nanomon user=postgres sslmode=disable"
+ENV API_ENDPOINT=http://localhost:8000/api
+EXPOSE 8000 8001
+
+# Set the entrypoint to the startup script
+ENTRYPOINT ["/app/standalone.sh"]

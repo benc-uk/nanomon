@@ -38,7 +38,11 @@ func ConnectToDB() *DB {
 		log.Fatal("### POSTGRES_DSN does not contain a valid host")
 	}
 
-	dnsParsed, _ := ParseDSN(dsn)
+	dnsParsed, err := ParseDSN(dsn)
+	if err != nil {
+		log.Fatalf("### DSN problem: %v", err)
+	}
+
 	log.Printf("### Connecting to Postgres %s:%s with user=%s & database=%s",
 		dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
 
@@ -53,8 +57,6 @@ func ConnectToDB() *DB {
 			dsn = regexp.MustCompile(`password=[^ ]+`).ReplaceAllString(dsn, "password="+password)
 		}
 	}
-
-	var err error
 
 	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {

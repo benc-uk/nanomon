@@ -29,6 +29,7 @@ func TestMonitorDisabledStart(t *testing.T) {
 	m.Enabled = false
 
 	go m.Start(0, nil)
+
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {
@@ -42,6 +43,7 @@ func TestMonitorNoIntervalStart(t *testing.T) {
 	m.Enabled = true
 
 	go m.Start(0, nil)
+
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {
@@ -133,6 +135,7 @@ func TestMonitorIntervalBad(t *testing.T) {
 	m.Interval = "goat"
 
 	go m.Start(0, nil)
+
 	time.Sleep(10 * time.Millisecond)
 
 	if m.ticker != nil {

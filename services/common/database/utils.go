@@ -14,7 +14,7 @@ type DSN struct {
 
 func ParseDSN(dsn string) (*DSN, error) {
 	if dsn == "" {
-		return nil, nil // No DSN provided
+		return nil, fmt.Errorf("empty DSN")
 	}
 
 	// For simplicity, we assume the DSN is in the format "host=localhost port=5432 dbname=test user=postgres"

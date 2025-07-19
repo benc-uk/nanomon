@@ -70,6 +70,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to start listening on channel %s: %v", channel, err)
 		}
+
 		log.Printf("### Listening for updates on channel: %s\n", channel)
 	}
 
@@ -122,7 +123,7 @@ func main() {
 		case <-time.After(90 * time.Second):
 			// Send a ping to keep the connection alive
 			go func() {
-				db.Listener.Ping()
+				_ = db.Listener.Ping()
 			}()
 		}
 	}
@@ -132,6 +133,7 @@ func handleNotification(notification *pq.Notification) {
 	switch notification.Channel {
 	case "new_monitor":
 		mon := &monitor.Monitor{}
+
 		err := json.Unmarshal([]byte(notification.Extra), mon)
 		if err != nil {
 			log.Println("Error parsing new monitor JSON:", err)
@@ -139,23 +141,30 @@ func handleNotification(notification *pq.Notification) {
 		}
 
 		log.Printf("### New monitor created: %s", mon.Name)
+
 		monitors = append(monitors, mon)
 		go mon.Start(0, db) // Start immediately
 
 	case "monitor_updated":
 		updatedMon := &monitor.Monitor{}
+
 		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
 		if err != nil {
 			log.Println("### Error parsing updated monitor JSON:", err)
+
 			return
 		}
 
 		for i, m := range monitors {
 			if m.ID == updatedMon.ID {
 				monitors[i].Stop()
+
 				go updatedMon.Start(0, db)
+
 				monitors[i] = updatedMon
+
 				log.Printf("### Monitor updated: %s", notification.Extra)
+
 				return
 			}
 		}
@@ -164,9 +173,14 @@ func handleNotification(notification *pq.Notification) {
 		idInt, _ := strconv.Atoi(notification.Extra)
 		for i, m := range monitors {
 			if m.ID == idInt {
+				name := monitors[i].Name
+				log.Printf("### Attempting to stop & remove monitor %d (%s)", idInt, name)
+
 				monitors[i].Stop()
 				monitors = append(monitors[:i], monitors[i+1:]...)
-				log.Printf("### Monitor %d removed from active list", idInt)
+
+				log.Printf("### Monitor '%s' removed from pool", name)
+
 				return
 			}
 		}

@@ -34,7 +34,6 @@ func (r *Result) Store(db *database.DB) error {
 		r.Message,
 		string(outputsJSON),
 	)
-
 	if err != nil {
 		return err
 	}
@@ -62,6 +61,7 @@ func GetResultsForMonitor(db *database.DB, monitorID int, max int) ([]*Result, e
 
 	for rows.Next() {
 		var r Result
+
 		var outputsJSON string
 
 		if err := rows.Scan(&r.Date, &r.MonitorID, &r.MonitorName, &r.MonitorTarget,
@@ -98,6 +98,7 @@ func GetResults(db *database.DB, max int) ([]*Result, error) {
 
 	for rows.Next() {
 		var r Result
+
 		var outputsJSON string
 
 		if err := rows.Scan(&r.Date, &r.MonitorID, &r.MonitorName, &r.MonitorTarget,
@@ -118,6 +119,7 @@ func GetResults(db *database.DB, max int) ([]*Result, error) {
 // Delete all results from the database
 func DeleteAll(db *database.DB) error {
 	query := "TRUNCATE TABLE results"
+
 	_, err := db.Handle.Exec(query)
 	if err != nil {
 		return err

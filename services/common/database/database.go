@@ -12,8 +12,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	pq "github.com/lib/pq"
 )
 
 type DB struct {
@@ -39,7 +39,8 @@ func ConnectToDB() *DB {
 	}
 
 	dnsParsed, _ := ParseDSN(dsn)
-	log.Printf("### Connecting to Postgres %s:%s with user=%s & database=%s", dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
+	log.Printf("### Connecting to Postgres %s:%s with user=%s & database=%s",
+		dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
 
 	password := os.Getenv("POSTGRES_PASSWORD")
 	if password != "" {
@@ -54,6 +55,7 @@ func ConnectToDB() *DB {
 	}
 
 	var err error
+
 	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("### Failed to open database: %v", err)
@@ -64,12 +66,17 @@ func ConnectToDB() *DB {
 		err = db.Handle.Ping()
 		if err == nil {
 			log.Println("### Connected to database successfully!")
+
 			err = nil
+
 			break
 		}
+
 		log.Printf("### Failed to connect to database %v, retrying in 10 seconds...", err)
+
 		time.Sleep(10 * time.Second)
 	}
+
 	if err != nil {
 		log.Fatalf("### Failed to connect to database after retries: %v", err)
 	}
@@ -78,6 +85,7 @@ func ConnectToDB() *DB {
 	go func() {
 		for {
 			_ = db.Ping(nil)
+
 			time.Sleep(15 * time.Second) // Ping every 15 seconds
 		}
 	}()
@@ -88,15 +96,16 @@ func ConnectToDB() *DB {
 			log.Println("Listener error:", err)
 		}
 	})
-	//defer db.Listener.Close()
 
 	db.Timeout = 30 * time.Second // Default timeout for operations
+
 	return db
 }
 
 func (db *DB) Close() {
 	if db.Handle != nil {
 		log.Println("### Closing database connection")
+
 		err := db.Handle.Close()
 		if err != nil {
 			log.Println("### Error closing database connection:", err)
@@ -104,8 +113,10 @@ func (db *DB) Close() {
 			log.Println("### Database connection closed successfully")
 		}
 	}
+
 	if db.Listener != nil {
 		log.Println("### Closing database listener")
+
 		err := db.Listener.Close()
 		if err != nil {
 			log.Println("### Error closing database listener:", err)
@@ -124,11 +135,13 @@ func (db *DB) Ping(healthCallback func(healthy bool)) error {
 	err := db.Handle.Ping()
 	if err != nil {
 		log.Println("### Warning! Database ping failed:", err)
+
 		db.Healthy = false
 	} else {
 		if !db.Healthy {
 			log.Println("### Database connection restored")
 		}
+
 		db.Healthy = true
 	}
 

@@ -1,3 +1,13 @@
+--- Check if the current database is 'nanomon' prevents accidental execution on the wrong database
+SELECT current_database() AS db_name;
+DO $$
+BEGIN
+    IF current_database() != 'nanomon' THEN
+        RAISE EXCEPTION 'This script should only be run on the nanomon database!';
+    END IF;
+END $$; 
+
+
 -- Create monitors table
 CREATE TABLE monitors (
   id SERIAL PRIMARY KEY,
@@ -28,7 +38,6 @@ CREATE TABLE results (
 -- Add indexes
 CREATE INDEX idx_monitor_id ON results(monitor_id);
 CREATE INDEX idx_date ON results(date);
-
 
 -- Function to notify on new monitor insertion
 CREATE OR REPLACE FUNCTION notify_monitor_insert()

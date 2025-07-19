@@ -22,3 +22,11 @@ echo -e "\n\nNanoMon frontend is accessible at {{ $scheme }}://$INGRESS_IP/\n\n"
 {{- end }}
 {{- end }}
 
+{{- if .Values.postgresql.primary.persistence.enabled }}
+
+You have enabled persistent storage for Postgres, it will take several minutes before the application is fully available 
+{{- if not .Values.postgresql.auth.password }}
+WARNING: You have enabled persistence but not set `postgresql.auth.password` this is a bad idea 
+See the docs for details.
+{{- end }}
+{{- end }}

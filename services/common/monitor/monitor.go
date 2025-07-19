@@ -77,6 +77,7 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	_, result := m.run()
 	if result != nil && db != nil {
 		log.Printf("### Monitor '%s' initial run result: %d", m.Name, result.Status)
+
 		err := result.Store(db)
 		if err != nil {
 			log.Printf("### Failed to store initial result for monitor '%s': %v", m.Name, err)
@@ -88,9 +89,11 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	// This will block, so Start() should always be called with a goroutine
 	for {
 		<-m.ticker.C
+
 		_, result = m.run()
 		if result != nil && db != nil {
 			log.Printf("### Monitor '%s' run result: %d", m.Name, result.Status)
+
 			err := result.Store(db)
 			if err != nil {
 				log.Printf("### Failed to store result for monitor '%s': %v", m.Name, err)
@@ -147,7 +150,6 @@ func (m *Monitor) run() (bool, *result.Result) {
 
 		if ruleExp != nil {
 			ruleResult, err := ruleExp.Evaluate(res.Outputs)
-
 			if err != nil {
 				res.Message = fmt.Sprintf("rule eval error: %s", err.Error())
 				res.Status = result.StatusFailed
@@ -205,6 +207,7 @@ func (m *Monitor) Stop() {
 // Delete all monitors from the database
 func DeleteAll(db *database.DB) error {
 	query := "TRUNCATE TABLE monitors CASCADE"
+
 	_, err := db.Handle.Exec(query)
 	if err != nil {
 		return err

@@ -160,8 +160,8 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
 	}
-	monitor.Store(api.db)
 
+	err = monitor.Store(api.db)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "monitors", err).Send(resp)
 		return
@@ -202,6 +202,7 @@ func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
 		problem.Wrap(400, req.RequestURI, "monitors", errors.New(msg)).Send(resp)
 		return
 	}
+
 	m.Updated = time.Now()
 
 	log.Printf("### Monitor properties: %+v", m.Target)
@@ -261,6 +262,7 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 		problem.Wrap(400, req.RequestURI, "results", errors.New("max must be between 1 and 1000")).Send(resp)
 		return
 	}
+
 	results, err := result.GetResults(api.db, max)
 	if err != nil {
 		problem.Wrap(500, req.RequestURI, "results", err).Send(resp)
@@ -277,7 +279,9 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 // Import JSON to bulk configure monitors
 func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("### Importing monitors from request body")
+
 	var monitors []MonitorReq
+
 	err := json.NewDecoder(req.Body).Decode(&monitors)
 	if err != nil {
 		problem.Wrap(400, req.RequestURI, "monitors", err).Send(resp)

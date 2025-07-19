@@ -14,7 +14,12 @@ import (
 func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 	monitors := []*Monitor{}
 
-	rows, err := db.Handle.Query("SELECT id, name, type, interval, updated, enabled, rule, target, properties FROM monitors")
+	query := `
+		SELECT id, name, type, interval, updated, enabled, 
+		rule, target, properties FROM monitors
+	`
+
+	rows, err := db.Handle.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +27,11 @@ func FetchMonitors(db *database.DB) ([]*Monitor, error) {
 
 	for rows.Next() {
 		var m Monitor
+
 		var properties string
 
-		if err := rows.Scan(&m.ID, &m.Name, &m.Type, &m.Interval, &m.Updated, &m.Enabled, &m.Rule, &m.Target, &properties); err != nil {
+		if err := rows.Scan(&m.ID, &m.Name, &m.Type, &m.Interval, &m.Updated, &m.Enabled,
+			&m.Rule, &m.Target, &properties); err != nil {
 			return nil, err
 		}
 
@@ -51,6 +58,7 @@ func (m *Monitor) Store(db *database.DB) error {
 	`
 
 	var id int
+
 	err = db.Handle.QueryRow(query, m.Name, m.Type, m.Interval, m.Target, m.Rule, m.Enabled, string(properties)).Scan(&id)
 	if err != nil {
 		return err
@@ -65,9 +73,11 @@ func (m *Monitor) Store(db *database.DB) error {
 // Fetch a monitor by ID from the database
 func FetchMonitor(db *database.DB, id int) (*Monitor, error) {
 	var m Monitor
+
 	var properties string
 
 	query := "SELECT id, name, type, interval, updated, enabled, rule, target, properties FROM monitors WHERE id = $1"
+
 	err := db.Handle.QueryRow(query, id).Scan(&m.ID, &m.Name, &m.Type, &m.Interval, &m.Updated, &m.Enabled, &m.Rule, &m.Target, &properties)
 	if err != nil {
 		return nil, err
@@ -85,7 +95,9 @@ func DeleteMonitor(id int, db *database.DB) error {
 	}
 
 	query := "DELETE FROM monitors WHERE id = $1 RETURNING id"
+
 	var deletedID int
+
 	err := db.Handle.QueryRow(query, id).Scan(&deletedID)
 	if err != nil {
 		return err
@@ -107,7 +119,9 @@ func (m *Monitor) Update(db *database.DB) error {
 		WHERE id = $8
 		RETURNING id
 	`
+
 	var id int
+
 	err = db.Handle.QueryRow(query, m.Name, m.Type, m.Interval, m.Target, m.Rule, m.Enabled, string(properties), m.ID).Scan(&id)
 	if err != nil {
 		return err

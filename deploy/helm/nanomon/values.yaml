@@ -50,17 +50,23 @@ frontend:
   apiEndpoint:
 
 postgresql:
-  # -- Point to an existing MongoDB instance, leave blank when enabled=true
-  connectionDSN:
-  # -- Enable deploying MongoDB, leave connectionURI blank if true
+  # -- Enable deploying Postgres, set to false when using an external database
   enabled: true
+  # -- Point to an existing database instance, leave blank when enabled=true
+  externalDSN:
+  # -- Password for the external database, leave blank when enabled=true
+  externalPassword:
   #@ignore
   auth:
     #@ignore
     username: nanomon
     #@ignore
     database: nanomon
+  #@ignore
   primary:
+    #@ignore
+    initdb:
+      scriptsConfigMap: nanomon-db-init
     #@ignore
     persistence:
       #@ignore

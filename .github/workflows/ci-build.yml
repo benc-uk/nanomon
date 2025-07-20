@@ -24,6 +24,8 @@ env:
   IMAGE_NAME: benc-uk/nanomon
   IMAGE_TAG: dev
   VERSION: dev
+  POSTGRES_DSN: "host=localhost port=5432 user=nanomon dbname=nanomon sslmode=disable"
+  POSTGRES_PASSWORD: notsecret123
 
 jobs:
   lint-test:

@@ -47,7 +47,7 @@ func main() {
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
 
-	if monitor.IsAlertingEnabled() {
+	if IsAlertingEnabled() {
 		log.Printf("### Alerting is enabled, emails will be sent went monitors fail")
 	}
 
@@ -102,6 +102,9 @@ func main() {
 	// Start the monitors loaded from the database
 	// Note they each run in their own goroutines
 	for i, m := range monitors {
+		// Inject the alerting callback
+		m.OnRunEnd = checkForAlerts
+
 		// Delay each monitor start by 2 seconds for a staggered start
 		go m.Start(i*2, db)
 	}
@@ -131,7 +134,9 @@ func main() {
 func handleNotification(notification *pq.Notification) {
 	switch notification.Channel {
 	case "new_monitor":
-		mon := &monitor.Monitor{}
+		mon := &monitor.Monitor{
+			OnRunEnd: checkForAlerts, // Set the alert callback
+		}
 
 		err := json.Unmarshal([]byte(notification.Extra), mon)
 		if err != nil {
@@ -145,7 +150,9 @@ func handleNotification(notification *pq.Notification) {
 		go mon.Start(0, db) // Start immediately
 
 	case "monitor_updated":
-		updatedMon := &monitor.Monitor{}
+		updatedMon := &monitor.Monitor{
+			OnRunEnd: checkForAlerts, // Set the alert callback
+		}
 
 		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
 		if err != nil {

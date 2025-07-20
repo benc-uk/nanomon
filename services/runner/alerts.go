@@ -3,12 +3,13 @@
 // NanoMon Runner - Alerting and email sending
 // ----------------------------------------------------------------------------
 
-package monitor
+package main
 
 import (
 	"bytes"
 	"fmt"
 	"log"
+	"nanomon/services/common/monitor"
 	"nanomon/services/common/result"
 	"net/smtp"
 	"os"
@@ -59,7 +60,8 @@ func init() {
 	}
 }
 
-func checkForAlerts(m *Monitor, r result.Result) {
+// checkForAlerts checks if a monitor has failed and sends an alert email if necessary
+func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 	maxFailCount := 3
 	maxFailCountEnv := os.Getenv("ALERT_FAIL_COUNT")
 
@@ -70,12 +72,12 @@ func checkForAlerts(m *Monitor, r result.Result) {
 	log.Printf("###   Monitor '%s' has failed %d times...", m.Name, m.ErrorCount)
 
 	alertData := struct {
-		Monitor *Monitor
+		Monitor *monitor.Monitor
 		Result  result.Result
 		LinkURL string
 	}{
 		Monitor: m,
-		Result:  r,
+		Result:  *r,
 		LinkURL: linkURL,
 	}
 
@@ -97,6 +99,7 @@ func checkForAlerts(m *Monitor, r result.Result) {
 	}
 }
 
+// sendEmail sends an email alert using the configured SMTP settings
 func sendEmail(body, subject string) {
 	// Alerting is not configured and disabled
 	if !IsAlertingEnabled() {

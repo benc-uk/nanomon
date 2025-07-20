@@ -39,6 +39,9 @@ type Monitor struct {
 	ErrorCount   int
 	InErrorState bool
 
+	// Callback event hooks
+	OnRunEnd func(m *Monitor, r *result.Result)
+
 	// Prometheus things for this monitor
 	ticker *time.Ticker
 	gauge  *prometheus.GaugeVec
@@ -181,12 +184,20 @@ func (m *Monitor) run() (bool, *result.Result) {
 	if res.Status > result.StatusOK {
 		m.ErrorCount++
 
-		checkForAlerts(m, *res)
+		// Call the OnRunEnd callback if set
+		if m.OnRunEnd != nil {
+			m.OnRunEnd(m, res)
+		}
 
 		return false, res
 	} else {
 		m.ErrorCount = 0
 		m.InErrorState = false
+	}
+
+	// Call the OnRunEnd callback if set
+	if m.OnRunEnd != nil {
+		m.OnRunEnd(m, res)
 	}
 
 	return true, res

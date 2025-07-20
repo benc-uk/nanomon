@@ -28,7 +28,7 @@ env:
   POSTGRES_PASSWORD: notsecret123
 
 jobs:
-  lint-test:
+  lint-build:
     name: Testing & Linting
     runs-on: ubuntu-latest
     steps:
@@ -45,8 +45,28 @@ jobs:
       - name: Install tools
         run: just dev-tools
 
+      - name: Check the build
+        env:
+          BUILD_INFO: "ignore me"
+        run: just build
+
       - name: Linting & formatting
         run: just lint
+
+  tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install just
+        uses: taiki-e/install-action@just
 
       # Run tests and filter the output to JUnit format
       - name: Run unit tests
@@ -80,18 +100,13 @@ jobs:
           path: api-test-results.xml
           reporter: java-junit
 
-      - name: Check the build
-        env:
-          BUILD_INFO: "ignore me"
-        run: just build
-
   image-build:
     name: Build and push images
     if: github.ref == 'refs/heads/main'
     env:
       BUILD_INFO: "CI build, SHA:${{ github.sha }}"
     runs-on: ubuntu-latest
-    needs: lint-test
+    needs: tests
     steps:
       - uses: actions/checkout@v4
 

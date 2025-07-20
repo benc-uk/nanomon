@@ -68,6 +68,9 @@ jobs:
       - name: Install just
         uses: taiki-e/install-action@just
 
+      - name: Install tools
+        run: just dev-tools
+
       # Run tests and filter the output to JUnit format
       - name: Run unit tests
         run: |

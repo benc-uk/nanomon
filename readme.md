@@ -189,10 +189,10 @@ When running locally this is done with a dotenv file, which is located in `.dev\
 
 ### Variables used by both API service and runner:
 
-| _Name_            | _Description_                    | _Default_ |
-| ----------------- | -------------------------------- | --------- |
-| POSTGRES_DSN      | Connection string for PostgreSQL | _blank_   |
-| POSTGRES_PASSWORD | Password for PostgreSQL user     | _blank_   |
+| _Name_            | _Description_                                                                               | _Default_ |
+| ----------------- | ------------------------------------------------------------------------------------------- | --------- |
+| POSTGRES_DSN      | Connection string in DSN format for PostgreSQL, see [notes below](#appendix-database-notes) | _blank_   |
+| POSTGRES_PASSWORD | Password for connecting to PostgreSQL, see [notes below](#appendix-database-notes)          | _blank_   |
 
 ### Variables used by _both_ the API and frontend host:
 
@@ -342,16 +342,19 @@ Limitations:
 
 ## Appendix: Database Notes
 
-- The services will dynamically create the database and collections if they don't exist at startup. By default the database name is `nanomon` but this can be changed with the `MONGO_DB` env var.
-- For change stream support to work MongoDB must be running as a replica set, when running locally this is enabled in the Docker container that is started. Also the Helm chart will deploy MongoDB as a replica set.
+The database used by NanoMon is PostgreSQL, the runner makes use of the listen/notify feature to keep in sync with the monitors table, and to trigger runs of monitors. The API and frontend host connect directly to the database.
 
-### Azure Cosmos DB
+To see how the trigger & notify is setup within PostgreSQL, see the [nanomon_init.sql](./sql/init/nanomon_init.sql) which is run when the database is created. This file is used by the deployment scripts to create the initial database and tables, and also to create the triggers and stored procedures.
 
-Azure Cosmos DB can be used as a database for NanoMon, however there are two things to consider:
+The DSN connection string for PostgreSQL is in the format used by pq, which is the Go driver for PostgreSQL. See [pq docs](https://pkg.go.dev/github.com/lib/pq#hdr-Connection_String_Parameters). The format is:
 
-- An index must be added for the `date` field to the results collection, this can be done in the Azure Portal or with a single command:  
-  `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
-- Cosmos DB for MongoDB does have support for change streams, however it comes with [several limitations, most notably the lack of support for delete events](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/change-streams?tabs=javascript#current-limitations). Given these limitations NanoMon will fall back to polling when using Cosmos DB
+```php
+host={host} port={port} user={user} dbname={dbname}
+```
+
+Note. It's adviced to not include `password=` in the DSN, instead set the `POSTGRES_PASSWORD` environment variable. Should password be present in the DSN, it will be used, but the `POSTGRES_PASSWORD` will override it.
+
+When starting up the API and runner services, they will attempt to connect to the database, if the connection fails they will retry for a period of time (6 tries with 10 seconds between) before exiting. This is to allow the database to start up first, or to allow the database to be created by the deployment scripts. They will additional ping the database every 15 seconds to check the connection is still healthy, and will attempt to reconnect if the database becomes unavailable.
 
 ## Appendix: Prometheus
 

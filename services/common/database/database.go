@@ -18,8 +18,7 @@ import (
 
 type DB struct {
 	Handle   *sql.DB
-	Timeout  time.Duration // Timeout for database operations
-	Listener *pq.Listener  // Optional listener for notifications
+	Listener *pq.Listener // Optional listener for notifications
 	Healthy  bool
 }
 
@@ -98,8 +97,6 @@ func ConnectToDB() *DB {
 			log.Println("Listener error:", err)
 		}
 	})
-
-	db.Timeout = 30 * time.Second // Default timeout for operations
 
 	return db
 }

@@ -23,10 +23,6 @@ api:
 runner:
   # -- Number of pod replicas for the runner, best left as 1
   replicaCount: 1
-  # -- Set to "true" to using DB polling instead of MongoDB change streams
-  usePolling:
-  # -- Only set when using polling, use a duration string, e.g. "5s"
-  pollingInterval:
   alerting:
     # -- SMTP password for sending alerts, set to enable alerting
     password:

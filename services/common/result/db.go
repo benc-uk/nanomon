@@ -1,7 +1,6 @@
 package result
 
 import (
-	"context"
 	"encoding/json"
 	"nanomon/services/common/database"
 )
@@ -14,26 +13,13 @@ func (r *Result) Store(db *database.DB) error {
 		return err
 	}
 
-	// Prepare the SQL statement
 	query := `
 		INSERT INTO results (date, monitor_id, monitor_name, monitor_target, status, value, message, outputs)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
-	// Execute the query with context timeout
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	_, err = db.Handle.ExecContext(ctx, query,
-		r.Date,
-		r.MonitorID,
-		r.MonitorName,
-		r.MonitorTarget,
-		r.Status,
-		float64(r.Value), // Convert int to float64 for database
-		r.Message,
-		string(outputsJSON),
-	)
+	_, err = db.Handle.Exec(query, r.Date, r.MonitorID, r.MonitorName, r.MonitorTarget,
+		r.Status, r.Value, r.Message, outputsJSON)
 	if err != nil {
 		return err
 	}

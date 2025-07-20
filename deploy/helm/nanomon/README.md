@@ -44,8 +44,6 @@ Deploy NanoMon, a HTTP and network monitoring tool
 | runner.alerting.smtpHost | string | `"smtp.gmail.com"` | SMTP host for sending alerts |
 | runner.alerting.smtpPort | int | `587` | SMTP port for sending alerts |
 | runner.alerting.to | string | `nil` | The email address to send alerts to, set to enable alerting |
-| runner.pollingInterval | string | `nil` | Only set when using polling, use a duration string, e.g. "5s" |
 | runner.replicaCount | int | `1` | Number of pod replicas for the runner, best left as 1 |
-| runner.usePolling | string | `nil` | Set to "true" to using DB polling instead of MongoDB change streams |
 | tolerations | list | `[]` | Tolerations used by all pods |
 

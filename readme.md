@@ -56,22 +56,21 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 ```text
 📂
-├── api             - API reference and specifications, using TypeSpec
-├── build           - Dockerfiles and supporting build artifacts
-├── deploy
-│   ├── azure       - Deploy to Azure using Bicep
-│   ├── helm        - Helm chart to deploy NanoMon
-│   └── kubernetes  - Example Kubernetes manifests (No Helm)
-├── etc             - Misc stuff :)
-├── frontend        - The source for the frontend React app
-├── scripts         - Supporting helper bash scripts
-├── services
-│   ├── api         - Go source for the API service
-│   ├── common      - Shared internal Go code
-│   ├── frontend    - Go source for the frontend host server
-│   └── runner      - Go source for the runner
-├── templates       - Email alert template used by runner
-└── tests           - Integration and performance tests
+ ├── .dev         // Local dev config & tools
+ ├── api          // API specs, OpenAPI, TypeSpec & Bruno
+ ├── build        // Build Dockerfiles
+ ├── deploy       // Deployment artifacts; Helm, Kubernetes, Azure Bicep
+ ├── docs         // Documentation, guides and diagrams
+ ├── frontend     // Source for the frontend app, written in React
+ ├── scripts      // Supporting scripts
+ ├── services     // Source for backend services, API, runner and frontend host
+ │   ├── api
+ │   ├── common
+ │   ├── frontend
+ │   └── runner
+ ├── sql          // Database schema & init scripts
+ ├── templates    // Alerting email templates
+ └── tests        // Integration & performance tests
 ```
 
 [![CI Pipeline](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml/badge.svg)](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml)
@@ -82,27 +81,9 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
 
-### Local Dev Quick Start
+### Quick Start & Run
 
-Pre-reqs:
-
-- Linux system like Ubuntu (WSL2 was used for development), MacOS might work 🤷‍♂️
-- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
-- [Go SDK & toolchain](https://go.dev/doc/install)
-- [Node.js](https://nodejs.org/en/download)
-- [Just](https://just.systems) task runner and make replacement
-  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.tools/`), then you can run `.tools/just`
-  - When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
-
-To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
-
-- Run `just install`
-- Run `just run-all`
-- The frontend should automatically open in your browser.
-
-### Run Standalone Image
-
-If you just want to try the app out, you can start the standalone image using Docker. This doesn't require you to have Go, Node.js etc
+If you just want to try the app out, you can start the standalone image using Docker. This will run the entire system in a single container, which is useful for demos and quick testing. The standalone image includes the API, runner, frontend host and a PostgreSQL database.
 
 ```bash
 docker pull ghcr.io/benc-uk/nanomon-standalone:latest
@@ -110,6 +91,24 @@ docker run --rm -it -p 8000:8000 -p 8001:8001 ghcr.io/benc-uk/nanomon-standalone
 ```
 
 Then open the following URL http://localhost:8001/
+
+### Local Dev Quick Start
+
+Pre-reqs:
+
+- Linux system like Ubuntu (WSL was used for development), MacOS might work 🤷‍♂️
+- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
+- [Go SDK & toolchain](https://go.dev/doc/install)
+- [Node.js](https://nodejs.org/en/download)
+- [Just](https://just.systems) task runner and make replacement
+  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.dev/`), then you can run `.dev/just`
+  - When working locally, copy the `.dev/.env.sample` to `.dev/.env` and set any configuration variables in the file.
+
+To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
+
+- Run `just dev-tools` to install the dev tools into the `.dev` directory.
+- Run `just run-all`
+- The frontend should automatically open in your browser.
 
 ### Deploy to Kubernetes using Helm
 
@@ -158,18 +157,19 @@ See [Azure & Bicep docs](./deploy/azure/)
 ## Just Reference
 
 ```text
- 🔸build                   # 🔨 Build all binaries and bundle the frontend, we don't really use this
+ 🔸build                   # 🔨 Build binaries and bundle the frontend
  🔸clean                   # 🧹 Clean up, remove dev data and temp files
  🔸dev-tools               # 🔮 Install dev tools into project tools directory
  🔸format                  # 📝 Format source files and fix linting problems
  🔸generate-specs          # 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
+ 🔸helm-prep               # 🪖 Update Helm docs & repo index
  🔸images                  # 📦 Build all container images, using Docker compose
- 🔸lint fix="false"        # 🔍 Lint & format, default is to run lint check only and set exit code
+ 🔸lint fix="false"        # 🔍 Lint & format, default is to check only and set exit code
  🔸push                    # 📤 Push all container images
  🔸remove-db               # 🌊 Remove Postgres container and its data volume
  🔸run-all                 # 🚀 Run all services locally with hot-reload, plus Postgres
  🔸run-api                 # 🎯 Run the API service locally, with hot reloading
- 🔸run-db                  # 🐘 Run Postgres in container (needs Docker)
+ 🔸run-db                  # 🐘 Run Postgres in container
  🔸run-frontend            # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
  🔸run-runner              # 🏃 Run the runner service locally, with hot reloading
  🔸test                    # 🧪 Run all unit tests
@@ -346,13 +346,13 @@ The database used by NanoMon is PostgreSQL, the runner makes use of the listen/n
 
 To see how the trigger & notify is setup within PostgreSQL, see the [nanomon_init.sql](./sql/init/nanomon_init.sql) which is run when the database is created. This file is used by the deployment scripts to create the initial database and tables, and also to create the triggers and stored procedures.
 
-The DSN connection string for PostgreSQL is in the format used by pq, which is the Go driver for PostgreSQL. See [pq docs](https://pkg.go.dev/github.com/lib/pq#hdr-Connection_String_Parameters). The format is:
+The DSN connection string for PostgreSQL is in the format used by pq, which is a Go driver for PostgreSQL. See [pq docs](https://pkg.go.dev/github.com/lib/pq#hdr-Connection_String_Parameters). The format is:
 
 ```php
 host={host} port={port} user={user} dbname={dbname}
 ```
 
-Note. It's adviced to not include `password=` in the DSN, instead set the `POSTGRES_PASSWORD` environment variable. Should password be present in the DSN, it will be used, but the `POSTGRES_PASSWORD` will override it.
+Note. It's advised to not include `password=` in the DSN, instead set the `POSTGRES_PASSWORD` environment variable. Should password be present in the DSN, it will be used, but should `POSTGRES_PASSWORD` be set too, it will override it.
 
 When starting up the API and runner services, they will attempt to connect to the database, if the connection fails they will retry for a period of time (6 tries with 10 seconds between) before exiting. This is to allow the database to start up first, or to allow the database to be created by the deployment scripts. They will additional ping the database every 15 seconds to check the connection is still healthy, and will attempt to reconnect if the database becomes unavailable.
 

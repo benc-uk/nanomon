@@ -66,6 +66,12 @@ services:
     networks:
       - back
 
+  standalone:
+    image: ${IMAGE_REG}/${IMAGE_NAME}-standalone:${IMAGE_TAG}
+    build:
+      context: ..
+      dockerfile: ./build/Dockerfile.standalone
+
 networks:
   front:
   back:

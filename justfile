@@ -38,7 +38,7 @@ lint fix="false": npm_install
 # 📝 Format source files and fix linting problems
 format: (lint "true")
 
-# 🔨 Build all binaries and bundle the frontend, we don't really use this
+# 🔨 Build all binaries and bundle the frontend
 build: (check-env needed_vars) npm_install
     mkdir -p bin
     go build -o bin -ldflags "-X main.version=$VERSION -X \"main.buildInfo=$BUILD_INFO\"" nanomon/services/...
@@ -68,7 +68,7 @@ run-frontend: npm_install
     cd frontend
     npm run dev
 
-# 🐘 Run Postgres in container (needs Docker) 
+# 🐘 Run Postgres in container
 run-db:
     echo -e "🐘 Starting Postgres..."
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
@@ -125,6 +125,10 @@ generate-specs:
 clean:
 	rm -rf tmp bin .tools frontend/config api/**/node_modules api/**/tsp-output frontend/.vite *.xml
 	docker volume rm nanomon-db-data || true
+
+# 🪖 Update Helm docs & repo index
+helm-prep:
+    ./scripts/prep-helm.sh
 
 [private]
 npm_install:

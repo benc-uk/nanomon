@@ -25,11 +25,11 @@ env:
   IMAGE_TAG: dev
   VERSION: dev
   POSTGRES_DSN: "host=localhost port=5432 user=nanomon dbname=nanomon sslmode=disable"
-  POSTGRES_PASSWORD: notsecret123
+  POSTGRES_PASSWORD: notsecret123 # This is used to integration test against a local Postgres instance
 
 jobs:
   lint-build:
-    name: Testing & Linting
+    name: Lint & Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

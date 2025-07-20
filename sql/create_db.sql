@@ -1,5 +1,6 @@
 -- Create database and user for Nanomon
--- This script is only used when NOT running Postgres in a container
+-- This script is only used when standing your own PostgreSQL server
+-- In normal use or deployment this SQL is never needed
 
 CREATE DATABASE IF NOT EXISTS nanomon;
 CREATE USER IF NOT EXISTS nanomon WITH PASSWORD 'nanomon';

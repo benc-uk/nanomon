@@ -41,7 +41,7 @@ jobs:
         uses: taiki-e/install-action@just
 
       - name: Install tools
-        run: just install
+        run: just dev-tools
 
       - name: Linting & formatting
         run: just lint

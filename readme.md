@@ -20,11 +20,11 @@ The architecture is a fairly standard design, consisting of four application com
 
 ![architecture diagram](./etc/architecture.drawio.png)
 
-- **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the MongoDB database.
-- **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
+- **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the database.
+- **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It also connects directly to the database, and reads monitor configuration data, and saves back & stores result data.
 - **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using [React](https://react.dev) and [Vite](https://vite.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
-- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB. Cloud and hosted services which provide MongoDB compatibility (e.g. Azure Cosmos DB) also work
+- **PostgreSQL** - Backend data store, this is a vanilla instance of PostgreSQL (aka postgres) database server. Cloud and hosted services which provide PostgreSQL compatibility (e.g. Azure Cosmos DB) can of course be used.
 
 ## Concepts
 
@@ -124,17 +124,15 @@ See [Azure & Bicep docs](./deploy/azure/)
 ### Runner
 
 - Written in Go, [source code - /services/runner](./services/runner/)
-- The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
-- It keeps in sync with the `monitors` collection in the database, it does this one of two ways:
-  - Watching the collection using MongoDB change stream. This mode is preferred as it results in instant updates to changes made in the frontend & UI
-  - If change stream isn't supported, then the runner falls back to polling the database for changes.
+- The runner requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
+- It dynamically keeps in sync with the `monitors` table in the database. This is achieved by using the listen/notify feature of PostgreSQL, which is used to listen for notification messages without the need for polling. These messages are sent using triggers & stored procedures, which are called when a monitor is created, updated or deleted.
 - If configured the runner will send email alerts, see [alerting section below](#alerting-configuration)
 - By default runner doesn't listen to inbound network connections or bind to any ports, the exception being if [Prometheus support is enabled](#appendix-prometheus)
 
 ### API
 
 - Written in Go, [source code - /services/api](./services/api/)
-- The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
+- The API requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
 - Listens on port 8000 by default.
 - All routes are prefixed `/api` this makes it easier to put a path based HTTP router in front of the API and the SPA frontend
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
@@ -160,19 +158,19 @@ See [Azure & Bicep docs](./deploy/azure/)
 ## Just Reference
 
 ```text
- 🔸build                   # 🔨 Build all binaries into ./bin/ directory, not really needed
- 🔸clean                   # 🧹 Clean up, remove dev data and files
+ 🔸build                   # 🔨 Build all binaries and bundle the frontend, we don't really use this
+ 🔸clean                   # 🧹 Clean up, remove dev data and temp files
+ 🔸dev-tools               # 🔮 Install dev tools into project tools directory
  🔸format                  # 📝 Format source files and fix linting problems
  🔸generate-specs          # 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
- 🔸image-standalone        # 📦 Build the special standalone all-in-one image
  🔸images                  # 📦 Build all container images, using Docker compose
- 🔸install                 # 🔮 Install dev tools into project tools directory
  🔸lint fix="false"        # 🔍 Lint & format, default is to run lint check only and set exit code
  🔸push                    # 📤 Push all container images
- 🔸run-all                 # 🚀 Run all services locally with hot-reload, plus MongoDB
+ 🔸remove-db               # 🌊 Remove Postgres container and its data volume
+ 🔸run-all                 # 🚀 Run all services locally with hot-reload, plus Postgres
  🔸run-api                 # 🎯 Run the API service locally, with hot reloading
- 🔸run-db                  # 🍃 Run MongoDB in container (needs Docker)
- 🔸run-frontend            # 🌐 Run frontend with Vite dev HTTP server & hot-reload
+ 🔸run-db                  # 🐘 Run Postgres in container (needs Docker)
+ 🔸run-frontend            # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
  🔸run-runner              # 🏃 Run the runner service locally, with hot reloading
  🔸test                    # 🧪 Run all unit tests
  🔸test-api report="false" # 🔬 Run API integration tests, using HttpYac
@@ -180,7 +178,8 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ## Configuration Reference
 
-All three components (API, runner and frontend host) expect their configuration in the form of environmental variables. When running locally this is done via a `.env` file. Note. The `.env` file is not used when deploying or running the app elsewhere
+All three components (API, runner and frontend host) expect their configuration in the form of environmental variables.  
+When running locally this is done with a dotenv file, which is located in `.dev\.env` along with a sample to be used to get started. The `.env` file is used solely for local development.
 
 ### Variables used only by the frontend host:
 
@@ -190,11 +189,10 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ### Variables used by both API service and runner:
 
-| _Name_        | _Description_                     | _Default_                 |
-| ------------- | --------------------------------- | ------------------------- |
-| MONGO_URI     | Connection string for MongoDB     | mongodb://localhost:27017 |
-| MONGO_DB      | Database name to use              | nanomon                   |
-| MONGO_TIMEOUT | Timeout for connecting to MongoDB | 30s                       |
+| _Name_            | _Description_                    | _Default_ |
+| ----------------- | -------------------------------- | --------- |
+| POSTGRES_DSN      | Connection string for PostgreSQL | _blank_   |
+| POSTGRES_PASSWORD | Password for PostgreSQL user     | _blank_   |
 
 ### Variables used by _both_ the API and frontend host:
 
@@ -208,19 +206,18 @@ All three components (API, runner and frontend host) expect their configuration 
 
 > Note. All settings for alerting that begin with `ALERT_` are optional
 
-| _Name_              | _Description_                                                                                             | _Default_             |
-| ------------------- | --------------------------------------------------------------------------------------------------------- | --------------------- |
-| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                                                | _blank_               |
-| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                                        | _blank_               |
-| ALERT_SMTP_TO       | Address alert emails are sent to                                                                          | _blank_               |
-| ALERT_SMTP_HOST     | SMTP hostname                                                                                             | smtp.gmail.com        |
-| ALERT_SMTP_PORT     | SMTP port                                                                                                 | 587                   |
-| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email                               | 3                     |
-| ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL                    | http://localhost:3000 |
-| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s                   |
-| USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false                 |
-| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                                                 | false                 |
-| PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                                            | 8080                  |
+| _Name_              | _Description_                                                                          | _Default_             |
+| ------------------- | -------------------------------------------------------------------------------------- | --------------------- |
+| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                             | _blank_               |
+| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                     | _blank_               |
+| ALERT_SMTP_TO       | Address alert emails are sent to                                                       | _blank_               |
+| ALERT_SMTP_HOST     | SMTP hostname                                                                          | smtp.gmail.com        |
+| ALERT_SMTP_PORT     | SMTP port                                                                              | 587                   |
+| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email            | 3                     |
+| ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL | http://localhost:3000 |
+| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                     | 10s                   |
+| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                              | false                 |
+| PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                         | 8080                  |
 
 ## Monitor Reference
 

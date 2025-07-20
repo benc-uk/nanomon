@@ -203,15 +203,3 @@ func (m *Monitor) Stop() {
 		m.ticker.Stop()
 	}
 }
-
-// Delete all monitors from the database
-func DeleteAll(db *database.DB) error {
-	query := "TRUNCATE TABLE monitors CASCADE"
-
-	_, err := db.Handle.Exec(query)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

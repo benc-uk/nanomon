@@ -123,7 +123,6 @@ GET {{endpoint}}/monitors/{{ createMon.id }}/results?max=5
 
 
 ### Get results for all monitors
-# @sleep 1000
 GET {{endpoint}}/results?max=10
 
 ?? status == 200
@@ -145,14 +144,14 @@ Content-Type: application/json
     "name": "Test Health",
     "type": "http",
     "interval": "20s",
-    "target": "http://localhost:8000/health",
+    "target": "http://localhost:8000/api/health",
     "enabled": true
   },
   {
     "name": "Test Status",
     "type": "http",
     "interval": "5s",
-    "target": "http://localhost:8000/status",
+    "target": "http://localhost:8000/api/status",
     "enabled": true
   }
 ]

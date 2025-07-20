@@ -130,6 +130,19 @@ func (m *Monitor) Update(db *database.DB) error {
 	return nil
 }
 
+// Delete all monitors from the database
+func DeleteAll(db *database.DB) error {
+	// Do not use TRUNCATE here as it does not invoke ON DELETE triggers
+	query := "DELETE FROM monitors CASCADE"
+
+	_, err := db.Handle.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Parse properties from a JSON string into a map
 func parseProperties(properties string) map[string]string {
 	props := make(map[string]string)

@@ -13,24 +13,18 @@ post {
 body:json {
   [
     {
-      "name": "Bruno Test Bulk 1",
+      "name": "Bruno Test Health {{$randomDomainWord}}",
       "type": "http",
-      "interval": "60s",
-      "target": "https://example.net",
-      "properties": {
-        "timeout": "10s"
-      },
-      "enabled": false
+      "interval": "20s",
+      "target": "http://localhost:8000/api/health",
+      "enabled": true
     },
     {
-      "name": "Bruno Test Bulk 2",
+      "name": "Bruno Test Status {{$randomDomainWord}}",
       "type": "http",
-      "interval": "60s",
-      "target": "https://example.net",
-      "properties": {
-        "timeout": "10s"
-      },
-      "enabled": false
+      "interval": "5s",
+      "target": "http://localhost:8000/api/status",
+      "enabled": true
     }
   ]
 }

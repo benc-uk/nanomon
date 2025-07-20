@@ -1,26 +1,25 @@
 {
   "[sql]": {
     "editor.formatOnSave": false
-  }
-  // "pgsql.serverGroups": [
-  //   {
-  //     "name": "Nanomon",
-  //     "id": "F7FE6D24-9130-4678-A119-BA4D454618A8",
-  //     "isDefault": true
-  //   }
-  // ],
-  // "pgsql.connections": [
-  //   {
-  //     "id": "AFDCAE7A-C06D-4850-A62B-0A513E11F1AB",
-  //     "groupId": "F7FE6D24-9130-4678-A119-BA4D454618A8",
-  //     "authenticationType": "SqlLogin",
-  //     "sslmode": "prefer",
-  //     "server": "localhost",
-  //     "password": "",
-  //     "user": "nanomon",
-  //     "profileName": "local-postgres",
-  //     "database": "nanomon",
-  //     "savePassword": true
-  //   }
-  // ]
+  },
+  "pgsql.serverGroups": [
+    {
+      "name": "Nanomon",
+      "id": "F7FE6D24-9130-4678-A119-BA4D454618A8"
+    }
+  ],
+  "pgsql.connections": [
+    {
+      "id": "AFDCAE7A-C06D-4850-A62B-0A513E11F1AB",
+      "groupId": "F7FE6D24-9130-4678-A119-BA4D454618A8",
+      "authenticationType": "SqlLogin",
+      "sslmode": "prefer",
+      "server": "localhost",
+      "password": "",
+      "user": "nanomon",
+      "profileName": "local-postgres",
+      "database": "nanomon",
+      "savePassword": true
+    }
+  ]
 }

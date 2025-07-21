@@ -41,13 +41,13 @@ jobs:
       - name: Install just
         uses: taiki-e/install-action@just
 
-      - name: Build & push images - normal tagged
+      - name: Build & push images - semver tagged
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
           just images
           just --yes push
 
-      - name: Build & push images - latest
+      - name: Build & push images - latest tagged
         env:
           IMAGE_TAG: latest
         run: |

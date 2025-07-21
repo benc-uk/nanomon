@@ -2,10 +2,10 @@ apiVersion: v2
 name: nanomon
 description: Deploy NanoMon, a HTTP and network monitoring tool
 type: application
-version: "0.0.7"
-appVersion: "0.1.3"
+version: "0.0.8"
+appVersion: "0.2.0"
 dependencies:
-  - name: mongodb
+  - name: postgresql
+    version: "16.7.20"
     repository: https://charts.bitnami.com/bitnami
-    condition: mongodb.enabled
-    version: 13.x.x
+    condition: postgresql.enabled

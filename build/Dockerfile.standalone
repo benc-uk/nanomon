@@ -3,9 +3,9 @@
 # ******************************************************************
 
 # ===================================================================================
-# === Stage 1: Build the services 
+# === Stage 1: Build the services ===================================================
 # ===================================================================================
-FROM golang:1.23-alpine AS go-build
+FROM golang:1.24-alpine AS go-build
 
 # Note these are ALWAYS passed in, so the values here are never used
 ARG VERSION="0.0.0"
@@ -46,29 +46,52 @@ RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
   -o frontend nanomon/services/frontend
 
 # ================================================================================================
-# === Stage 2: Munge everything into a single image 
+# === Stage 2: Bundle the frontend app ===========================================================
 # ================================================================================================
-FROM bitnami/mongodb:8.0
-WORKDIR /app 
 
-# Root certs
-COPY --from=go-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+FROM node:22-alpine AS node-build
 
-# Copy the standalone script
-COPY build/standalone.sh .
+WORKDIR /build
 
-# Frontend HTML/JS/CSS
+# Copy the frontend app source files
+COPY frontend/package* ./
+
+# Install dependencies
+RUN npm install --silent --ci
+
+# Copy the frontend app source files
 COPY frontend/ .
+RUN rm -rf public/config.json
+
+# Build the frontend app
+RUN npm run build
+
+# ================================================================================================
+# === Stage 3: Munge everything into a single image ==============================================
+# ================================================================================================
+FROM postgres:17
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the previous stage's artifacts into this stage
+COPY --from=go-build /build/runner .
+COPY --from=go-build /build/api .
+COPY --from=go-build /build/frontend .  
+COPY --from=node-build /build/dist ./dist
+
 # Templates are needed just for the runner
 COPY ./templates ./templates/
 
-# Copy the Go server binaries
-COPY --from=go-build /build/api . 
-COPY --from=go-build /build/runner . 
-COPY --from=go-build /build/frontend . 
+# Copy SQL initialization scripts
+COPY ./sql/init/* /docker-entrypoint-initdb.d/
 
-ENV POLLING_INTERVAL=1s
+# Main startup script
+COPY build/standalone.sh .
+
+ENV POSTGRES_DSN="host=localhost dbname=nanomon user=postgres sslmode=disable"
 ENV API_ENDPOINT=http://localhost:8000/api
 EXPOSE 8000 8001
 
-CMD [ "bash", "./standalone.sh" ]
+# Set the entrypoint to the startup script
+ENTRYPOINT ["/app/standalone.sh"]

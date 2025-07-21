@@ -30,7 +30,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      MONGO_URI: mongodb://database:27017
+      POSTGRES_DSN: host=database port=5432 user=nanomon dbname=nanomon sslmode=disable
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     restart: always
     networks:
       - back
@@ -45,19 +46,23 @@ services:
         VERSION: ${VERSION}
         BUILD_INFO: ${BUILD_INFO}
     environment:
-      MONGO_URI: mongodb://database:27017
+      POSTGRES_DSN: host=database port=5432 user=nanomon dbname=nanomon sslmode=disable
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     restart: always
     networks:
       - back
 
   database:
-    image: mongo:6-jammy
+    image: postgres:17
     ports:
-      - "27017:27017"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: nanomon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: nanomon
     volumes:
-      - type: volume
-        source: db-data
-        target: /data/db
+      - db-data:/var/lib/postgresql/data
+      - ../sql/init:/docker-entrypoint-initdb.d
     networks:
       - back
 
@@ -66,9 +71,6 @@ services:
     build:
       context: ..
       dockerfile: ./build/Dockerfile.standalone
-      args:
-        VERSION: ${VERSION}
-        BUILD_INFO: ${BUILD_INFO}
 
 networks:
   front:

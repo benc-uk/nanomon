@@ -4,12 +4,12 @@
 # ==============================================================================
 
 set shell := ['bash', '-c']
-set dotenv-load := true
+set dotenv-path := '.dev/.env'
 set quiet := true
 
-import 'etc/common.just'
+import '.dev/common.just'
 
-tools_dir := join(`pwd`, '.tools')
+tools_dir := join(`pwd`, '.dev')
 npm_dir := join(tools_dir, 'node_modules', '.bin')
 needed_vars := "VERSION BUILD_INFO IMAGE_REG IMAGE_NAME IMAGE_TAG"
 
@@ -18,10 +18,8 @@ default:
     {{ just_executable() }} --list --list-prefix ' 🔸'
 
 # 🔮 Install dev tools into project tools directory
-install:
-    # Note: Temporary version fixing to 1.61.3 see https://github.com/air-verse/air/issues/718
-    {{ just_executable() }} install-air {{ tools_dir }}
-    {{ just_executable() }} install-golangcilint {{ tools_dir }}
+dev-tools:
+    go mod tidy -modfile=.dev/tools.mod
     {{ just_executable() }} install-npm httpyac httpyac {{ tools_dir }}
 
 # 🔍 Lint & format, default is to run lint check only and set exit code
@@ -34,13 +32,13 @@ lint fix="false": npm_install
     npm_lint_script={{ if fix != "false" { "lint:fix" } else { "lint" } }}
     npm_format_script={{ if fix != "false" { "format" } else { "format:check" } }}
 
-    {{ tools_dir + '/golangci-lint' }} run ./... $golangci_args
+    go tool -modfile=.dev/tools.mod golangci-lint run -c .dev/golangci.yaml ./... $golangci_args
     cd frontend && npm run $npm_lint_script && npm run $npm_format_script 
 
 # 📝 Format source files and fix linting problems
 format: (lint "true")
 
-# 🔨 Build all binaries and bundle the frontend, we don't really use this
+# 🔨 Build all binaries and bundle the frontend
 build: (check-env needed_vars) npm_install
     mkdir -p bin
     go build -o bin -ldflags "-X main.version=$VERSION -X \"main.buildInfo=$BUILD_INFO\"" nanomon/services/...
@@ -50,10 +48,6 @@ build: (check-env needed_vars) npm_install
 images: (check-env needed_vars) (print-vars needed_vars)
     docker compose -f build/compose.yaml build
 
-# 📦 Build the special standalone all-in-one image
-image-standalone: (check-env needed_vars) (print-vars needed_vars)
-    docker compose -f build/compose.yaml build standalone
-
 # 📤 Push all container images
 [confirm('Are you sure you want to push all images?')]
 push: (check-env needed_vars)
@@ -61,11 +55,11 @@ push: (check-env needed_vars)
 
 # 🏃 Run the runner service locally, with hot reloading
 run-runner:
-    {{ tools_dir + '/air' }} -c  ./services/runner/.air.toml
+    go tool -modfile=.dev/tools.mod air -c ./services/runner/.air.toml
 
 # 🎯 Run the API service locally, with hot reloading
 run-api:
-    {{ tools_dir + '/air' }} -c  ./services/api/.air.toml
+    go tool -modfile=.dev/tools.mod air -c ./services/api/.air.toml
 
 # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
 run-frontend: npm_install
@@ -74,22 +68,30 @@ run-frontend: npm_install
     cd frontend
     npm run dev
 
-# 🍃 Run MongoDB in container (needs Docker)
+# 🐘 Run Postgres in container
 run-db:
-    echo -e "🍃 Starting MongoDB...\nNote: You will not see any logs"
+    echo -e "🐘 Starting Postgres..."
     command -v docker > /dev/null || ( echo "{{ err }} Docker not installed!"; exit 1 )
-    docker rm -f mongo || true
-    docker run --rm -p 27017:27017 -v nm-mongo-data:/bitnami/mongodb \
-     -e MONGODB_REPLICA_SET_MODE=primary \
-     -e MONGODB_ADVERTISED_HOSTNAME=localhost \
-     -e ALLOW_EMPTY_PASSWORD=yes \
-     --name mongo bitnami/mongodb:8.0 >/dev/null 2>&1
+    docker rm -f postgres || true
+    docker run --rm -p 5432:5432 \
+     -e POSTGRES_DB=nanomon \
+     -e POSTGRES_USER=nanomon \
+     -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+     -v nanomon-db-data:/var/lib/postgresql/data \
+     -v ./sql/init:/docker-entrypoint-initdb.d \
+     --name postgres postgres:17
 
-# 🚀 Run all services locally with hot-reload, plus MongoDB
+# 🌊 Remove Postgres container and its data volume
+remove-db:
+    echo -e "⛔ Removing Postgres container and stored data"
+    docker rm -f postgres || true
+    docker volume rm nanomon-db-data || true
+
+# 🚀 Run all services locally with hot-reload, plus Postgres
 run-all:
     #!/bin/env bash
-    trap "echo -e '\n⛔ Removing MongoDB container' && docker rm -f mongo" EXIT
-    if ! docker ps | grep -q mongo; then {{ just_executable() }} run-db & fi
+    trap "echo -e '\n⛔ Removing Postgres container' && docker rm -f postgres" EXIT
+    if ! docker ps | grep -q postgres; then {{ just_executable() }} run-db & fi
     sleep 15 
     {{ just_executable() }} run-runner &
     sleep 5
@@ -122,7 +124,11 @@ generate-specs:
 [confirm('Are you sure you want to clean up?')]
 clean:
 	rm -rf tmp bin .tools frontend/config api/**/node_modules api/**/tsp-output frontend/.vite *.xml
-	docker volume rm nm-mongo-data || true
+	docker volume rm nanomon-db-data || true
+
+# 🪖 Update Helm docs & repo index
+helm-prep:
+    ./scripts/prep-helm.sh
 
 [private]
 npm_install:

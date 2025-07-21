@@ -1,0 +1,11 @@
+{{- if not .Values.postgresql.externalDSN }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Note we can't use the release name here as we need to reference this in the values.yaml
+  name: nanomon-db-init
+  labels:
+    {{- include "nanomon.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "sql/init/*").AsConfig | indent 2 }}
+{{- end }}

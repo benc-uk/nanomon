@@ -74,7 +74,7 @@ export default function Results() {
 
   return (
     <>
-      <ResultTable results={results} />
+      <ResultTable results={results} showName={true} />
       <Footer refreshTime={refreshTime} loading={loading} updated={updated} paused={paused} setPaused={setPaused} />
     </>
   )

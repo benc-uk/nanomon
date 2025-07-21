@@ -1,144 +1,154 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
-// NanoMon - Base database package for wrapping MongoDB client & collections
+// NanoMon - Base database package for wrapping PostgreSQL client
 // ----------------------------------------------------------------------------
 
 package database
 
 import (
-	"context"
+	"database/sql"
 	"log"
-	"nanomon/services/common/types"
-	"net/url"
 	"os"
+	"regexp"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	_ "github.com/lib/pq"
+	pq "github.com/lib/pq"
 )
 
 type DB struct {
-	Timeout time.Duration
-
-	Monitors *mongo.Collection
-	Results  *mongo.Collection
-	client   *mongo.Client
-
-	healthy bool
+	Handle   *sql.DB
+	Listener *pq.Listener // Optional listener for notifications
+	Healthy  bool
 }
 
 // Open and connect to the database based on env vars
 func ConnectToDB() *DB {
 	db := &DB{}
+	db.Healthy = true
 
-	timeoutEnv := os.Getenv("MONGO_TIMEOUT")
-	if timeoutEnv == "" {
-		timeoutEnv = "30s"
+	dsn := os.Getenv("POSTGRES_DSN")
+	if dsn == "" {
+		log.Fatal("POSTGRES_DSN environment variable is not set")
 	}
 
-	db.Timeout, _ = time.ParseDuration(timeoutEnv)
-
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		mongoURI = "mongodb://localhost:27017"
+	host := regexp.MustCompile(`host=([^ ]+)`).FindStringSubmatch(dsn)
+	if len(host) < 2 {
+		log.Fatal("POSTGRES_DSN does not contain a valid host")
 	}
 
-	var err error
-
-	url, err := url.Parse(mongoURI)
-	if err == nil {
-		log.Printf("### Connecting to: %s:%s", url.Hostname(), url.Port())
-	}
-
-	mongoDB := os.Getenv("MONGO_DB")
-	if mongoDB == "" {
-		mongoDB = "nanomon"
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	db.client, err = mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	dnsParsed, err := ParseDSN(dsn)
 	if err != nil {
-		log.Fatalln("### FATAL! MongoDB client error", err.Error())
+		log.Fatalf("DSN problem: %v", err)
 	}
 
-	err = db.client.Ping(ctx, readpref.Primary())
+	log.Printf("Connecting to Postgres %s:%s with user=%s & database=%s",
+		dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
+
+	password := os.Getenv("POSTGRES_PASSWORD")
+	if password != "" {
+		// If password is set
+		if !regexp.MustCompile(`password=`).MatchString(dsn) {
+			// If password is not already in DSN, append it
+			dsn += " password=" + password
+		} else {
+			// If password is already in DSN, replace it
+			dsn = regexp.MustCompile(`password=[^ ]+`).ReplaceAllString(dsn, "password="+password)
+		}
+	}
+
+	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalln("### FATAL! Failed to open MongoDB: ", err)
-	} else {
-		log.Println("### Connected to MongoDB ok!")
+		log.Fatalf("Failed to open database: %v", err)
 	}
 
-	_ = db.client.Database(mongoDB).CreateCollection(ctx, "monitors")
-	_ = db.client.Database(mongoDB).CreateCollection(ctx, "results")
+	// Ping the database in a loop until we connect or give up
+	for i := 0; i < 6; i++ {
+		err = db.Handle.Ping()
+		if err == nil {
+			log.Println("Connected to database successfully!")
 
-	db.Monitors = db.client.Database(mongoDB).Collection("monitors")
-	db.Results = db.client.Database(mongoDB).Collection("results")
+			err = nil
 
-	db.healthy = true
+			break
+		}
+
+		log.Printf("Failed to connect to database %v, retrying in 10 seconds...", err)
+
+		time.Sleep(10 * time.Second)
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to connect to database after retries: %v", err)
+	}
+
+	// Kick off background ping to keep the connection alive
+	go func() {
+		ticker := time.NewTicker(time.Second * 15)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			db.Ping()
+		}
+	}()
+
+	// Create listener
+	db.Listener = pq.NewListener(dsn, 10*time.Second, time.Minute, func(ev pq.ListenerEventType, err error) {
+		if err != nil {
+			log.Println("Listener error:", err)
+		}
+	})
 
 	return db
 }
 
-// Check the database is alive
-func (db *DB) Ping(healthCallback func(healthy bool)) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
-	defer cancel()
+func (db *DB) Close() {
+	log.Println("Closing Postgres database connections...")
 
-	err := db.client.Ping(ctx, readpref.Primary())
-	if err != nil {
-		if db.healthy {
-			log.Printf("### 🚨 DB connection lost: %v", err)
-			healthCallback(false)
+	if db.Handle != nil {
+		log.Println("Closing database handle")
+
+		err := db.Handle.Close()
+		if err != nil {
+			log.Println("Error closing database connection:", err)
+		} else {
+			log.Println("Database connection closed successfully")
 		}
-
-		db.healthy = false
-
-		return err
 	}
 
-	if !db.healthy {
-		log.Printf("### 🥳 DB connection re-established, wow!")
-		healthCallback(true)
+	if db.Listener != nil {
+		log.Println("Closing database listener")
+
+		err := db.Listener.Close()
+		if err != nil {
+			log.Println("Error closing database listener:", err)
+		} else {
+			log.Println("Database listener closed successfully")
+		}
 	}
-
-	db.healthy = true
-
-	return nil
 }
 
-// Close the database connection
-func (db DB) Close() {
-	if db.client == nil {
+// Check the database connection is health, also keeps the connection alive
+func (db *DB) Ping() {
+	if db.Handle == nil {
 		return
 	}
 
-	err := db.client.Disconnect(context.TODO())
+	err := db.Handle.Ping()
 	if err != nil {
-		log.Fatal(err)
-	}
-}
+		log.Println("Warning! Database ping failed:", err)
 
-// Store a result in the database
-func (db *DB) StoreResult(r types.Result) error {
-	// For unit tests
-	if db == nil {
-		return nil
-	}
+		db.Healthy = false
+	} else {
+		if !db.Healthy {
+			log.Println("Database connection restored")
+		}
 
-	msg := ""
-	if r.Message != "" {
-		msg = "; msg:" + r.Message
+		db.Healthy = true
 	}
 
-	log.Printf("###   Storing result, status:%d%s", r.Status, msg)
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.Timeout)
-	defer cancel()
-
-	_, err := db.Results.InsertOne(ctx, r)
-
-	return err
+	if db.Listener != nil {
+		// We ignore any errors here, as this serves as a keep-alive
+		_ = db.Listener.Ping()
+	}
 }

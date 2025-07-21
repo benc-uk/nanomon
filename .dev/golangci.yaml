@@ -1,0 +1,54 @@
+version: "2"
+linters:
+  enable:
+    - bodyclose
+    - gosec
+    - misspell
+    - nilerr
+    - nilnil
+    - revive
+    - staticcheck
+    - wsl_v5
+  settings:
+    misspell:
+      locale: UK
+    revive:
+      confidence: 0.5
+      severity: error
+      enable-all-rules: false
+      rules:
+        - name: line-length-limit
+          arguments:
+            - 150
+          severity: error
+        - name: var-naming
+          severity: error
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: (.+)\.go$
+        text: G404
+      - path: (.+)\.go$
+        text: goCamel
+      - path: (.+)\.go$
+        text: G402
+      - path: (.+)\.go$
+        text: ST1019
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

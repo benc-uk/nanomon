@@ -2,8 +2,13 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-include_ext = [ "go" ]
-include_dir = [ "services/api" ]
+include_ext = ["go"]
+include_dir = [
+  "services/api",
+  "services/common/database",
+  "services/common/monitor",
+  "services/common/result",
+]
 cmd = "go build -o ./tmp/api -ldflags \"-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'\" nanomon/services/api"
 bin = "tmp/api"
 

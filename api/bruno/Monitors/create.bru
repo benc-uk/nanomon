@@ -5,14 +5,14 @@ meta {
 }
 
 post {
-  url: {{apiEndpoint}}/api/monitors/{{process.env.FOO}}
+  url: {{apiEndpoint}}/api/monitors
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "name": "Bruno Test",
+    "name": "Bruno Test {{$randomDomainWord}}",
     "type": "http",
     "interval": "60s",
     "target": "https://example.net",
@@ -28,6 +28,6 @@ vars:post-response {
 }
 
 assert {
-  res.body.id: matches ^[0-9a-f]{24}$
+  res.body.id: isNumber
   res.status: eq 200
 }

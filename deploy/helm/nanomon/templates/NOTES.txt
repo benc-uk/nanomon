@@ -21,7 +21,12 @@ INGRESS_IP=$(kubectl get ingress {{ include "nanomon.fullname" . }} -o jsonpath=
 echo -e "\n\nNanoMon frontend is accessible at {{ $scheme }}://$INGRESS_IP/\n\n"
 {{- end }}
 {{- end }}
-{{- if .Values.mongodb.persistence.enabled }}
 
-NOTE: There might be a delay while MongoDB starts and is assigned a persistent volume 
+{{- if .Values.postgresql.primary.persistence.enabled }}
+
+You have enabled persistent storage for Postgres, it will take several minutes before the application is fully available 
+{{- if not .Values.postgresql.auth.password }}
+WARNING: You have enabled persistence but not set `postgresql.auth.password` this is a bad idea 
+See the docs for details.
+{{- end }}
 {{- end }}

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: NanoMon API Service
   version: '2024-10-17'
-  description: The REST API for operating and using NanoMon
+  description: The REST API for managing and using NanoMon
 tags:
   - name: Monitors
   - name: Results
@@ -59,7 +59,7 @@ paths:
         - Monitors
   /api/monitors/import:
     post:
-      operationId: import
+      operationId: MonitorAPI_importMonitors
       description: Import configuration from a JSON file
       parameters: []
       responses:
@@ -172,7 +172,7 @@ paths:
         - Monitors
   /api/monitors/{id}/results:
     get:
-      operationId: fetchResults
+      operationId: MonitorAPI_getResults
       description: List *Results* for a single monitor. Doesn't require authentication
       parameters:
         - name: id
@@ -206,7 +206,7 @@ paths:
         - Monitors
   /api/results:
     get:
-      operationId: fetchAll
+      operationId: ResultsAPI_getResults
       description: List *Results* for ALL monitors. Doesn't require authentication
       parameters:
         - name: max
@@ -228,7 +228,7 @@ paths:
       tags:
         - Results
     delete:
-      operationId: deleteAll
+      operationId: ResultsAPI_deleteAll
       description: Delete all *Results*
       parameters: []
       responses:

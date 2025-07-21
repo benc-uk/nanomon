@@ -23,10 +23,6 @@ api:
 runner:
   # -- Number of pod replicas for the runner, best left as 1
   replicaCount: 1
-  # -- Set to "true" to using DB polling instead of MongoDB change streams
-  usePolling:
-  # -- Only set when using polling, use a duration string, e.g. "5s"
-  pollingInterval:
   alerting:
     # -- SMTP password for sending alerts, set to enable alerting
     password:
@@ -49,32 +45,28 @@ frontend:
   # -- Endpoint to access the deployed API, don't set when using ingress
   apiEndpoint:
 
-mongodb:
-  # -- Point to an existing MongoDB instance, leave blank when enabled=true
-  connectionURI:
-  # -- Enable deploying MongoDB, leave connectionURI blank if true
+postgresql:
+  # -- Enable deploying Postgres, set to false when using an external database
   enabled: true
-  #@ignored
-  architecture: replicaset
-  #@ignored
-  replicaCount: 2
-  #@ignored
-  arbiter:
-    #@ignored
-    enabled: false
-  #@ignored
-  useStatefulSet: true
-  persistence:
-    # -- Enable persistence for MongoDB
-    enabled: false
-    # -- Size of the MongoDB persistent volume
-    size: 1Gi
-    # -- Storage class for the MongoDB persistent volume
-    storageClass: default
-  #@ignored
+  # -- Point to an existing database instance, leave blank when enabled=true
+  externalDSN:
+  # -- Password for the external database, leave blank when enabled=true
+  externalPassword:
+  #@ignore
   auth:
-    #@ignored
-    enabled: false
+    #@ignore
+    username: nanomon
+    #@ignore
+    database: nanomon
+  #@ignore
+  primary:
+    #@ignore
+    initdb:
+      scriptsConfigMap: nanomon-db-init
+    #@ignore
+    persistence:
+      #@ignore
+      enabled: false
 
 ingress:
   # -- Use a Ingress, you will need an ingress controller deployed and setup

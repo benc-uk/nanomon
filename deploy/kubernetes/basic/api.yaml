@@ -12,18 +12,24 @@ spec:
         app: nanomon-api
     spec:
       containers:
-      - name: nanomon-api
-        image: ghcr.io/benc-uk/nanomon-api:latest
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        env:
-          - name: MONGO_URI
-            value: mongodb://mongo:27017
-        ports:
-          - containerPort: 8000
+        - name: nanomon-api
+          image: ghcr.io/benc-uk/nanomon-api:dev
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          env:
+            - name: POSTGRES_DSN
+              value: "host=postgres port=5432 user=nanomon dbname=nanomon sslmode=disable"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+
+          ports:
+            - containerPort: 8000
 ---
 apiVersion: v1
 kind: Service

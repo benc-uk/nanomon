@@ -1,4 +1,0 @@
-use("nanomon");
-
-db.monitors.drop();
-db.results.drop();

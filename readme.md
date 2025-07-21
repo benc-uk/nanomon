@@ -18,13 +18,13 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
 
 The architecture is a fairly standard design, consisting of four application components and a database.
 
-![architecture diagram](./etc/architecture.drawio.png)
+![architecture diagram](./docs/architecture.drawio.png)
 
-- **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the MongoDB database.
-- **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It connects directly to the MongoDB database, and reads monitor configuration data, and saves back & stores result data.
+- **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the database.
+- **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It also connects directly to the database, and reads monitor configuration data, and saves back & stores result data.
 - **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using [React](https://react.dev) and [Vite](https://vite.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
-- **MongoDB** - Backend data store, this is a vanilla instance of MongoDB. Cloud and hosted services which provide MongoDB compatibility (e.g. Azure Cosmos DB) also work
+- **PostgreSQL** - Backend data store, this is a standard instance of the PostgreSQL database server (often called just postgres). Versions 16 and 17 have been tested.
 
 ## Concepts
 
@@ -49,6 +49,7 @@ There are three types of monitor currently supported:
 - **HTTP** &ndash; Makes HTTP(S) requests to a given URL and measures the response time.
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
+- **DNS** &ndash; Looks up DNS records for a given hostname or domain name.
 
 For more details see the [complete monitor reference](#monitor-reference)
 
@@ -56,22 +57,21 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 ```text
 📂
-├── api             - API reference and specifications, using TypeSpec
-├── build           - Dockerfiles and supporting build artifacts
-├── deploy
-│   ├── azure       - Deploy to Azure using Bicep
-│   ├── helm        - Helm chart to deploy NanoMon
-│   └── kubernetes  - Example Kubernetes manifests (No Helm)
-├── etc             - Misc stuff :)
-├── frontend        - The source for the frontend React app
-├── scripts         - Supporting helper bash scripts
-├── services
-│   ├── api         - Go source for the API service
-│   ├── common      - Shared internal Go code
-│   ├── frontend    - Go source for the frontend host server
-│   └── runner      - Go source for the runner
-├── templates       - Email alert template used by runner
-└── tests           - Integration and performance tests
+ ├── .dev         // Local dev config & tools
+ ├── api          // API specs, OpenAPI, TypeSpec & Bruno
+ ├── build        // Build Dockerfiles
+ ├── deploy       // Deployment artifacts; Helm, Kubernetes, Azure Bicep
+ ├── docs         // Documentation, guides and diagrams
+ ├── frontend     // Source for the frontend app, written in React
+ ├── scripts      // Supporting scripts
+ ├── services     // Source for backend services, API, runner and frontend host
+ │   ├── api
+ │   ├── common
+ │   ├── frontend
+ │   └── runner
+ ├── sql          // Database schema & init scripts
+ ├── templates    // Alerting email templates
+ └── tests        // Integration & performance tests
 ```
 
 [![CI Pipeline](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml/badge.svg)](https://github.com/benc-uk/nanomon/actions/workflows/ci-build.yml)
@@ -80,36 +80,36 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 ## Getting Started
 
-Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
+Here are the most common options for quickly getting started running locally, or deploying to the cloud / Kubernetes.
 
-### Local Dev Quick Start
+### Quick Start & Run
 
-Pre-reqs:
-
-- Linux system like Ubuntu (WSL2 was used for development), MacOS might work 🤷‍♂️
-- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
-- [Go SDK & toolchain](https://go.dev/doc/install)
-- [Node.js](https://nodejs.org/en/download)
-- [Just](https://just.systems) task runner and make replacement
-  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.tools/`), then you can run `.tools/just`
-  - When working locally, copy the `.env.sample` to `.env` and set any configuration variables in the `.env` file.
-
-To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
-
-- Run `just install`
-- Run `just run-all`
-- The frontend should automatically open in your browser.
-
-### Run Standalone Image
-
-If you just want to try the app out, you can start the standalone image using Docker. This doesn't require you to have Go, Node.js etc
+If you just want to try the app out, you can start the standalone image using Docker. This will run the entire system in a single container, which is useful for demos and quick testing. The standalone image includes the API, runner, frontend host and a PostgreSQL database.
 
 ```bash
 docker pull ghcr.io/benc-uk/nanomon-standalone:latest
 docker run --rm -it -p 8000:8000 -p 8001:8001 ghcr.io/benc-uk/nanomon-standalone:latest
 ```
 
-Then open the following URL http://localhost:8001/
+Then open the following URL http://localhost:8001/ to access the frontend app.
+
+### Local Dev Quick Start
+
+Pre-reqs:
+
+- Linux system like Ubuntu (WSL was used for development), MacOS might work 🤷‍♂️
+- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/), Podman should also work, but hasn't been extensively tested.
+- [Go SDK & toolchain](https://go.dev/doc/install)
+- [Node.js](https://nodejs.org/en/download)
+- [Just](https://just.systems) task runner and make replacement
+  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into the local project, then you can run `.dev/just`
+  - When working locally, copy the `.dev/.env.sample` to `.dev/.env` and set any configuration variables in the file.
+
+To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.
+
+- Run `just dev-tools` to install the dev tools into the `.dev` directory.
+- Run `just run-all`
+- The frontend should automatically open in your browser.
 
 ### Deploy to Kubernetes using Helm
 
@@ -124,17 +124,15 @@ See [Azure & Bicep docs](./deploy/azure/)
 ### Runner
 
 - Written in Go, [source code - /services/runner](./services/runner/)
-- The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
-- It keeps in sync with the `monitors` collection in the database, it does this one of two ways:
-  - Watching the collection using MongoDB change stream. This mode is preferred as it results in instant updates to changes made in the frontend & UI
-  - If change stream isn't supported, then the runner falls back to polling the database for changes.
+- The runner requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
+- It dynamically keeps in sync with the `monitors` table in the database. This is achieved by using the listen/notify feature of PostgreSQL, which is used to listen for notification messages without the need for polling. These messages are sent using triggers & stored procedures, which are called when a monitor is created, updated or deleted.
 - If configured the runner will send email alerts, see [alerting section below](#alerting-configuration)
 - By default runner doesn't listen to inbound network connections or bind to any ports, the exception being if [Prometheus support is enabled](#appendix-prometheus)
 
 ### API
 
 - Written in Go, [source code - /services/api](./services/api/)
-- The runner requires a connection to MongoDB in order to start, it will exit if the connection fails.
+- The API requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
 - Listens on port 8000 by default.
 - All routes are prefixed `/api` this makes it easier to put a path based HTTP router in front of the API and the SPA frontend
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
@@ -160,19 +158,20 @@ See [Azure & Bicep docs](./deploy/azure/)
 ## Just Reference
 
 ```text
- 🔸build                   # 🔨 Build all binaries into ./bin/ directory, not really needed
- 🔸clean                   # 🧹 Clean up, remove dev data and files
+ 🔸build                   # 🔨 Build binaries and bundle the frontend
+ 🔸clean                   # 🧹 Clean up, remove dev data and temp files
+ 🔸dev-tools               # 🔮 Install dev tools into project tools directory
  🔸format                  # 📝 Format source files and fix linting problems
  🔸generate-specs          # 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
- 🔸image-standalone        # 📦 Build the special standalone all-in-one image
+ 🔸helm-prep               # 🪖 Update Helm docs & repo index
  🔸images                  # 📦 Build all container images, using Docker compose
- 🔸install                 # 🔮 Install dev tools into project tools directory
- 🔸lint fix="false"        # 🔍 Lint & format, default is to run lint check only and set exit code
+ 🔸lint fix="false"        # 🔍 Lint & format, default is to check only and set exit code
  🔸push                    # 📤 Push all container images
- 🔸run-all                 # 🚀 Run all services locally with hot-reload, plus MongoDB
+ 🔸remove-db               # 🌊 Remove Postgres container and its data volume
+ 🔸run-all                 # 🚀 Run all services locally with hot-reload, plus Postgres
  🔸run-api                 # 🎯 Run the API service locally, with hot reloading
- 🔸run-db                  # 🍃 Run MongoDB in container (needs Docker)
- 🔸run-frontend            # 🌐 Run frontend with Vite dev HTTP server & hot-reload
+ 🔸run-db                  # 🐘 Run Postgres in container
+ 🔸run-frontend            # 🌐 Run React frontend with Vite dev HTTP server & hot-reload
  🔸run-runner              # 🏃 Run the runner service locally, with hot reloading
  🔸test                    # 🧪 Run all unit tests
  🔸test-api report="false" # 🔬 Run API integration tests, using HttpYac
@@ -180,7 +179,8 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ## Configuration Reference
 
-All three components (API, runner and frontend host) expect their configuration in the form of environmental variables. When running locally this is done via a `.env` file. Note. The `.env` file is not used when deploying or running the app elsewhere
+All three components (API, runner and frontend host) expect their configuration in the form of environmental variables.  
+When running locally this is done with a dotenv file, which is located in `.dev\.env` along with a sample to be used to get started. The `.env` file is used solely for local development.
 
 ### Variables used only by the frontend host:
 
@@ -190,11 +190,10 @@ All three components (API, runner and frontend host) expect their configuration 
 
 ### Variables used by both API service and runner:
 
-| _Name_        | _Description_                     | _Default_                 |
-| ------------- | --------------------------------- | ------------------------- |
-| MONGO_URI     | Connection string for MongoDB     | mongodb://localhost:27017 |
-| MONGO_DB      | Database name to use              | nanomon                   |
-| MONGO_TIMEOUT | Timeout for connecting to MongoDB | 30s                       |
+| _Name_            | _Description_                                                                               | _Default_ |
+| ----------------- | ------------------------------------------------------------------------------------------- | --------- |
+| POSTGRES_DSN      | Connection string in DSN format for PostgreSQL, see [notes below](#appendix-database-notes) | _blank_   |
+| POSTGRES_PASSWORD | Password for connecting to PostgreSQL, see [notes below](#appendix-database-notes)          | _blank_   |
 
 ### Variables used by _both_ the API and frontend host:
 
@@ -208,19 +207,18 @@ All three components (API, runner and frontend host) expect their configuration 
 
 > Note. All settings for alerting that begin with `ALERT_` are optional
 
-| _Name_              | _Description_                                                                                             | _Default_             |
-| ------------------- | --------------------------------------------------------------------------------------------------------- | --------------------- |
-| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                                                | _blank_               |
-| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                                        | _blank_               |
-| ALERT_SMTP_TO       | Address alert emails are sent to                                                                          | _blank_               |
-| ALERT_SMTP_HOST     | SMTP hostname                                                                                             | smtp.gmail.com        |
-| ALERT_SMTP_PORT     | SMTP port                                                                                                 | 587                   |
-| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email                               | 3                     |
-| ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL                    | http://localhost:3000 |
-| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                                        | 10s                   |
-| USE_POLLING         | Force polling mode, by default MongoDB change streams will be tried, and polling mode used if that fails. | false                 |
-| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                                                 | false                 |
-| PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                                            | 8080                  |
+| _Name_              | _Description_                                                                          | _Default_             |
+| ------------------- | -------------------------------------------------------------------------------------- | --------------------- |
+| ALERT_SMTP_PASSWORD | For alerting, the password for mail server                                             | _blank_               |
+| ALERT_SMTP_FROM     | From address for alerts, also used as the username                                     | _blank_               |
+| ALERT_SMTP_TO       | Address alert emails are sent to                                                       | _blank_               |
+| ALERT_SMTP_HOST     | SMTP hostname                                                                          | smtp.gmail.com        |
+| ALERT_SMTP_PORT     | SMTP port                                                                              | 587                   |
+| ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email            | 3                     |
+| ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL | http://localhost:3000 |
+| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                     | 10s                   |
+| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                              | false                 |
+| PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                         | 8080                  |
 
 ## Monitor Reference
 
@@ -345,16 +343,19 @@ Limitations:
 
 ## Appendix: Database Notes
 
-- The services will dynamically create the database and collections if they don't exist at startup. By default the database name is `nanomon` but this can be changed with the `MONGO_DB` env var.
-- For change stream support to work MongoDB must be running as a replica set, when running locally this is enabled in the Docker container that is started. Also the Helm chart will deploy MongoDB as a replica set.
+The database used by NanoMon is PostgreSQL, the runner makes use of the listen/notify feature to keep in sync with the monitors table, and to trigger runs of monitors. The API and frontend host connect directly to the database.
 
-### Azure Cosmos DB
+To see how the trigger & notify is setup within PostgreSQL, see the [nanomon_init.sql](./sql/init/nanomon_init.sql) which is run when the database is created. This file is used by the deployment scripts to create the initial database and tables, and also to create the triggers and stored procedures.
 
-Azure Cosmos DB can be used as a database for NanoMon, however there are two things to consider:
+The DSN connection string for PostgreSQL is in the format used by pq, which is a Go driver for PostgreSQL. See [pq docs](https://pkg.go.dev/github.com/lib/pq#hdr-Connection_String_Parameters). The format is:
 
-- An index must be added for the `date` field to the results collection, this can be done in the Azure Portal or with a single command:  
-  `az cosmosdb mongodb collection update -a $COSMOS_ACCOUNT -g $COSMOS_RG -d nanomon -n results --idx '[{"key":{"keys":["_id"]}},{"key":{"keys":["date"]}}]'`
-- Cosmos DB for MongoDB does have support for change streams, however it comes with [several limitations, most notably the lack of support for delete events](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/change-streams?tabs=javascript#current-limitations). Given these limitations NanoMon will fall back to polling when using Cosmos DB
+```php
+host={host} port={port} user={user} dbname={dbname}
+```
+
+Note. It's advised to not include `password=` in the DSN, instead set the `POSTGRES_PASSWORD` environment variable. Should password be present in the DSN, it will be used, but should `POSTGRES_PASSWORD` be set too, it will override it.
+
+When starting up the API and runner services, they will attempt to connect to the database, if the connection fails they will retry for a period of time (6 tries with 10 seconds between) before exiting. This is to allow the database to start up first, or to allow the database to be created by the deployment scripts. They will additional ping the database every 15 seconds to check the connection is still healthy, and will attempt to reconnect if the database becomes unavailable.
 
 ## Appendix: Prometheus
 

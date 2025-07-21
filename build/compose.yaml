@@ -69,6 +69,9 @@ services:
   standalone:
     image: ${IMAGE_REG}/${IMAGE_NAME}-standalone:${IMAGE_TAG}
     build:
+      args:
+        VERSION: ${VERSION}
+        BUILD_INFO: ${BUILD_INFO}
       context: ..
       dockerfile: ./build/Dockerfile.standalone
 

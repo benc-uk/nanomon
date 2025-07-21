@@ -110,7 +110,7 @@ module api './bicep-iac/modules/containers/app.bicep' = {
     envs: [
       {
         name: 'POSTGRES_DSN'
-        value: postgresDSN != '' ? postgresDSN : database.outputs.dsn
+        value: postgresDSN != '' ? postgresDSN : database!.outputs.dsn
       }
       {
         name: 'POSTGRES_PASSWORD'
@@ -189,7 +189,7 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
     envs: [
       {
         name: 'POSTGRES_DSN'
-        value: postgresDSN != '' ? postgresDSN : database.outputs.dsn
+        value: postgresDSN != '' ? postgresDSN : database!.outputs.dsn
       }
       {
         name: 'POSTGRES_PASSWORD'
@@ -224,6 +224,6 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
 }
 
 output appURL string = 'https://${frontend.outputs.fqdn}/'
-output dbHost string = postgresDSN != '' ? 'Unknown' : database.outputs.host
+output dbHost string = postgresDSN != '' ? 'Unknown' : database!.outputs.host
 output resGroup string = resGroup.name
-output postgresResName string = postgresDSN != '' ? 'Unknown' : database.outputs.name
+output postgresResName string = postgresDSN != '' ? 'Unknown' : database!.outputs.name

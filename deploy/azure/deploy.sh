@@ -14,7 +14,7 @@ if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
 fi
 
 # Easy way to make files are relative to the script
-cd "$(dirname "$0")"
+repoRoot=$(git rev-parse --show-toplevel 2>/dev/null)
 
 # Check CLI is installed
 which az > /dev/null || { echo -e "💥 Error! Azure CLI is not installed. https://aka.ms/azure-cli"; exit 1; }
@@ -31,13 +31,13 @@ if [ ! -f "$paramFile" ]; then
   exit 1
 fi
 
-SUB_NAME=$(az account show --query name -o tsv)
-test "$SUB_NAME" || { echo -e "💥 \e[31mYou are not logged into Azure!"; exit 1; }
-TENANT_ID=$(az account show --query tenantId -o tsv)
+subName=$(az account show --query name -o tsv)
+test "$subName" || { echo -e "💥 \e[31mYou are not logged into Azure!"; exit 1; }
+tenantId=$(az account show --query tenantId -o tsv)
 
 echo -e "\e[32m⛅ Azure details: \e[0m"
-echo -e " 🔑 \e[34mSubscription: \e[33m$SUB_NAME\e[0m"
-echo -e " 🌐 \e[34mTenant:       \e[33m$TENANT_ID\e[0m"
+echo -e " 🔑 \e[34mSubscription: \e[33m$subName\e[0m"
+echo -e " 🌐 \e[34mTenant:       \e[33m$tenantId\e[0m"
 
 if [[ "${NOPROMPT-0}" != "1" ]]; then 
   read -r -p "🤔 Are these details are correct? [Y/n] " response
@@ -49,8 +49,8 @@ fi
 myIP=$(curl -s https://api.ipify.org)
 
 echo -e "\n🚀 Deploying NanoMon to Azure..."
-az deployment sub create --template-file main.bicep --location "${location}" \
-  --parameters "${paramFile}" allowAccessForIP="$myIP" --name nanomon
+az deployment sub create --template-file "${repoRoot}/deploy/azure/main.bicep" --location "${location}" \
+  --parameters "${paramFile}" allowAccessForIP="$myIP" --name nanomon --query "properties.provisioningState" -o tsv
 
 appUrl=$(az deployment sub show --name nanomon --query "properties.outputs.appURL.value" -o tsv)
 dbHost=$(az deployment sub show --name nanomon --query "properties.outputs.dbHost.value" -o tsv)
@@ -72,9 +72,8 @@ if [[ -z "$postgresPassword" ]]; then
 fi
 set -e
 
-echo -e "🎈 Initializing the database using SQL init script"
-sqlDir=$(realpath "$(dirname "$0")/../../sql/init")
-docker run -it --rm -v "$sqlDir":/root -e PGPASSWORD="$postgresPassword" postgres psql -h "$dbHost" -U citus -d nanomon -f /root/nanomon_init.sql
+echo -e "\n🎈 Initializing the database using SQL init script"
+docker run -it --rm -v "$repoRoot/sql/init":/root -e PGPASSWORD="$postgresPassword" postgres psql --quiet -h "$dbHost" -U citus -d nanomon -f /root/nanomon_init.sql
 
 echo -e "\n\e[32m🎉 NanoMon was deployed to Azure!\e[0m"
 echo -e "\e[34m🌐 App URL: \e[33m$appUrl\e[0m\n"

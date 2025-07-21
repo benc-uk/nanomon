@@ -18,13 +18,13 @@ In a hurry? - Jump to the sections [running locally quick start](#local-dev-quic
 
 The architecture is a fairly standard design, consisting of four application components and a database.
 
-![architecture diagram](./etc/architecture.drawio.png)
+![architecture diagram](./docs/architecture.drawio.png)
 
 - **API** - API provides the main interface for the frontend and any custom clients. It is RESTful and runs over HTTP(S). It connects directly to the database.
 - **Runner** - Monitor runs are executed from here (see [concepts](#concepts) below). It also connects directly to the database, and reads monitor configuration data, and saves back & stores result data.
 - **Frontend** - The web interface is a SPA (single page application), consisting of a static set of HTML, JS etc which executes from the user's browser. It connects directly to the API, and is developed using [React](https://react.dev) and [Vite](https://vite.dev/)
 - **Frontend Host** - The static content host for the frontend app, which contains no business logic. This simply serves frontend application files HTML, JS and CSS files over HTTP. In addition it exposes a small configuration endpoint.
-- **PostgreSQL** - Backend data store, this is a vanilla instance of PostgreSQL (aka postgres) database server. Cloud and hosted services which provide PostgreSQL compatibility (e.g. Azure Cosmos DB) can of course be used.
+- **PostgreSQL** - Backend data store, this is a standard instance of the PostgreSQL database server (often called just postgres). Versions 16 and 17 have been tested.
 
 ## Concepts
 
@@ -49,6 +49,7 @@ There are three types of monitor currently supported:
 - **HTTP** &ndash; Makes HTTP(S) requests to a given URL and measures the response time.
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
+- **DNS** &ndash; Looks up DNS records for a given hostname or domain name.
 
 For more details see the [complete monitor reference](#monitor-reference)
 
@@ -79,7 +80,7 @@ For more details see the [complete monitor reference](#monitor-reference)
 
 ## Getting Started
 
-Here are the most common options for quickly getting started running locally, or deploying to the cloud or Kubernetes.
+Here are the most common options for quickly getting started running locally, or deploying to the cloud / Kubernetes.
 
 ### Quick Start & Run
 
@@ -90,18 +91,18 @@ docker pull ghcr.io/benc-uk/nanomon-standalone:latest
 docker run --rm -it -p 8000:8000 -p 8001:8001 ghcr.io/benc-uk/nanomon-standalone:latest
 ```
 
-Then open the following URL http://localhost:8001/
+Then open the following URL http://localhost:8001/ to access the frontend app.
 
 ### Local Dev Quick Start
 
 Pre-reqs:
 
 - Linux system like Ubuntu (WSL was used for development), MacOS might work 🤷‍♂️
-- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/)
+- [Docker engine & CLI](https://docs.docker.com/engine/install/ubuntu/), Podman should also work, but hasn't been extensively tested.
 - [Go SDK & toolchain](https://go.dev/doc/install)
 - [Node.js](https://nodejs.org/en/download)
 - [Just](https://just.systems) task runner and make replacement
-  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into a local project folder (`.dev/`), then you can run `.dev/just`
+  - If you're not keen on installing another binary on your system or into your PATH, run `./scripts/install-just.sh` which puts the binary into the local project, then you can run `.dev/just`
   - When working locally, copy the `.dev/.env.sample` to `.dev/.env` and set any configuration variables in the file.
 
 To run all the components directly on your dev machine. You will need to be using a Linux compatible system (e.g. WSL or a MacOS) with bash, make, Go, Docker & Node.js installed. You can try the provided [devcontainer](https://containers.dev/) if you don't have these pre-reqs.

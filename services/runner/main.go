@@ -33,11 +33,11 @@ var (
 )
 
 func main() {
-	log.Println("### 🏃 NanoMon runner is starting...")
-	log.Println("### Version:", version, buildInfo)
+	log.Println("🏃 NanoMon runner is starting...")
+	log.Println("Version:", version, buildInfo)
 
 	if IsAlertingEnabled() {
-		log.Printf("### Alerting is enabled, emails will be sent went monitors fail")
+		log.Printf("Alerting is enabled, emails will be sent went monitors fail")
 	}
 
 	db = database.ConnectToDB()
@@ -46,7 +46,7 @@ func main() {
 
 	monitors, err = monitor.FetchMonitors(db)
 	if err != nil {
-		log.Fatalln("### Error loading monitors:", err)
+		log.Fatalln("Error loading monitors:", err)
 	}
 
 	// Try to watch the database for changes
@@ -58,7 +58,7 @@ func main() {
 			log.Fatalf("Failed to start listening on channel %s: %v", channel, err)
 		}
 
-		log.Printf("### Listening for updates on channel: %s\n", channel)
+		log.Printf("Listening for updates on channel: %s\n", channel)
 	}
 
 	// Optionally start the Prometheus metrics server
@@ -77,12 +77,12 @@ func main() {
 
 		// Start the Prometheus metrics server in a goroutine
 		go func() {
-			log.Printf("### Prometheus enabled")
-			log.Printf("### Metrics endpoint: http://localhost:%s/metrics", port)
+			log.Printf("Prometheus enabled")
+			log.Printf("Metrics endpoint: http://localhost:%s/metrics", port)
 
 			err := promServer.ListenAndServe()
 			if err != nil {
-				log.Println("### Prometheus server failed to start", err)
+				log.Println("Prometheus server failed to start", err)
 			}
 		}()
 	}
@@ -129,7 +129,7 @@ func handleNotification(notification *pq.Notification) {
 			return
 		}
 
-		log.Printf("### New monitor created: %s", mon.Name)
+		log.Printf("New monitor created: %s", mon.Name)
 
 		monitors = append(monitors, mon)
 		go mon.Start(0, db) // Start immediately
@@ -141,7 +141,7 @@ func handleNotification(notification *pq.Notification) {
 
 		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
 		if err != nil {
-			log.Println("### Error parsing updated monitor JSON:", err)
+			log.Println("Error parsing updated monitor JSON:", err)
 
 			return
 		}
@@ -154,7 +154,7 @@ func handleNotification(notification *pq.Notification) {
 
 				monitors[i] = updatedMon
 
-				log.Printf("### Monitor updated: %s", notification.Extra)
+				log.Printf("Monitor updated: %s", notification.Extra)
 
 				return
 			}
@@ -165,24 +165,24 @@ func handleNotification(notification *pq.Notification) {
 		for i, m := range monitors {
 			if m.ID == idInt {
 				name := monitors[i].Name
-				log.Printf("### Attempting to stop & remove monitor %d (%s)", idInt, name)
+				log.Printf("Attempting to stop & remove monitor %d (%s)", idInt, name)
 
 				monitors[i].Stop()
 				monitors = append(monitors[:i], monitors[i+1:]...)
 
-				log.Printf("### Monitor '%s' removed from pool", name)
+				log.Printf("Monitor '%s' removed from pool", name)
 
 				return
 			}
 		}
 
 	default:
-		log.Println("Unknown notification channel:", notification.Channel)
+		log.Println("Warning! Unknown notification channel:", notification.Channel)
 	}
 }
 
 func shutdown() {
-	log.Println("### Signal received, attempting graceful shutdown")
+	log.Println("Signal received, attempting graceful shutdown")
 	db.Close()
 
 	for _, m := range monitors {

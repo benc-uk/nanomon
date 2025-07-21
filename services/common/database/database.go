@@ -29,20 +29,20 @@ func ConnectToDB() *DB {
 
 	dsn := os.Getenv("POSTGRES_DSN")
 	if dsn == "" {
-		log.Fatal("### POSTGRES_DSN environment variable is not set")
+		log.Fatal("POSTGRES_DSN environment variable is not set")
 	}
 
 	host := regexp.MustCompile(`host=([^ ]+)`).FindStringSubmatch(dsn)
 	if len(host) < 2 {
-		log.Fatal("### POSTGRES_DSN does not contain a valid host")
+		log.Fatal("POSTGRES_DSN does not contain a valid host")
 	}
 
 	dnsParsed, err := ParseDSN(dsn)
 	if err != nil {
-		log.Fatalf("### DSN problem: %v", err)
+		log.Fatalf("DSN problem: %v", err)
 	}
 
-	log.Printf("### Connecting to Postgres %s:%s with user=%s & database=%s",
+	log.Printf("Connecting to Postgres %s:%s with user=%s & database=%s",
 		dnsParsed.Host, dnsParsed.Port, dnsParsed.User, dnsParsed.Database)
 
 	password := os.Getenv("POSTGRES_PASSWORD")
@@ -59,27 +59,27 @@ func ConnectToDB() *DB {
 
 	db.Handle, err = sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalf("### Failed to open database: %v", err)
+		log.Fatalf("Failed to open database: %v", err)
 	}
 
 	// Ping the database in a loop until we connect or give up
 	for i := 0; i < 6; i++ {
 		err = db.Handle.Ping()
 		if err == nil {
-			log.Println("### Connected to database successfully!")
+			log.Println("Connected to database successfully!")
 
 			err = nil
 
 			break
 		}
 
-		log.Printf("### Failed to connect to database %v, retrying in 10 seconds...", err)
+		log.Printf("Failed to connect to database %v, retrying in 10 seconds...", err)
 
 		time.Sleep(10 * time.Second)
 	}
 
 	if err != nil {
-		log.Fatalf("### Failed to connect to database after retries: %v", err)
+		log.Fatalf("Failed to connect to database after retries: %v", err)
 	}
 
 	// Kick off background ping to keep the connection alive
@@ -102,27 +102,27 @@ func ConnectToDB() *DB {
 }
 
 func (db *DB) Close() {
-	log.Println("### Closing Postgres database connections...")
+	log.Println("Closing Postgres database connections...")
 
 	if db.Handle != nil {
-		log.Println("### Closing database handle")
+		log.Println("Closing database handle")
 
 		err := db.Handle.Close()
 		if err != nil {
-			log.Println("### Error closing database connection:", err)
+			log.Println("Error closing database connection:", err)
 		} else {
-			log.Println("### Database connection closed successfully")
+			log.Println("Database connection closed successfully")
 		}
 	}
 
 	if db.Listener != nil {
-		log.Println("### Closing database listener")
+		log.Println("Closing database listener")
 
 		err := db.Listener.Close()
 		if err != nil {
-			log.Println("### Error closing database listener:", err)
+			log.Println("Error closing database listener:", err)
 		} else {
-			log.Println("### Database listener closed successfully")
+			log.Println("Database listener closed successfully")
 		}
 	}
 }
@@ -135,12 +135,12 @@ func (db *DB) Ping() {
 
 	err := db.Handle.Ping()
 	if err != nil {
-		log.Println("### Warning! Database ping failed:", err)
+		log.Println("Warning! Database ping failed:", err)
 
 		db.Healthy = false
 	} else {
 		if !db.Healthy {
-			log.Println("### Database connection restored")
+			log.Println("Database connection restored")
 		}
 
 		db.Healthy = true

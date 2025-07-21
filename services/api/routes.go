@@ -147,7 +147,7 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("### Creating monitor %+v", m)
+	log.Printf("Creating monitor %+v", m)
 	m.Updated = time.Now()
 
 	monitor := &monitor.Monitor{
@@ -205,7 +205,7 @@ func (api API) updateMonitor(resp http.ResponseWriter, req *http.Request) {
 
 	m.Updated = time.Now()
 
-	log.Printf("### Monitor properties: %+v", m.Target)
+	log.Printf("Monitor properties: %+v", m.Target)
 
 	monitor := &monitor.Monitor{
 		ID:         idInt,
@@ -278,7 +278,7 @@ func (api API) getResults(resp http.ResponseWriter, req *http.Request) {
 
 // Import JSON to bulk configure monitors
 func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
-	log.Printf("### Importing monitors from request body")
+	log.Printf("Importing monitors from request body")
 
 	var monitors []MonitorReq
 
@@ -311,16 +311,16 @@ func (api API) importMonitors(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		log.Printf("### Imported monitor ID %d: %+v", monitor.ID, m)
+		log.Printf("Imported monitor ID %d: %+v", monitor.ID, m)
 	}
 
-	log.Printf("### Imported %d monitors successfully", len(monitors))
+	log.Printf("Imported %d monitors successfully", len(monitors))
 	resp.WriteHeader(http.StatusNoContent)
 }
 
 // Reset and remove all monitors
 func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
-	log.Printf("### Resetting and deleting all monitors")
+	log.Printf("Resetting and deleting all monitors")
 
 	err := monitor.DeleteAll(api.db)
 	if err != nil {
@@ -328,13 +328,13 @@ func (api API) deleteMonitors(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("### Removed all monitors")
+	log.Printf("Removed all monitors")
 	resp.WriteHeader(http.StatusNoContent)
 }
 
 // Reset and remove all results
 func (api API) deleteResults(resp http.ResponseWriter, req *http.Request) {
-	log.Printf("### Resetting and deleting all results")
+	log.Printf("Resetting and deleting all results")
 
 	err := result.DeleteAll(api.db)
 	if err != nil {
@@ -342,6 +342,6 @@ func (api API) deleteResults(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("### Removed all results")
+	log.Printf("Removed all results")
 	resp.WriteHeader(http.StatusNoContent)
 }

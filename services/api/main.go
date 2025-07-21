@@ -64,9 +64,9 @@ func main() {
 		// Authentication can be switched on or off
 		clientID := os.Getenv("AUTH_CLIENT_ID")
 		if clientID == "" {
-			log.Println("### 🚨 No AUTH_CLIENT_ID set, skipping auth validation")
+			log.Println("No AUTH_CLIENT_ID set, skipping auth validation")
 		} else {
-			log.Println("### 🔐 Auth enabled, validating JWT tokens")
+			log.Println("Auth enabled, validating JWT tokens")
 
 			// Validate JWT tokens using the Microsoft common public key endpoint and our scope
 			jwtValidator := auth.NewJWTValidator(
@@ -96,14 +96,12 @@ func main() {
 		api.addAnonymousRoutes(publicRouter)
 	})
 
-	log.Printf("### ⚓ API routes configured")
-
 	// Trap SIGINT and SIGTERM to gracefully shutdown the server
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-		log.Println("### Signal received, attempting graceful shutdown")
+		log.Println("Signal received, attempting graceful shutdown")
 		db.Close()
 		os.Exit(0)
 	}()

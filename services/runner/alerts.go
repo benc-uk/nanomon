@@ -55,8 +55,8 @@ func init() {
 
 	emailTemplate, err = template.ParseFiles("templates/alert.html")
 	if err != nil {
-		log.Printf("### Error loading email template: %s", err)
-		log.Printf("### Warning! Email alerting will be disabled!")
+		log.Printf("Error loading email template: %s", err)
+		log.Printf("Warning! Email alerting will be disabled!")
 	}
 }
 
@@ -74,7 +74,7 @@ func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 		return
 	}
 
-	log.Printf("###   Monitor '%s' has failed %d times...", m.Name, m.ErrorCount)
+	log.Printf("  Monitor '%s' has failed %d times...", m.Name, m.ErrorCount)
 
 	alertData := struct {
 		Monitor *monitor.Monitor
@@ -93,7 +93,7 @@ func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 			body := w.String()
 
 			if err != nil {
-				log.Printf("###   Error executing email template: %s", err)
+				log.Printf("  Error executing email template: %s", err)
 				return
 			}
 
@@ -108,11 +108,11 @@ func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 func sendEmail(body, subject string) {
 	// Alerting is not configured and disabled
 	if !IsAlertingEnabled() {
-		log.Printf("###   Alerting is disabled")
+		log.Printf("  Alerting is disabled")
 		return
 	}
 
-	log.Printf("###   Sending email alert")
+	log.Printf("  Sending email alert")
 
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	subjectLine := "Subject: " + subject + "\n"
@@ -122,11 +122,11 @@ func sendEmail(body, subject string) {
 
 	err := smtp.SendMail(host+":"+port, auth, from, []string{to}, []byte(msg))
 	if err != nil {
-		log.Printf("### Alert SMTP error: %s", err)
+		log.Printf("Alert SMTP error: %s", err)
 		return
 	}
 
-	log.Printf("###   Alert email was sent!")
+	log.Printf("  Alert email was sent!")
 }
 
 func IsAlertingEnabled() bool {

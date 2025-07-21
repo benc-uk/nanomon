@@ -53,9 +53,9 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("### 🌐 NanoMon Frontend, listening on port:", port)
-	log.Println("### Version:", version)
-	log.Println("### Serving app content from:", dir)
+	log.Println("🌐 NanoMon Frontend, listening on port:", port)
+	log.Println("Version:", version)
+	log.Println("Serving app content from:", dir)
 	log.Fatal(srv.ListenAndServe())
 }
 

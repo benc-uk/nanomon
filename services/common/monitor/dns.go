@@ -16,7 +16,7 @@ import (
 )
 
 func (m *Monitor) runDNS() *result.Result {
-	log.Printf("### Running DNS monitor '%s' on target %s", m.Name, m.Target)
+	log.Printf("Running DNS monitor '%s' on target %s", m.Name, m.Target)
 	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error

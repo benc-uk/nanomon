@@ -50,21 +50,21 @@ type Monitor struct {
 // Start the monitor ticker, to run & execute the monitor on regular interval
 func (m *Monitor) Start(delay int, db *database.DB) {
 	if m.Enabled {
-		log.Printf("### Starting monitor ticker '%s' every %s", m.Name, m.Interval)
+		log.Printf("Starting monitor ticker '%s' every %s", m.Name, m.Interval)
 	} else {
-		log.Printf("### Monitor '%s' is disabled, will not be run", m.Name)
+		log.Printf("Monitor '%s' is disabled, will not be run", m.Name)
 		return
 	}
 
 	intervalDuration, err := time.ParseDuration(m.Interval)
 	if err != nil {
-		log.Printf("### Monitor '%s' has invalid interval", m.Name)
+		log.Printf("Monitor '%s' has invalid interval", m.Name)
 		return
 	}
 
 	// Don't allow silly short intervals
 	if intervalDuration < time.Second {
-		log.Printf("### Monitor '%s' has an interval less than 1s", m.Name)
+		log.Printf("Monitor '%s' has an interval less than 1s", m.Name)
 		return
 	}
 
@@ -79,11 +79,11 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	// Run the monitor immediately on start
 	_, result := m.run()
 	if result != nil && db != nil {
-		log.Printf("### Monitor '%s' initial run result: %d", m.Name, result.Status)
+		log.Printf("Monitor '%s' initial run result: %d", m.Name, result.Status)
 
 		err := result.Store(db)
 		if err != nil {
-			log.Printf("### Failed to store initial result for monitor '%s': %v", m.Name, err)
+			log.Printf("Failed to store initial result for monitor '%s': %v", m.Name, err)
 		}
 	}
 
@@ -93,11 +93,11 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	for range m.ticker.C {
 		_, result = m.run()
 		if result != nil && db != nil {
-			log.Printf("### Monitor '%s' run result: %d", m.Name, result.Status)
+			log.Printf("Monitor '%s' run result: %d", m.Name, result.Status)
 
 			err := result.Store(db)
 			if err != nil {
-				log.Printf("### Failed to store result for monitor '%s': %v", m.Name, err)
+				log.Printf("Failed to store result for monitor '%s': %v", m.Name, err)
 			}
 		}
 	}
@@ -110,13 +110,13 @@ func (m *Monitor) run() (bool, *result.Result) {
 	}
 
 	if m.Target == "" {
-		log.Printf("### Monitor '%s' has no target, will be skipped", m.Name)
+		log.Printf("Monitor '%s' has no target, will be skipped", m.Name)
 		return false, nil
 	}
 
 	var res *result.Result
 
-	log.Printf("### Running monitor '%s' at '%s'", m.Name, m.Target)
+	log.Printf("Running monitor '%s' at '%s'", m.Name, m.Target)
 
 	switch m.Type {
 	case TypeHTTP:
@@ -132,12 +132,12 @@ func (m *Monitor) run() (bool, *result.Result) {
 		res = m.runDNS()
 
 	default:
-		log.Printf("### Unknown monitor type '%s', will be skipped", m.Type)
+		log.Printf("Unknown monitor type '%s', will be skipped", m.Type)
 		return false, nil
 	}
 
 	if os.Getenv("DEBUG") == "true" {
-		log.Printf("### DEBUG '%s' outputs: %+v", m.Name, res.Outputs)
+		log.Printf("DEBUG '%s' outputs: %+v", m.Name, res.Outputs)
 	}
 
 	// Logic block to evaluate the rule and set status & message accordingly
@@ -200,7 +200,7 @@ func (m *Monitor) run() (bool, *result.Result) {
 
 // Stop the monitor
 func (m *Monitor) Stop() {
-	log.Println("### Stopping monitor", m.Name)
+	log.Println("Stopping monitor", m.Name)
 
 	// Unregister the Prometheus gauge for this monitor
 	m.unregisterGauge()

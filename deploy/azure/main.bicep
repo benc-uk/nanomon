@@ -1,15 +1,12 @@
 // ==============================================================================
 // Bicep IaC template
-// Deploy all NanoMon components using Azure Container Apps 
+// Deploy all NanoMon components using Azure Container Apps and AVN
 // ==============================================================================
 
 targetScope = 'subscription'
 
 @description('Name used for resource group, and default base name for all resources')
 param appName string
-
-@description('Azure region for all resources')
-param location string = deployment().location
 
 @description('Repo and registry where the images are stored')
 param imageRepo string = 'ghcr.io/benc-uk'
@@ -26,11 +23,14 @@ param authTenant string = 'common'
 @description('Connection DSN to an external Postgres database, if empty a new Postgres database will be created')
 param postgresDSN string = ''
 
+@description('IP address granted access to the Postgres database')
+param allowAccessForIP string = ''
+
 @description('Password for the Postgres user')
 @secure()
 param postgresPassword string = ''
 
-@description('Alerting parameters, all optional')
+// Alerting parameters, all optional
 param alertFrom string = ''
 param alertTo string = ''
 param alertMailHost string = ''
@@ -40,65 +40,71 @@ param alertMailPort string = ''
 param alertPassword string = '__ignored_default__'
 param alertFailCount int = 3
 
-@description('IP address granted access to the Postgres database')
-param allowAccessForIP string = ''
-
 // ===== Modules & Resources ==================================================
 
 resource resGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   name: appName
-  location: location
+  location: deployment().location
 }
 
-module database './bicep-iac/modules/database/postgres-cosmosdb.bicep' = if (postgresDSN == '') {
+module database 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.12.1' = if (postgresDSN == '') {
   scope: resGroup
+
   params: {
-    location: location
-    name: 'nanomon-db'
-    databaseName: 'nanomon'
-    version: '16'
-    adminPassword: postgresPassword
-    allowAccessForIP: allowAccessForIP
+    name: 'nanomon-db-${substring(uniqueString(resGroup.name), 0, 5)}'
+    skuName: 'Standard_B1ms'
+    tier: 'Burstable'
+    version: '17'
+    geoRedundantBackup: 'Disabled'
+    highAvailability: 'Disabled'
+    availabilityZone: -1
+
+    administratorLogin: 'nanomon'
+    administratorLoginPassword: postgresPassword
+
+    databases: [
+      { name: 'nanomon' }
+    ]
+
+    publicNetworkAccess: 'Enabled'
+    firewallRules: [
+      {
+        name: 'AllowAzure'
+        endIpAddress: '0.0.0.0'
+        startIpAddress: '0.0.0.0'
+      }
+      {
+        name: 'AllowAccessForIP'
+        endIpAddress: allowAccessForIP
+        startIpAddress: allowAccessForIP
+      }
+    ]
   }
 }
 
-module logAnalytics './bicep-iac/modules/monitoring/log-analytics.bicep' = {
+module appEnv 'br/public:avm/res/app/managed-environment:0.11.2' = {
   scope: resGroup
 
   params: {
-    location: location
-    name: 'logs'
+    name: 'nanomon'
+
+    zoneRedundant: false
+    publicNetworkAccess: 'Enabled'
+    appLogsConfiguration: {
+      destination: 'azure-monitor'
+    }
   }
 }
 
-module containerAppEnv './bicep-iac/modules/containers/app-env.bicep' = {
+module api 'br/public:avm/res/app/container-app:0.18.1' = {
   scope: resGroup
 
   params: {
-    location: location
-    name: 'app-environment'
-    logAnalyticsName: logAnalytics.outputs.name
-    logAnalyticsResGroup: resGroup.name
-  }
-}
-
-module api './bicep-iac/modules/containers/app.bicep' = {
-  scope: resGroup
-
-  params: {
-    location: location
     name: 'nanomon-api'
-    environmentId: containerAppEnv.outputs.id
-    image: '${imageRepo}/nanomon-api:${imageTag}'
+    environmentResourceId: appEnv.outputs.resourceId
 
-    probePath: '/api/health'
-    probePort: 8000
-
-    ingressPort: 8000
+    ingressTargetPort: 8000
     ingressExternal: true
-
-    cpu: '0.25'
-    memory: '0.5Gi'
 
     secrets: [
       {
@@ -107,73 +113,86 @@ module api './bicep-iac/modules/containers/app.bicep' = {
       }
     ]
 
-    envs: [
+    containers: [
       {
-        name: 'POSTGRES_DSN'
-        value: postgresDSN != '' ? postgresDSN : database!.outputs.dsn
-      }
-      {
-        name: 'POSTGRES_PASSWORD'
-        secretRef: 'postgres-password'
-      }
-      {
-        name: 'AUTH_CLIENT_ID'
-        value: authClientId
-      }
-      {
-        name: 'AUTH_TENANT'
-        value: authTenant
+        image: '${imageRepo}/nanomon-api:${imageTag}'
+        name: 'nanomon-api'
+        resources: { cpu: '0.25', memory: '0.5Gi' }
+        probes: [
+          {
+            type: 'Liveness'
+            httpGet: { path: '/api/health', port: 8000 }
+          }
+        ]
+        env: [
+          {
+            name: 'POSTGRES_DSN'
+            value: postgresDSN != '' ? postgresDSN : 'host=${database!.outputs.fqdn} dbname=nanomon user=nanomon'
+          }
+          {
+            name: 'POSTGRES_PASSWORD'
+            secretRef: 'postgres-password'
+          }
+          {
+            name: 'AUTH_CLIENT_ID'
+            value: authClientId
+          }
+          {
+            name: 'AUTH_TENANT'
+            value: authTenant
+          }
+        ]
       }
     ]
   }
 }
 
-module frontend './bicep-iac/modules/containers/app.bicep' = {
+module frontend 'br/public:avm/res/app/container-app:0.18.1' = {
   scope: resGroup
 
   params: {
-    location: location
     name: 'nanomon-frontend'
-    environmentId: containerAppEnv.outputs.id
-    image: '${imageRepo}/nanomon-frontend:${imageTag}'
+    environmentResourceId: appEnv.outputs.resourceId
 
-    probePath: '/'
-    probePort: 8001
-
-    ingressPort: 8001
+    ingressTargetPort: 8001
     ingressExternal: true
 
-    cpu: '0.25'
-    memory: '0.5Gi'
-
-    envs: [
+    containers: [
       {
-        name: 'API_ENDPOINT'
-        value: 'https://${api.outputs.fqdn}/api'
-      }
-      {
-        name: 'AUTH_CLIENT_ID'
-        value: authClientId
-      }
-      {
-        name: 'AUTH_TENANT'
-        value: authTenant
+        image: '${imageRepo}/nanomon-frontend:${imageTag}'
+        name: 'nanomon-frontend'
+        resources: { cpu: '0.25', memory: '0.5Gi' }
+        probes: [
+          {
+            type: 'Liveness'
+            httpGet: { path: '/', port: 8001 }
+          }
+        ]
+        env: [
+          {
+            name: 'API_ENDPOINT'
+            value: 'https://${api.outputs.fqdn}/api'
+          }
+          {
+            name: 'AUTH_CLIENT_ID'
+            value: authClientId
+          }
+          {
+            name: 'AUTH_TENANT'
+            value: authTenant
+          }
+        ]
       }
     ]
   }
 }
 
-module runner './bicep-iac/modules/containers/app.bicep' = {
+module runner 'br/public:avm/res/app/container-app:0.18.1' = {
   scope: resGroup
 
   params: {
-    location: location
     name: 'nanomon-runner'
-    environmentId: containerAppEnv.outputs.id
-    image: '${imageRepo}/nanomon-runner:${imageTag}'
-
-    cpu: '0.25'
-    memory: '0.5Gi'
+    environmentResourceId: appEnv.outputs.resourceId
 
     secrets: [
       {
@@ -186,44 +205,52 @@ module runner './bicep-iac/modules/containers/app.bicep' = {
       }
     ]
 
-    envs: [
+    containers: [
       {
-        name: 'POSTGRES_DSN'
-        value: postgresDSN != '' ? postgresDSN : database!.outputs.dsn
-      }
-      {
-        name: 'POSTGRES_PASSWORD'
-        secretRef: 'postgres-password'
-      }
-      {
-        name: 'ALERT_SMTP_FROM'
-        value: alertFrom
-      }
-      {
-        name: 'ALERT_SMTP_TO'
-        value: alertTo
-      }
-      {
-        name: 'ALERT_SMTP_HOST'
-        value: alertMailHost
-      }
-      {
-        name: 'ALERT_MAIL_PORT'
-        value: alertMailPort
-      }
-      {
-        name: 'ALERT_SMTP_PASSWORD'
-        secretRef: 'alert-smtp-password'
-      }
-      {
-        name: 'ALERT_FAIL_COUNT'
-        value: '${alertFailCount}'
+        image: '${imageRepo}/nanomon-runner:${imageTag}'
+        name: 'nanomon-runner'
+        resources: { cpu: '0.25', memory: '0.5Gi' }
+
+        env: [
+          {
+            name: 'POSTGRES_DSN'
+            value: postgresDSN != '' ? postgresDSN : 'host=${database!.outputs.fqdn} dbname=nanomon user=nanomon'
+          }
+          {
+            name: 'POSTGRES_PASSWORD'
+            secretRef: 'postgres-password'
+          }
+          {
+            name: 'ALERT_SMTP_FROM'
+            value: alertFrom
+          }
+          {
+            name: 'ALERT_SMTP_TO'
+            value: alertTo
+          }
+          {
+            name: 'ALERT_SMTP_HOST'
+            value: alertMailHost
+          }
+          {
+            name: 'ALERT_MAIL_PORT'
+            value: alertMailPort
+          }
+          {
+            name: 'ALERT_SMTP_PASSWORD'
+            secretRef: 'alert-smtp-password'
+          }
+          {
+            name: 'ALERT_FAIL_COUNT'
+            value: '${alertFailCount}'
+          }
+        ]
       }
     ]
   }
 }
 
 output appURL string = 'https://${frontend.outputs.fqdn}/'
-output dbHost string = postgresDSN != '' ? 'Unknown' : database!.outputs.host
+output dbHost string = postgresDSN != '' ? 'Unknown' : database!.outputs.fqdn
 output resGroup string = resGroup.name
 output postgresResName string = postgresDSN != '' ? 'Unknown' : database!.outputs.name

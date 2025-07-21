@@ -73,7 +73,7 @@ fi
 set -e
 
 echo -e "\n🎈 Initializing the database using SQL init script"
-docker run -it --rm -v "$repoRoot/sql/init":/root -e PGPASSWORD="$postgresPassword" postgres psql --quiet -h "$dbHost" -U citus -d nanomon -f /root/nanomon_init.sql
+docker run -it --rm -v "$repoRoot/sql/init":/root -e PGPASSWORD="$postgresPassword" postgres psql --quiet -h "$dbHost" -U nanomon -d nanomon -f /root/nanomon_init.sql
 
 echo -e "\n\e[32m🎉 NanoMon was deployed to Azure!\e[0m"
 echo -e "\e[34m🌐 App URL: \e[33m$appUrl\e[0m\n"

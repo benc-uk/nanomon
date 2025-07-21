@@ -8,17 +8,10 @@ Make a copy of `example.bicepparam` if you wish and modify the parameters, at a 
 
 ## Running Deployment
 
-First fetch/update the latest sub-modules required for the templates
-
-```
-git submodule update --init --recursive
-```
-
-Then deploy using the bash helper script
+The deploy.sh script will deploy the Bicep template with the parameters provided in the `myparams.bicepparam` file. You can run the deployment script from the `deploy/azure` directory as follows:
 
 ```bash
-cd deploy/azure
-./deploy.sh myparams.bicepparam
+deploy/azure/deploy.sh someplace/myparams.bicepparam
 ```
 
 The script will attempt to automate the entire deployment process, including:
@@ -34,12 +27,12 @@ At end of the deployment, you should see a message with the URL of the NanoMon f
 
 - Container App x3 (API, frontend and runner)
 - Container Apps Environment
-- Azure Cosmos DB for PostgreSQL Cluster (smallest burstable tier)
+- Azure Database for PostgreSQL flexible server (smallest burstable tier)
 - Log Analytics workspace
 
 ## Notes
 
-By default the template will deploy a Azure Cosmos DB for PostgreSQL Cluster with a new database and user. If you want to use an existing database, set the `postgresDSN` parameter in your `my-params.bicepparam` file. When using an external database, you must also set the `postgresPassword` parameter to the password of the existing database user.
+By default the template will deploy a Azure Database for PostgreSQL flexible server with a new database. If you want to use an existing database, set the `postgresDSN` parameter in your `my-params.bicepparam` file. When using an external database, you must also set the `postgresPassword` parameter to the password of the existing database user.
 
 When using an external database, you must also ensure that the database is accessible from the Azure Container Apps environment. This may involve configuring firewall rules or VNet integration. It is also your responsibility to run the initial SQL setup script to create the required tables and triggers. This is located in `sql/init/nanomon_init.sql`
 

@@ -1,3 +1,0 @@
-[submodule "deploy/azure/bicep-iac"]
-	path = deploy/azure/bicep-iac
-	url = https://github.com/benc-uk/bicep-iac

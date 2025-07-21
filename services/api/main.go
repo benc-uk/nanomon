@@ -99,6 +99,7 @@ func main() {
 	// Trap SIGINT and SIGTERM to gracefully shutdown the server
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
 		<-sigChan
 		log.Println("Signal received, attempting graceful shutdown")

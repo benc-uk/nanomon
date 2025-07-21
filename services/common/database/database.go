@@ -86,6 +86,7 @@ func ConnectToDB() *DB {
 	go func() {
 		ticker := time.NewTicker(time.Second * 15)
 		defer ticker.Stop()
+
 		for range ticker.C {
 			db.Ping()
 		}

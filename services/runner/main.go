@@ -7,7 +7,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"nanomon/services/common/database"
 	"nanomon/services/common/monitor"
@@ -34,16 +33,6 @@ var (
 )
 
 func main() {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	// Try to trap shutdown signals and have a clean stop & exit
-	go func() {
-		<-sigChan
-		shutdown()
-		os.Exit(1)
-	}()
-
 	log.Println("### 🏃 NanoMon runner is starting...")
 	log.Println("### Version:", version, buildInfo)
 
@@ -52,7 +41,6 @@ func main() {
 	}
 
 	db = database.ConnectToDB()
-	defer db.Close()
 
 	var err error
 
@@ -109,8 +97,9 @@ func main() {
 		go m.Start(i*2, db)
 	}
 
-	defer db.Listener.Close()
-	defer db.Handle.Close()
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	defer shutdown()
 
 	// Main loop
 	for {
@@ -120,22 +109,18 @@ func main() {
 				handleNotification(notification)
 			}
 		case <-sigChan:
-			fmt.Println("\n👋 Received shutdown signal, exiting...")
 			return
-		case <-time.After(90 * time.Second):
-			// Send a ping to keep the connection alive
-			go func() {
-				_ = db.Listener.Ping()
-			}()
 		}
 	}
 }
 
+// This function handles notifications from the database listener
+// It processes monitor creation, update, and deletion events
 func handleNotification(notification *pq.Notification) {
 	switch notification.Channel {
 	case "new_monitor":
 		mon := &monitor.Monitor{
-			OnRunEnd: checkForAlerts, // Set the alert callback
+			OnRunEnd: checkForAlerts,
 		}
 
 		err := json.Unmarshal([]byte(notification.Extra), mon)
@@ -151,7 +136,7 @@ func handleNotification(notification *pq.Notification) {
 
 	case "monitor_updated":
 		updatedMon := &monitor.Monitor{
-			OnRunEnd: checkForAlerts, // Set the alert callback
+			OnRunEnd: checkForAlerts,
 		}
 
 		err := json.Unmarshal([]byte(notification.Extra), updatedMon)
@@ -197,7 +182,7 @@ func handleNotification(notification *pq.Notification) {
 }
 
 func shutdown() {
-	log.Println("### Runner shutting down, attempting clean exit")
+	log.Println("### Signal received, attempting graceful shutdown")
 	db.Close()
 
 	for _, m := range monitors {

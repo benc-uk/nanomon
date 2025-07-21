@@ -69,6 +69,11 @@ func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 		maxFailCount, _ = strconv.Atoi(maxFailCountEnv)
 	}
 
+	// Monitor hasn't failed, nothing to do!
+	if m.ErrorCount <= 0 {
+		return
+	}
+
 	log.Printf("###   Monitor '%s' has failed %d times...", m.Name, m.ErrorCount)
 
 	alertData := struct {

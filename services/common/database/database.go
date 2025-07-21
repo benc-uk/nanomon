@@ -84,10 +84,10 @@ func ConnectToDB() *DB {
 
 	// Kick off background ping to keep the connection alive
 	go func() {
-		for {
-			_ = db.Ping(nil)
-
-			time.Sleep(15 * time.Second) // Ping every 15 seconds
+		ticker := time.NewTicker(time.Second * 15)
+		defer ticker.Stop()
+		for range ticker.C {
+			db.Ping()
 		}
 	}()
 
@@ -102,8 +102,10 @@ func ConnectToDB() *DB {
 }
 
 func (db *DB) Close() {
+	log.Println("### Closing Postgres database connections...")
+
 	if db.Handle != nil {
-		log.Println("### Closing database connection")
+		log.Println("### Closing database handle")
 
 		err := db.Handle.Close()
 		if err != nil {
@@ -125,10 +127,10 @@ func (db *DB) Close() {
 	}
 }
 
-// Check the database is alive
-func (db *DB) Ping(healthCallback func(healthy bool)) error {
+// Check the database connection is health, also keeps the connection alive
+func (db *DB) Ping() {
 	if db.Handle == nil {
-		return nil // No connection, nothing to ping
+		return
 	}
 
 	err := db.Handle.Ping()
@@ -144,9 +146,8 @@ func (db *DB) Ping(healthCallback func(healthy bool)) error {
 		db.Healthy = true
 	}
 
-	if healthCallback != nil {
-		healthCallback(db.Healthy)
+	if db.Listener != nil {
+		// We ignore any errors here, as this serves as a keep-alive
+		_ = db.Listener.Ping()
 	}
-
-	return err
 }

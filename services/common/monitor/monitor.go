@@ -36,8 +36,8 @@ type Monitor struct {
 	Properties map[string]string // Set of properties varies per monitor type
 
 	// Used for alerts not stored in the database
-	ErrorCount   int
-	InErrorState bool
+	ErrorCount   int  // Number of times the monitor has failed
+	InErrorState bool // If an alert is currently active
 
 	// Callback event hooks
 	OnRunEnd func(m *Monitor, r *result.Result)
@@ -90,9 +90,7 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	m.ticker = time.NewTicker(intervalDuration)
 
 	// This will block, so Start() should always be called with a goroutine
-	for {
-		<-m.ticker.C
-
+	for range m.ticker.C {
 		_, result = m.run()
 		if result != nil && db != nil {
 			log.Printf("### Monitor '%s' run result: %d", m.Name, result.Status)
@@ -181,23 +179,20 @@ func (m *Monitor) run() (bool, *result.Result) {
 	// Update the values in the Prometheus gauge
 	m.updateGauge(res)
 
-	if res.Status > result.StatusOK {
-		m.ErrorCount++
-
-		// Call the OnRunEnd callback if set
+	// When the monitor run is complete, call the OnRunEnd callback if set
+	defer func() {
 		if m.OnRunEnd != nil {
 			m.OnRunEnd(m, res)
 		}
+	}()
+
+	if res.Status > result.StatusOK {
+		m.ErrorCount++
 
 		return false, res
 	} else {
 		m.ErrorCount = 0
 		m.InErrorState = false
-	}
-
-	// Call the OnRunEnd callback if set
-	if m.OnRunEnd != nil {
-		m.OnRunEnd(m, res)
 	}
 
 	return true, res

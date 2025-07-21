@@ -8,7 +8,9 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
 	"regexp"
+	"syscall"
 	"time"
 
 	"nanomon/services/common/database"
@@ -82,8 +84,11 @@ func main() {
 
 	// Anonymous routes
 	router.Group(func(publicRouter chi.Router) {
-		// Add optional root, health & status endpoints
-		api.AddHealthEndpoint(publicRouter, "api/health")
+		// Health check endpoint, reflects the database health
+		api.AddHealthEndpoint(publicRouter, "api/health", func() bool {
+			return api.db.Healthy
+		})
+
 		api.AddStatusEndpoint(publicRouter, "api/status")
 		api.AddOKEndpoint(publicRouter, "api/")
 
@@ -93,15 +98,14 @@ func main() {
 
 	log.Printf("### ⚓ API routes configured")
 
-	// Start ticker to check the DB connection, and set the health status
+	// Trap SIGINT and SIGTERM to gracefully shutdown the server
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		ticker := time.Tick(5 * time.Second)
-
-		for range ticker {
-			_ = db.Ping(func(dbHealthy bool) {
-				api.Healthy = dbHealthy
-			})
-		}
+		<-sigChan
+		log.Println("### Signal received, attempting graceful shutdown")
+		db.Close()
+		os.Exit(0)
 	}()
 
 	// Start the API server, this function will block until the server is stopped

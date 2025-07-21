@@ -6,7 +6,7 @@ metadata:
     {{- include "nanomon.labels" . | nindent 4 }}
     component: runner
 spec:
-  replicas: {{ .Values.api.replicaCount }}
+  replicas: {{ .Values.runner.replicaCount }}
   selector:
     matchLabels:
       {{- include "nanomon.selectorLabels" . | nindent 6 }}

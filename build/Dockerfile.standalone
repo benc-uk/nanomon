@@ -80,9 +80,6 @@ COPY --from=go-build /build/api .
 COPY --from=go-build /build/frontend .  
 COPY --from=node-build /build/dist ./dist
 
-# Templates are needed just for the runner
-COPY ./templates ./templates/
-
 # Copy SQL initialization scripts
 COPY ./sql/init/* /docker-entrypoint-initdb.d/
 

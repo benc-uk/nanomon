@@ -7,6 +7,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed" // for embedding the email template
 	"fmt"
 	"log"
 	"nanomon/services/common/monitor"
@@ -27,6 +28,9 @@ var (
 
 	emailTemplate *template.Template
 )
+
+//go:embed templates/email.html
+var emailTemplateContent string
 
 func init() {
 	from = os.Getenv("ALERT_SMTP_FROM")
@@ -53,10 +57,9 @@ func init() {
 	// Load email template
 	var err error
 
-	emailTemplate, err = template.ParseFiles("templates/alert.html")
+	emailTemplate, err = template.New("email").Parse(emailTemplateContent)
 	if err != nil {
-		log.Printf("Error loading email template: %s", err)
-		log.Printf("Warning! Email alerting will be disabled!")
+		log.Printf("Error loading email alert template: %s", err)
 	}
 }
 
@@ -87,18 +90,20 @@ func checkForAlerts(m *monitor.Monitor, r *result.Result) {
 	}
 
 	if m.ErrorCount >= maxFailCount && !m.InErrorState {
-		if emailTemplate != nil {
-			w := &bytes.Buffer{}
-			err := emailTemplate.Execute(w, alertData)
-			body := w.String()
-
-			if err != nil {
-				log.Printf("  Error executing email template: %s", err)
-				return
-			}
-
-			sendEmail(body, fmt.Sprintf("NanoMon alert for: %s", m.Name))
+		if emailTemplate == nil {
+			return
 		}
+
+		w := &bytes.Buffer{}
+		err := emailTemplate.Execute(w, alertData)
+		body := w.String()
+
+		if err != nil {
+			log.Printf("  Error executing email template: %s", err)
+			return
+		}
+
+		sendEmail(body, fmt.Sprintf("NanoMon alert for: %s", m.Name))
 
 		m.InErrorState = true
 	}

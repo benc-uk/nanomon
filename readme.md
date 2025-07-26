@@ -70,7 +70,6 @@ For more details see the [complete monitor reference](#monitor-reference)
  │   ├── frontend
  │   └── runner
  ├── sql          // Database schema & init scripts
- ├── templates    // Alerting email templates
  └── tests        // Integration & performance tests
 ```
 

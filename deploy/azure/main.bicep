@@ -36,9 +36,12 @@ param alertTo string = ''
 param alertMailHost string = ''
 param alertMailPort string = ''
 @secure()
-#disable-next-line secure-parameter-default
-param alertPassword string = '__ignored_default__'
+param alertPassword string = ''
 param alertFailCount int = 3
+
+// ===== Variables ==================================================
+
+var scaleSettings = { minReplicas: 1, maxReplicas: 1, rules: [] }
 
 // ===== Modules & Resources ==================================================
 
@@ -113,10 +116,11 @@ module api 'br/public:avm/res/app/container-app:0.18.1' = {
       }
     ]
 
+    scaleSettings: scaleSettings
+
     containers: [
       {
         image: '${imageRepo}/nanomon-api:${imageTag}'
-        name: 'nanomon-api'
         resources: { cpu: '0.25', memory: '0.5Gi' }
         probes: [
           {
@@ -156,6 +160,8 @@ module frontend 'br/public:avm/res/app/container-app:0.18.1' = {
 
     ingressTargetPort: 8001
     ingressExternal: true
+
+    scaleSettings: scaleSettings
 
     containers: [
       {
@@ -205,10 +211,11 @@ module runner 'br/public:avm/res/app/container-app:0.18.1' = {
       }
     ]
 
+    scaleSettings: scaleSettings
+
     containers: [
       {
         image: '${imageRepo}/nanomon-runner:${imageTag}'
-        name: 'nanomon-runner'
         resources: { cpu: '0.25', memory: '0.5Gi' }
 
         env: [

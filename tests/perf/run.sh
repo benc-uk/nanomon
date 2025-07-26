@@ -18,3 +18,6 @@ mkdir -p output
 
 echo "🚀 Starting k6 tests"
 k6 run -o csv=output/results.csv "$DIR/"perf-test.js
+
+echo "📊 Opening summary report"
+sensible-browser output/load-test-summary.html || echo "💥 Warning! Could not open the summary in a browser, please check output/load-test-summary.html manually"

@@ -16,7 +16,7 @@ const StatusFailed = 2
 type Result struct {
 	Date    time.Time `json:"date"`
 	Status  int       `json:"status"`
-	Value   int       `json:"value"`
+	Value   float64   `json:"value"`
 	Message string    `json:"message"`
 
 	MonitorID     int    `json:"monitor_id"`

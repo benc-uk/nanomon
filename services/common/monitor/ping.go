@@ -73,7 +73,7 @@ func (m *Monitor) runPing() *result.Result {
 		"ipAddress":   stats.IPAddr,
 	}
 
-	r.Value = int(stats.AvgRtt.Milliseconds())
+	r.Value = float64(stats.AvgRtt.Milliseconds())
 	r.Outputs = outputs
 
 	return r

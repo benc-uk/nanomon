@@ -21,8 +21,9 @@ const TypeHTTP = "http"
 const TypePing = "ping"
 const TypeTCP = "tcp"
 const TypeDNS = "dns"
+const TypePrometheus = "prometheus"
 
-var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS}
+var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS, TypePrometheus}
 
 type Monitor struct {
 	ID         int
@@ -130,6 +131,9 @@ func (m *Monitor) run() (bool, *result.Result) {
 
 	case TypeDNS:
 		res = m.runDNS()
+
+	case TypePrometheus:
+		res = m.runPromQuery()
 
 	default:
 		log.Printf("Unknown monitor type '%s', will be skipped", m.Type)

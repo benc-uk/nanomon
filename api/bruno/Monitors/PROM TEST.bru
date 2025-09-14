@@ -1,0 +1,15 @@
+meta {
+  name: PROM TEST
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://48.222.228.211/api/v1/query?query=kube_pod_info
+  body: none
+  auth: none
+}
+
+params:query {
+  query: kube_pod_info
+}

@@ -8,7 +8,6 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"log"
 	"nanomon/services/common/result"
 	"net"
 	"strings"
@@ -16,7 +15,6 @@ import (
 )
 
 func (m *Monitor) runDNS() *result.Result {
-	log.Printf("Running DNS monitor '%s' on target %s", m.Name, m.Target)
 	r := result.NewResult(m.Name, m.Target, m.ID)
 
 	var err error
@@ -124,7 +122,7 @@ func (m *Monitor) runDNS() *result.Result {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("invalid record type: %s", recordType))
 	}
 
-	r.Value = int(time.Since(start).Milliseconds())
+	r.Value = float64(time.Since(start).Milliseconds())
 
 	outputs := map[string]interface{}{
 		"respTime":    r.Value,

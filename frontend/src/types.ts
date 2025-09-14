@@ -142,4 +142,21 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       group: '',
     },
   },
+
+  prometheus: {
+    ruleHint: 'value, metric, result_count',
+    allowedProps: ['query', 'timeout'],
+    template: {
+      name: 'New Prometheus Monitor',
+      type: 'prometheus',
+      interval: '60s',
+      enabled: true,
+      target: 'http://localhost:9090',
+      rule: '',
+      properties: {
+        query: 'up',
+      },
+      group: '',
+    },
+  },
 }

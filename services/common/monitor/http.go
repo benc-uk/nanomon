@@ -88,7 +88,7 @@ func (m *Monitor) runHTTP() *result.Result {
 	}
 	defer resp.Body.Close()
 
-	r.Value = int(time.Since(start).Milliseconds())
+	r.Value = float64(time.Since(start).Milliseconds())
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
@@ -125,7 +125,7 @@ func (m *Monitor) runHTTP() *result.Result {
 
 		// SPECIAL: When the regex match is a number,
 		// - set the result value to the number, this is a special case
-		r.Value = int(regexMatchFloat)
+		r.Value = regexMatchFloat
 	} else {
 		outputs["regexMatch"] = regexMatch
 	}

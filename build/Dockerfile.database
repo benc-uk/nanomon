@@ -1,0 +1,4 @@
+FROM postgres:17
+
+COPY ./sql/init/nanomon_init.sql /docker-entrypoint-initdb.d/
+

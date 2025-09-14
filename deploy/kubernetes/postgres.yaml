@@ -46,18 +46,12 @@ spec:
               cpu: "200m"
           livenessProbe:
             exec:
-              command:
-                - pg_isready
-                - -U
-                - postgres
+              command: ["pg_isready", "-U", "nanomon"]
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             exec:
-              command:
-                - pg_isready
-                - -U
-                - postgres
+              command: ["pg_isready", "-U", "nanomon"]
             initialDelaySeconds: 5
             periodSeconds: 5
           volumeMounts:

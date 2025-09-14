@@ -204,3 +204,8 @@ summary:hover {
 ::-webkit-input-placeholder {
   color: #bbb !important;
 }
+
+.wrap-any {
+  word-wrap: break-word;
+  word-break: break-word;
+}

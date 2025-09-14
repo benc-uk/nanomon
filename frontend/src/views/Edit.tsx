@@ -15,7 +15,7 @@ export default function Edit() {
 
   const isNew = pathname === '/new' ? true : false
   const title = isNew ? 'Create New Monitor' : 'Update'
-  const types = ['http', 'tcp', 'ping', 'dns']
+  const types = Object.keys(MonitorDefinitions)
 
   const [rulePop, setRulePop] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -108,6 +108,9 @@ export default function Edit() {
           </button>
           <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.dns.template)}>
             <MonitorIcon monitor={MonitorDefinitions.dns.template} /> DNS
+          </button>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.prometheus.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.prometheus.template} /> Prom
           </button>
         </div>
       </div>

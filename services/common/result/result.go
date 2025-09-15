@@ -49,3 +49,16 @@ func NewFailedResult(monName string, monTarget string, monID int, err error) *Re
 		MonitorID:     monID,
 	}
 }
+
+func (r *Result) StatusString() string {
+	switch r.Status {
+	case StatusOK:
+		return "OK"
+	case StatusError:
+		return "ERROR"
+	case StatusFailed:
+		return "FAILED"
+	default:
+		return "UNKNOWN"
+	}
+}

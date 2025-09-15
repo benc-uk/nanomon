@@ -73,6 +73,15 @@ func (m *Monitor) runPromQuery() *result.Result {
 	case model.ValVector:
 		vectorVal := queryRes.(model.Vector)
 
+		count := len(vectorVal)
+		if count == 0 {
+			r.Status = result.StatusError
+			r.Message = "query returned no data"
+			outputs["result_count"] = 0
+
+			break
+		}
+
 		// Regardless of how many results, just take the first one
 		sample := vectorVal[0]
 
@@ -82,7 +91,7 @@ func (m *Monitor) runPromQuery() *result.Result {
 		outputs["prom_timestamp"] = sample.Timestamp.Time()
 		outputs["value"] = float64(sample.Value)
 		outputs["result_type"] = "vector"
-		outputs["result_count"] = len(vectorVal)
+		outputs["result_count"] = count
 	}
 
 	r.Outputs = outputs

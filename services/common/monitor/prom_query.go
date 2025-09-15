@@ -31,6 +31,7 @@ func (m *Monitor) runPromQuery() *result.Result {
 	if err != nil {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
+
 	query, ok := m.Properties["query"]
 	if !ok || query == "" {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, fmt.Errorf("no query provided in properties"))

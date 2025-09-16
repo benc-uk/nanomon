@@ -50,6 +50,7 @@ There are three types of monitor currently supported:
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
 - **DNS** &ndash; Looks up DNS records for a given hostname or domain name.
+- **Prometheus** &ndash; Executes a Prometheus query against a given Prometheus server.
 
 For more details see the [complete monitor reference](#monitor-reference)
 
@@ -292,6 +293,22 @@ The DNS monitor looks up DNS records and returns the results as outputs, if the 
   - _resultCount_ - Number of records returned from the query (number)
   - _result1_, _result2_ etc - Each result of the query returned as a separate numbered output (string)
 
+### Prometheus Monitor
+
+The Prometheus monitor executes a Prometheus query against a given Prometheus server, it will return failed status if the query fails to execute or returns no results. Otherwise it will return OK.
+
+- **Target:** The full URL of the Prometheus server e.g. `http://prometheus-server:9090`
+- **Value:** The result of the query, if the result is a vector or range, the first value is used.
+- **Properties:**
+  - _query_ - The Prometheus query to execute, this is required.
+  - _timeout_ - Timeout interval e.g. "500ms" (default: 5s)
+- **Outputs / Rule Props:**
+  - _result_type_ - The type of result returned, one of 'vector', 'matrix', 'scalar' or 'string' (string)
+  - _value_ - The value of the result, if the result is a vector or range, the first value is used (number)
+  - _metric_ - The metric string of the result if applicable (string)
+  - _prom_timestamp_ - The timestamp of the result as returned by Prometheus (RFC3339 format) (string)
+  - _result_count_ - The number of results returned (number)
+
 ### Monitor Rules
 
 All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run.
@@ -358,11 +375,11 @@ When starting up the API and runner services, they will attempt to connect to th
 
 ## Appendix: Prometheus
 
-NanoMon has support for Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
+NanoMon has support for exporting & exposing Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
 
 This feature is disabled by default and is enabled by setting the `PROMETHEUS_ENABLE` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges (one gauge per monitor), these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
 
-Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools, and optionally enable things like the Prometheus alerts.
+Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools like Grafana, and optionally enable things like the Prometheus alerts.
 
 Example of metrics
 

@@ -21,7 +21,7 @@ func (m *Monitor) runPromQuery() *result.Result {
 
 	var err error
 
-	timeoutStr := "30s"
+	timeoutStr := "5s"
 	if timeoutProp, ok := m.Properties["timeout"]; ok && timeoutProp != "" {
 		timeoutStr = timeoutProp
 	}
@@ -58,7 +58,9 @@ func (m *Monitor) runPromQuery() *result.Result {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
-	outputs := map[string]any{}
+	outputs := map[string]any{
+		"type": queryRes.Type().String(),
+	}
 
 	switch queryRes.Type() {
 	case model.ValScalar:
@@ -68,17 +70,13 @@ func (m *Monitor) runPromQuery() *result.Result {
 		outputs["metric"] = scalarVal.String()
 		outputs["prom_timestamp"] = scalarVal.Timestamp.Time()
 		outputs["value"] = float64(scalarVal.Value)
-		outputs["result_type"] = "scalar"
 		outputs["result_count"] = 1
 	case model.ValVector:
 		vectorVal := queryRes.(model.Vector)
 
 		count := len(vectorVal)
 		if count == 0 {
-			r.Status = result.StatusError
-			r.Message = "query returned no data"
 			outputs["result_count"] = 0
-
 			break
 		}
 
@@ -90,7 +88,6 @@ func (m *Monitor) runPromQuery() *result.Result {
 		outputs["metric"] = sample.Metric.String()
 		outputs["prom_timestamp"] = sample.Timestamp.Time()
 		outputs["value"] = float64(sample.Value)
-		outputs["result_type"] = "vector"
 		outputs["result_count"] = count
 	}
 

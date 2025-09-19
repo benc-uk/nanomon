@@ -293,9 +293,11 @@ The DNS monitor looks up DNS records and returns the results as outputs, if the 
   - _resultCount_ - Number of records returned from the query (number)
   - _result1_, _result2_ etc - Each result of the query returned as a separate numbered output (string)
 
-### Prometheus Monitor
+### Prometheus Query Monitor
 
-The Prometheus monitor executes a Prometheus query against a given Prometheus server, it will return failed status if the query fails to execute or returns no results. Otherwise it will return OK.
+This monitor executes a query against a given Prometheus server, it will return failed status if the query fails to execute, otherwise it will return OK.
+
+You're going to need to be familiar with PromQL in order to use this monitor type, see [Prometheus Querying Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/) for more details. You'll also need to know the names of the metrics available in the Prometheus server you're querying.
 
 - **Target:** The full URL of the Prometheus server e.g. `http://prometheus-server:9090`
 - **Value:** The result of the query, if the result is a vector or range, the first value is used.
@@ -305,8 +307,8 @@ The Prometheus monitor executes a Prometheus query against a given Prometheus se
 - **Outputs / Rule Props:**
   - _result_type_ - The type of result returned, one of 'vector', 'matrix', 'scalar' or 'string' (string)
   - _value_ - The value of the result, if the result is a vector or range, the first value is used (number)
-  - _metric_ - The metric string of the result if applicable (string)
-  - _prom_timestamp_ - The timestamp of the result as returned by Prometheus (RFC3339 format) (string)
+  - _metric_ - Represents the metric as a string of key=value pairs (string)
+  - _prom_timestamp_ - The timestamp of the result as returned by Prometheus (string)
   - _result_count_ - The number of results returned (number)
 
 ### Monitor Rules

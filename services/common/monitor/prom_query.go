@@ -48,11 +48,9 @@ func (m *Monitor) runPromQuery() *result.Result {
 	// Create API client from the HTTP client
 	v1api := v1.NewAPI(promClient)
 
-	// Create context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	// Execute the query
 	queryRes, _, err := v1api.Query(ctx, query, time.Now())
 	if err != nil {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
@@ -71,6 +69,7 @@ func (m *Monitor) runPromQuery() *result.Result {
 		outputs["prom_timestamp"] = scalarVal.Timestamp.Time()
 		outputs["value"] = float64(scalarVal.Value)
 		outputs["result_count"] = 1
+	case model.ValMatrix:
 	case model.ValVector:
 		vectorVal := queryRes.(model.Vector)
 

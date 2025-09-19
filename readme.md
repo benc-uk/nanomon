@@ -133,7 +133,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 - Written in Go, [source code - /services/api](./services/api/)
 - The API requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
-- Listens on port 8000 by default.
+- Listens on port **8000** by default.
 - All routes are prefixed `/api` this makes it easier to put a path based HTTP router in front of the API and the SPA frontend
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
 - The API is RESTful, see the [API folder](./api/) for specifications and sample .http file.
@@ -150,9 +150,9 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ### Frontend Host
 
-- Written in Go, source code is in[/services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
+- Written in Go, source code is in [/services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
 - A simple static HTTP server for hosting & serving the content & files of the frontend app
-- Listens on port 8001 by default.
+- Listens on port **8001** by default.
 - Provides a single special API endpoint served at `/config.json` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
 ## Just Reference

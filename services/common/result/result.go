@@ -16,7 +16,7 @@ const StatusFailed = 2
 type Result struct {
 	Date    time.Time `json:"date"`
 	Status  int       `json:"status"`
-	Value   int       `json:"value"`
+	Value   float64   `json:"value"`
 	Message string    `json:"message"`
 
 	MonitorID     int    `json:"monitor_id"`
@@ -47,5 +47,18 @@ func NewFailedResult(monName string, monTarget string, monID int, err error) *Re
 		MonitorName:   monName,
 		MonitorTarget: monTarget,
 		MonitorID:     monID,
+	}
+}
+
+func (r *Result) StatusString() string {
+	switch r.Status {
+	case StatusOK:
+		return "OK"
+	case StatusError:
+		return "ERROR"
+	case StatusFailed:
+		return "FAILED"
+	default:
+		return "UNKNOWN"
 	}
 }

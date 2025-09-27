@@ -35,7 +35,7 @@ func (m *Monitor) runTCP() *result.Result {
 		return result.NewFailedResult(m.Name, m.Target, m.ID, err)
 	}
 
-	r.Value = int(time.Since(start).Milliseconds())
+	r.Value = float64(time.Since(start).Milliseconds())
 
 	outputs := map[string]any{
 		"respTime":  r.Value,

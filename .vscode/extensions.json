@@ -5,6 +5,8 @@
     "golang.go",
     "ms-azuretools.vscode-bicep",
     "mikestead.dotenv",
-    "anweber.vscode-httpyac"
+    "anweber.vscode-httpyac",
+    "ms-ossdata.vscode-pgsql",
+    "bruno-api-client.bruno"
   ]
 }

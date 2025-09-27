@@ -1,0 +1,9 @@
+# =================================================================================
+# This dockerfile builds a Postgres DB image with initialization SQL baked in.
+# It's used only for demonstration and testing purposes.
+# =================================================================================
+
+FROM postgres:17
+
+COPY ./sql/init/nanomon_init.sql /docker-entrypoint-initdb.d/
+

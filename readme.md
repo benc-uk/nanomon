@@ -50,6 +50,7 @@ There are three types of monitor currently supported:
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
 - **DNS** &ndash; Looks up DNS records for a given hostname or domain name.
+- **Prometheus** &ndash; Executes a Prometheus query against a given Prometheus server.
 
 For more details see the [complete monitor reference](#monitor-reference)
 
@@ -132,7 +133,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 - Written in Go, [source code - /services/api](./services/api/)
 - The API requires a connection to PostgreSQL in order to start, it will retry and eventually exit if the connection fails.
-- Listens on port 8000 by default.
+- Listens on port **8000** by default.
 - All routes are prefixed `/api` this makes it easier to put a path based HTTP router in front of the API and the SPA frontend
 - Makes use of the [benc-uk/go-rest-api](https://pkg.go.dev/github.com/benc-uk/go-rest-api) package.
 - The API is RESTful, see the [API folder](./api/) for specifications and sample .http file.
@@ -149,9 +150,9 @@ See [Azure & Bicep docs](./deploy/azure/)
 
 ### Frontend Host
 
-- Written in Go, source code is in[/services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
+- Written in Go, source code is in [/services/frontend](./services/frontend/) (Note. Don't confuse with the `/frontend` directory)
 - A simple static HTTP server for hosting & serving the content & files of the frontend app
-- Listens on port 8001 by default.
+- Listens on port **8001** by default.
 - Provides a single special API endpoint served at `/config.json` which reflects back to the frontend certain environmental variables (see [configuration](#configuration-reference) below)
 
 ## Just Reference
@@ -292,6 +293,24 @@ The DNS monitor looks up DNS records and returns the results as outputs, if the 
   - _resultCount_ - Number of records returned from the query (number)
   - _result1_, _result2_ etc - Each result of the query returned as a separate numbered output (string)
 
+### Prometheus Query Monitor
+
+This monitor executes a query against a given Prometheus server, it will return failed status if the query fails to execute, otherwise it will return OK.
+
+You're going to need to be familiar with PromQL in order to use this monitor type, see [Prometheus Querying Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/) for more details. You'll also need to know the names of the metrics available in the Prometheus server you're querying.
+
+- **Target:** The full URL of the Prometheus server e.g. `http://prometheus-server:9090`
+- **Value:** The result of the query, if the result is a vector or range, the first value is used.
+- **Properties:**
+  - _query_ - The Prometheus query to execute, this is required.
+  - _timeout_ - Timeout interval e.g. "500ms" (default: 5s)
+- **Outputs / Rule Props:**
+  - _result_type_ - The type of result returned, one of 'vector', 'matrix', 'scalar' or 'string' (string)
+  - _value_ - The value of the result, if the result is a vector or range, the first value is used (number)
+  - _metric_ - Represents the metric as a string of key=value pairs (string)
+  - _prom_timestamp_ - The timestamp of the result as returned by Prometheus (string)
+  - _result_count_ - The number of results returned (number)
+
 ### Monitor Rules
 
 All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run.
@@ -358,11 +377,11 @@ When starting up the API and runner services, they will attempt to connect to th
 
 ## Appendix: Prometheus
 
-NanoMon has support for Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
+NanoMon has support for exporting & exposing Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
 
 This feature is disabled by default and is enabled by setting the `PROMETHEUS_ENABLE` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges (one gauge per monitor), these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
 
-Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools, and optionally enable things like the Prometheus alerts.
+Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools like Grafana, and optionally enable things like the Prometheus alerts.
 
 Example of metrics
 

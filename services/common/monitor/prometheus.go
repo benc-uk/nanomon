@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Ben Coleman, 2023. Licensed under the MIT License.
 // NanoMon Runner - Support for Prometheus metrics
+// NOTE THIS IS TO EXPORT MONITOR METRICS TO PROMETHEUS NOT THE OTHER WAY AROUND
 // ----------------------------------------------------------------------------
 
 package monitor

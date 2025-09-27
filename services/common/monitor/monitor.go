@@ -21,8 +21,9 @@ const TypeHTTP = "http"
 const TypePing = "ping"
 const TypeTCP = "tcp"
 const TypeDNS = "dns"
+const TypePrometheus = "prometheus"
 
-var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS}
+var ValidTypes = []string{TypeHTTP, TypePing, TypeTCP, TypeDNS, TypePrometheus}
 
 type Monitor struct {
 	ID         int
@@ -79,7 +80,7 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	// Run the monitor immediately on start
 	_, result := m.run()
 	if result != nil && db != nil {
-		log.Printf("Monitor '%s' initial run result: %d", m.Name, result.Status)
+		log.Printf("Monitor '%s' initial run result: %s", m.Name, result.StatusString())
 
 		err := result.Store(db)
 		if err != nil {
@@ -93,7 +94,7 @@ func (m *Monitor) Start(delay int, db *database.DB) {
 	for range m.ticker.C {
 		_, result = m.run()
 		if result != nil && db != nil {
-			log.Printf("Monitor '%s' run result: %d", m.Name, result.Status)
+			log.Printf("Monitor '%s' run result: %s", m.Name, result.StatusString())
 
 			err := result.Store(db)
 			if err != nil {
@@ -130,6 +131,9 @@ func (m *Monitor) run() (bool, *result.Result) {
 
 	case TypeDNS:
 		res = m.runDNS()
+
+	case TypePrometheus:
+		res = m.runPromQuery()
 
 	default:
 		log.Printf("Unknown monitor type '%s', will be skipped", m.Type)

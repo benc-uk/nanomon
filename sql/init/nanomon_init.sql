@@ -31,7 +31,7 @@ CREATE TABLE results (
   monitor_target VARCHAR(512) NOT NULL,
   status INT NOT NULL,
   value DOUBLE PRECISION NOT NULL,
-  message VARCHAR(512) DEFAULT '',
+  message VARCHAR DEFAULT '',
   outputs JSONB DEFAULT '{}'::JSONB
 );
 

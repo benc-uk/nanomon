@@ -32,10 +32,10 @@ jobs:
     name: Lint & Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -58,10 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -78,7 +78,7 @@ jobs:
           go test -v 2>&1 ./... | go-junit-report -set-exit-code > unit-test-results.xml
 
       - name: Test Report (Unit)
-        uses: phoenix-actions/test-reporting@v8
+        uses: phoenix-actions/test-reporting@v15
         if: success() || failure()
         with:
           name: Unit Tests
@@ -96,7 +96,7 @@ jobs:
           just test-api true
 
       - name: Test Report (Integration)
-        uses: phoenix-actions/test-reporting@v8
+        uses: phoenix-actions/test-reporting@v15
         if: success() || failure()
         with:
           name: Integration Tests
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install just
         uses: taiki-e/install-action@just

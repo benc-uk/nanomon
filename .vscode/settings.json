@@ -1,5 +1,8 @@
 {
   "[sql]": {
     "editor.formatOnSave": false
+  },
+  "chat.tools.terminal.autoApprove": {
+    ".github/scripts/pr-summary.sh": true
   }
 }

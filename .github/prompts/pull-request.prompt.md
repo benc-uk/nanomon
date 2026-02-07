@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "agent"
 description: "Prompt for generating a pull request (PR)"
 ---
 

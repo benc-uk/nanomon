@@ -1,0 +1,25 @@
+info:
+  name: List All
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{apiEndpoint}}/api/monitors"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Retrieves a list of all monitors, returning an array of monitor objects in JSON format.

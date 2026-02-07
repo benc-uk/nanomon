@@ -1,0 +1,33 @@
+opencollection: 1.0.0
+
+info:
+  name: NanoMon API Service
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |
+    # A Bruno collection for calling the Nanomon API.
+
+    The collection is organized by the main endpoints of the API, with sample requests for each endpoint. This is in the new YAML based OpenCollection format https://www.opencollection.com/
+
+    In order to use this file, install the Bruno app https://www.usebruno.com/
+  type: text/markdown
+bundled: false
+extensions:
+  ignore:
+    - node_modules
+    - .git
+  presets:
+    request:
+      type: http
+      url: http://{{apiEndpoint}}/api

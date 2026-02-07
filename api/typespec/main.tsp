@@ -13,12 +13,8 @@ using TypeSpec.OpenAPI;
 
 // Core definitions for the whole API
 @doc("The REST API for managing and using NanoMon")
-@service({
-  title: "NanoMon API Service",
-})
-@info({
-  version: "2024-10-17",
-})
+@service(#{ title: "NanoMon API Service" })
+@info(#{ version: "2024-10-17" })
 @useAuth(BearerAuth)
 
 // List servers and endpoints
@@ -114,11 +110,11 @@ interface ResultsAPI {
 // This holds the configuration for a single monitor
 model Monitor {
   @key
-  @visibility("read")
+  @visibility(Lifecycle.Read)
   @pattern("[A-Fa-f0-9]{24}")
   id: string;
 
-  @visibility("read")
+  @visibility(Lifecycle.Read)
   updated: utcDateTime;
 
   /** Name of this monitor */

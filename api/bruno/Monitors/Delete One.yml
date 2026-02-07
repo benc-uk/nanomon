@@ -1,0 +1,23 @@
+info:
+  name: Delete One
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{apiEndpoint}}/api/monitors/{{monitorId}}"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Deletes a single monitor with the specified ID

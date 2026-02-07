@@ -1,0 +1,42 @@
+info:
+  name: Import
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{apiEndpoint}}/api/monitors/import"
+  body:
+    type: json
+    data: |-
+      [
+        {
+          "name": "Bruno Test Health {{$randomDomainWord}}",
+          "type": "http",
+          "interval": "20s",
+          "target": "http://localhost:8000/api/health",
+          "enabled": true
+        },
+        {
+          "name": "Bruno Test Status {{$randomDomainWord}}",
+          "type": "http",
+          "interval": "5s",
+          "target": "http://localhost:8000/api/status",
+          "enabled": true
+        }
+      ]
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Import configuration for multiple monitors in bulk

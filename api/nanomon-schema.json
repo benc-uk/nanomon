@@ -54,7 +54,7 @@
                 "RecordString": {
                     "type": "object",
                     "properties": {},
-                    "additionalProperties": {
+                    "unevaluatedProperties": {
                         "type": "string"
                     }
                 }

@@ -1,0 +1,22 @@
+info:
+  name: Get All
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{apiEndpoint}}/api/results"
+  params:
+    - name: max
+      value: "150"
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Retrieves a list of all results for all monitors, returning an array of result objects in JSON format. Optional query parameter 'max' can be used to limit the number of results returned.

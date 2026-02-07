@@ -1,0 +1,9 @@
+info:
+  name: Monitors
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs: API endpoints for managing monitors, including creating, updating, deleting, and importing monitor configurations.

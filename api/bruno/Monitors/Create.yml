@@ -1,0 +1,47 @@
+info:
+  name: Create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiEndpoint}}/api/monitors"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Test {{$randomDomainWord}}",
+        "type": "http",
+        "interval": "60s",
+        "target": "https://example.net",
+        "properties": {
+          "timeout": "10s"
+        },
+        "enabled": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.body.id
+      operator: isNumber
+    - expression: res.status
+      operator: eq
+      value: "200"
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: monitorId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Create a new HTTP monitor with some simple example parameters

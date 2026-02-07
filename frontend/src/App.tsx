@@ -13,6 +13,24 @@ import Edit from './views/Edit'
 import Admin from './views/Admin'
 import Results from './views/Results'
 
+function AuthRoute({ children, authEnabled }: { children: React.ReactNode; authEnabled: boolean }) {
+  // Bypass auth if not enabled
+  if (!authEnabled) {
+    return <>{children}</>
+  }
+
+  return (
+    <>
+      <AuthenticatedTemplate>{children}</AuthenticatedTemplate>
+      <UnauthenticatedTemplate>
+        <div className="alert alert-danger fs-2" role="alert">
+          <Fa icon={faKey} /> You are not authenticated!
+        </div>
+      </UnauthenticatedTemplate>
+    </>
+  )
+}
+
 function App() {
   const { instance: msalApp } = useMsal()
 
@@ -27,50 +45,28 @@ function App() {
     isAuthenticated = true // If auth is not enabled, we are always authenticated
   }
 
-  function AuthRoute({ children }: { children: React.ReactNode }) {
-    // Bypass auth if not enabled
-    if (!authEnabled) {
-      return <>{children}</>
+  async function login() {
+    try {
+      await msalApp.loginPopup()
+      const accounts = msalApp.getAllAccounts()
+      console.log(`### Login complete, accounts found: ${accounts.length}`)
+
+      if (accounts.length > 0) {
+        console.log(`### Setting active account: ${accounts[0].username}`)
+        msalApp.setActiveAccount(accounts[0])
+      }
+    } catch (err) {
+      console.error(`### Login error: ${String(err)}`)
     }
-
-    return (
-      <>
-        <AuthenticatedTemplate>{children}</AuthenticatedTemplate>
-        <UnauthenticatedTemplate>
-          <div className="alert alert-danger fs-2" role="alert">
-            <Fa icon={faKey} /> You are not authenticated!
-          </div>
-        </UnauthenticatedTemplate>
-      </>
-    )
   }
 
-  function login() {
-    msalApp
-      .loginPopup()
-      .then(() => {
-        const accounts = msalApp.getAllAccounts()
-        console.log('### Login complete, accounts found:', accounts)
-
-        if (accounts.length > 0) {
-          console.log('### Setting active account:', accounts[0].username)
-          msalApp.setActiveAccount(accounts[0])
-        }
-      })
-      .catch((err) => {
-        console.warn('### Login error:', err)
-      })
-  }
-
-  function logout() {
-    msalApp
-      .logout()
-      .then(() => {
-        console.log('### Logout complete')
-      })
-      .catch((err) => {
-        console.warn('### Logout error:', err)
-      })
+  async function logout() {
+    try {
+      await msalApp.logoutPopup()
+      console.log('### Logout complete')
+    } catch (err) {
+      console.error(`### Logout error: ${String(err)}`)
+    }
   }
 
   return (
@@ -146,7 +142,7 @@ function App() {
           <Route
             path="/edit/:id"
             element={
-              <AuthRoute>
+              <AuthRoute authEnabled={authEnabled}>
                 <Edit />
               </AuthRoute>
             }
@@ -154,7 +150,7 @@ function App() {
           <Route
             path="/new"
             element={
-              <AuthRoute>
+              <AuthRoute authEnabled={authEnabled}>
                 <Edit />
               </AuthRoute>
             }

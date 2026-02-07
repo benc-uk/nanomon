@@ -8,8 +8,9 @@ import './index.css'
 
 // Register the required components for Chart.js
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js'
-import { PublicClientApplication } from '@azure/msal-browser'
+import { PublicClientApplication, BrowserUtils } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
+import { broadcastResponseToMainFrame } from '@azure/msal-browser/redirect-bridge'
 import { AuthProviderMSAL } from './api/auth-provider-msal.ts'
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
@@ -51,7 +52,7 @@ async function startApp() {
         auth: {
           clientId: config.AUTH_CLIENT_ID,
           redirectUri: window.location.origin,
-          authority: `https://login.microsoftonline.com/${config.AUTH_TENANT}`,
+          authority: `https://login.microsoftonline.com/${config.AUTH_TENANT || 'common'}`,
         },
         cache: {
           cacheLocation: 'localStorage',
@@ -96,6 +97,11 @@ async function startApp() {
       </ServicesProvider>
     </BrowserRouter>,
   )
+}
+
+// Needed with MSAL.js v5, to properly handle auth, this is VERY poorly documented by Microsoft
+if (BrowserUtils.isInPopup() || BrowserUtils.isInIframe()) {
+  broadcastResponseToMainFrame().catch(() => {})
 }
 
 // Start the app, can't use top-level await yet

@@ -20,27 +20,22 @@ export default function Edit() {
   const [rulePop, setRulePop] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [firstFetch, setFirstFetch] = useState(true)
+  const [firstFetch, setFirstFetch] = useState(!isNew)
 
   const [monitor, setMonitor] = useState<MonitorFromDB | Monitor>(NewEmptyMonitor)
 
   useEffect(() => {
+    if (isNew || !editId) return
+
     async function fetchMonitor() {
       const fetchedMon = await api.getMonitor(editId || '')
       setMonitor(fetchedMon)
       setFirstFetch(false)
     }
 
-    if (!isNew && editId) {
-      fetchMonitor()
-        .then(void 0)
-        .catch(console.error)
-    }
-
-    if (isNew) {
-      setFirstFetch(false)
-      setMonitor(NewEmptyMonitor)
-    }
+    fetchMonitor()
+      .then(void 0)
+      .catch(console.error)
   }, [isNew, editId, api])
 
   async function save() {

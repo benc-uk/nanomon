@@ -92,7 +92,7 @@ run-all:
     #!/bin/env bash
     trap "echo -e '\n⛔ Removing Postgres container' && docker rm -f postgres" EXIT
     if ! docker ps | grep -q postgres; then {{ just_executable() }} run-db & fi
-    sleep 15 
+    sleep 5
     {{ just_executable() }} run-runner &
     sleep 5
     {{ just_executable() }} run-api &

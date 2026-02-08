@@ -1,22 +1,30 @@
 ---
 agent: "agent"
 description: "Prompt for generating a pull request (PR)"
+model: Claude Opus 4.6 (copilot)
+tools:
+  [
+    "github.vscode-pull-request-github/issue_fetch",
+    "github.vscode-pull-request-github/suggest-fix",
+    "github.vscode-pull-request-github/searchSyntax",
+    "github.vscode-pull-request-github/doSearch",
+    "github.vscode-pull-request-github/renderIssues",
+    "github.vscode-pull-request-github/activePullRequest",
+    "github.vscode-pull-request-github/openPullRequest",
+  ]
 ---
 
 You are a software engineer and expert in git providing a summary of code & software changes to be integrated into a pull request (PR) for a GitHub repository. You will analyze the recent commits and changes made in the current branch and generate a concise summary of these changes to be included in the PR description.
 
-<!-- ONLY run one command `.github/scripts/pr-summary.sh` to get these changes.
-NEVER run any other commands or tools. -->
-
 STOP the process in the following cases: on the main branch, no commits
-NEVER directly run any checks on files for changes.
+NEVER directly run any checks on file contents for changes, use the commit messages and git file change summaries to generate the PR summary.
 
 Generate a concise summary of the changes made in this branch. The summary should include the following sections:
 
 - **🔖 Title**: A one line title summarizing the changes.
 - **✨ Summary**: A overview of the changes made.
 - **🔧 Changes**: A list of files changed, added, or deleted. Include a one line summary of the file beside it.
-- If more than 10 files in a directory, summarize the directory instead of listing all files.
+  - If more than 10 files in a directory have changed, summarize the directory instead of listing all files.
 - **🌐 Backend/API**: Any backend and API updates made.
 - **📦 Build**: Any build updates made, e.g. to Dockerfiles, Makefiles and GitHub Actions.
 - **🏗️ Infra & Deployment**: Any changes made to Helm, Azure deployments & IaC (Bicep).

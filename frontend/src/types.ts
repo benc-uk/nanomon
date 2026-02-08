@@ -159,4 +159,21 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       group: '',
     },
   },
+
+  prom_scrape: {
+    ruleHint: 'value, respTime, metricCount, metricType, matchCount, matched',
+    allowedProps: ['metric', 'labels', 'timeout', 'valueMult'],
+    template: {
+      name: 'New Prometheus Scrape Monitor',
+      type: 'prom_scrape',
+      interval: '10s',
+      enabled: true,
+      target: 'http://localhost:9100/metrics',
+      rule: 'matched == true',
+      properties: {
+        metric: 'node_load1',
+      },
+      group: '',
+    },
+  },
 }

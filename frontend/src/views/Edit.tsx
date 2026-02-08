@@ -107,6 +107,9 @@ export default function Edit() {
           <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.prometheus.template)}>
             <MonitorIcon monitor={MonitorDefinitions.prometheus.template} /> Prom
           </button>
+          <button className="btn btn-secondary wide mx-1" onClick={() => setMonitor(MonitorDefinitions.prom_scrape.template)}>
+            <MonitorIcon monitor={MonitorDefinitions.prom_scrape.template} /> Scrape
+          </button>
         </div>
       </div>
 

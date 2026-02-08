@@ -15,7 +15,7 @@ const CHART_SIZE = 20
 const CHART_OPTIONS = {
   scales: {
     x: { display: false },
-    y: { beginAtZero: true },
+    y: { beginAtZero: false },
   },
 }
 let timeoutId: number

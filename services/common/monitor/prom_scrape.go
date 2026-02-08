@@ -45,7 +45,10 @@ func (m *Monitor) runPromScrape() *result.Result {
 		for _, pair := range strings.Split(labelsStr, ",") {
 			parts := strings.SplitN(strings.TrimSpace(pair), "=", 2)
 			if len(parts) == 2 {
-				labelFilter[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+				val := strings.TrimSpace(parts[1])
+				// Remove surrounding quotes if present
+				val = strings.Trim(val, `"`)
+				labelFilter[strings.TrimSpace(parts[0])] = val
 			}
 		}
 	}
@@ -166,6 +169,7 @@ func (m *Monitor) runPromScrape() *result.Result {
 			outputs["value"] = value
 			outputs["labels"] = strings.Join(labelParts, ", ")
 		}
+		outputs[strings.Join(labelParts, ", ")] = value
 	}
 
 	outputs["matched"] = matchCount > 0

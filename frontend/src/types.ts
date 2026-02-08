@@ -28,8 +28,7 @@ export const StatusError = 1
 export const StatusFailed = 2
 export type StatusCode = typeof StatusOK | typeof StatusError | typeof StatusFailed
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Output = { [key: string]: any }
+export type Output = { [key: string]: unknown }
 
 export interface Result {
   date: string

@@ -229,7 +229,7 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
                       return (
                         <tr key={key}>
                           <td>{key}</td>
-                          <td className="wrap-any">{value}</td>
+                          <td className="wrap-any">{value as string}</td>
                         </tr>
                       )
                     })}

@@ -1,0 +1,4 @@
+name: local-dev
+variables:
+  - name: apiEndpoint
+    value: http://localhost:8000

@@ -4,6 +4,7 @@ The API specs for the Nanomon API resides here
 
 - OpenAPI v3 Specs: [openapi.yaml](./openapi.yaml)
 - JSON Schema: [nanomon-schema.json](./nanomon-schema.json)
+- Documentation, as a static HTML page: [documentation.html](./documentation.html)
 
 ## Spec Sources
 

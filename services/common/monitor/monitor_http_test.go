@@ -74,9 +74,9 @@ var cases = []httpTestCase{
 		target:         "https://example.net",
 		expectedStatus: result.StatusOK,
 		expectedRunOK:  true,
-		rule:           "regexMatch >= 700",
+		rule:           "regexMatch >= 10",
 		props: map[string]string{
-			"bodyRegex": "media \\(max-width: (.*?)px\\)",
+			"bodyRegex": "margin:(\\d+)vh",
 		},
 	},
 	{

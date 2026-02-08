@@ -1,0 +1,23 @@
+info:
+  name: Delete All
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: "{{apiEndpoint}}/api/monitors"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Deletes all configuration for all monitors, beware!

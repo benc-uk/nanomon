@@ -346,7 +346,7 @@ components:
   securitySchemes:
     BearerAuth:
       type: http
-      scheme: bearer
+      scheme: Bearer
 servers:
   - url: http://localhost:8000
     description: Local dev server endpoint

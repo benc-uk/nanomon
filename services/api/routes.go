@@ -175,6 +175,7 @@ func (api API) createMonitor(resp http.ResponseWriter, req *http.Request) {
 		Updated:    m.Updated,
 		Enabled:    m.Enabled,
 		Properties: m.Properties,
+		Target:     m.Target,
 	}
 
 	api.ReturnJSON(resp, respMonitor)

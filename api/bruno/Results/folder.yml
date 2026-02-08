@@ -1,0 +1,8 @@
+info:
+  name: Results
+  type: folder
+  seq: 2
+
+request: {}
+
+docs: API endpoints for retrieving monitor results

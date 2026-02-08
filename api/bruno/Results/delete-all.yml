@@ -1,0 +1,17 @@
+info:
+  name: Delete All
+  type: http
+  seq: 2
+
+http:
+  method: DELETE
+  url: "{{apiEndpoint}}/api/results"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Deletes all results for all monitors from the system, beware! This action is irreversible and will permanently remove all historical monitoring data.

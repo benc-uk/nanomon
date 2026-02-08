@@ -1,0 +1,41 @@
+info:
+  name: Update One
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiEndpoint}}/api/monitors/{{monitorId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated {{$randomDomainWord}}",
+        "type": "http",
+        "interval": "500s",
+        "target": "https://example.net",
+        "properties": {
+          "thingy": "foo"
+        },
+        "enabled": false
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: eq
+      value: "{{monitorId}}"
+    - expression: res.body.name
+      operator: isNotEmpty
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Updates an existing monitor with the specified ID, allowing changes to its configuration. Returns the updated monitor details in JSON format.

@@ -26,28 +26,10 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
   const [lastResultDate, setLastResultDate] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [chartData, setChartData] = useState<ChartData<'line'>>({ datasets: [], labels: [] })
+  const [refreshCount, setRefreshCount] = useState(0)
 
-  // Fetch monitor and its results from the API
-  const loadMonitor = useCallback(async () => {
-    if (!id) {
-      return
-    }
-
-    setLoading(true)
-
-    let mon: MonitorFromDB
-    try {
-      mon = await api.getMonitor(id)
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      }
-      console.error(err)
-      return
-    }
-
-    const fetchedResults = await api.getResultsForMonitor(mon.id, MAX_RESULTS)
-
+  // Applies fetched data to component state
+  const applyMonitorData = useCallback((mon: MonitorFromDB, fetchedResults: ResultExtended[]) => {
     setMonitor({
       ...mon,
       status: getStatus(mon.enabled ? fetchedResults[0]?.status : -1),
@@ -55,18 +37,11 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
       message: fetchedResults[0]?.message,
     })
 
-    // Extend results with nice date and status details
-    const extendedResults = fetchedResults.map((result) => ({
-      ...result,
-      dateNice: new Date(result.date).toLocaleString(),
-      statusDetails: getStatus(result.status),
-    })) as ResultExtended[]
-
     const chartValues: number[] = []
     const chartLabels: string[] = []
 
-    for (let i = extendedResults.length - 1; i >= 0; i--) {
-      const r = extendedResults[i]
+    for (let i = fetchedResults.length - 1; i >= 0; i--) {
+      const r = fetchedResults[i]
       chartValues.push(r.value)
       chartLabels.push(r.date.replace('T', ' ').split('.')[0])
     }
@@ -76,12 +51,56 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
       datasets: [{ label: 'Value', data: chartValues, tension: 0.3, borderColor: 'rgb(46, 113, 214)', fill: true }],
     })
 
-    setResults(extendedResults)
+    setResults(fetchedResults)
     setUpdatedDate(niceDate(mon.updated))
     setLastResultDate(fetchedResults[0]?.date ? niceDate(fetchedResults[0]?.date) : '')
     setError('')
     setLoading(false)
-  }, [api, id])
+  }, [])
+
+  // Fetch monitor on mount and when refreshCount changes
+  useEffect(() => {
+    if (!id) return
+
+    let cancelled = false
+
+    const fetchData = async () => {
+      setLoading(true)
+
+      let mon: MonitorFromDB
+      try {
+        mon = await api.getMonitor(id)
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof Error) {
+          setError(err.message)
+        }
+        console.error(err)
+        return
+      }
+
+      const fetchedResults = await api.getResultsForMonitor(mon.id, MAX_RESULTS)
+
+      if (cancelled) return
+
+      // Extend results with nice date and status details
+      const extendedResults = fetchedResults.map((result) => ({
+        ...result,
+        dateNice: new Date(result.date).toLocaleString(),
+        statusDetails: getStatus(result.status),
+      })) as ResultExtended[]
+
+      applyMonitorData(mon, extendedResults)
+    }
+
+    fetchData()
+      .then(void 0)
+      .catch(console.error)
+
+    return () => {
+      cancelled = true
+    }
+  }, [api, id, refreshCount, applyMonitorData])
 
   async function deleteMonitor() {
     if (!id) {
@@ -91,13 +110,6 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
     await api.deleteMonitor(id)
     window.location.href = '/'
   }
-
-  // Fetch monitor on mount
-  useEffect(() => {
-    loadMonitor()
-      .then(void 0)
-      .catch(console.error)
-  }, [loadMonitor])
 
   if (error) {
     return (
@@ -138,7 +150,12 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
             &nbsp;
             {monitor.name}
           </div>
-          <button className="btn btn-light btn-sm" onClick={loadMonitor}>
+          <button
+            className="btn btn-light btn-sm"
+            onClick={() => {
+              setRefreshCount((c) => c + 1)
+            }}
+          >
             <Fa icon={faRefresh} fixedWidth={true} /> REFRESH
           </button>
         </div>

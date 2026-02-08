@@ -28,8 +28,7 @@ export const StatusError = 1
 export const StatusFailed = 2
 export type StatusCode = typeof StatusOK | typeof StatusError | typeof StatusFailed
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Output = { [key: string]: any }
+export type Output = { [key: string]: unknown }
 
 export interface Result {
   date: string
@@ -155,6 +154,23 @@ export const MonitorDefinitions: Record<string, MonitorDefinition> = {
       rule: '',
       properties: {
         query: 'up',
+      },
+      group: '',
+    },
+  },
+
+  prom_scrape: {
+    ruleHint: 'value, respTime, metricCount, metricType, matchCount, matched',
+    allowedProps: ['metric', 'labels', 'timeout', 'valueMult'],
+    template: {
+      name: 'New Prometheus Scrape Monitor',
+      type: 'prom_scrape',
+      interval: '10s',
+      enabled: true,
+      target: 'http://localhost:9100/metrics',
+      rule: 'matched == true',
+      properties: {
+        metric: 'node_load1',
       },
       group: '',
     },

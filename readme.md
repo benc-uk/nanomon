@@ -44,13 +44,14 @@ When a _monitor_ runs it generates a _result_. The _result_ as the name implies,
 
 ### Monitor Types
 
-There are three types of monitor currently supported:
+There are six types of monitor currently supported:
 
 - **HTTP** &ndash; Makes HTTP(S) requests to a given URL and measures the response time.
 - **Ping** &ndash; Carries out an ICMP ping to the target hostname or IP address.
 - **TCP** &ndash; Attempts to create a TCP socket connection to the given hostname and port.
 - **DNS** &ndash; Looks up DNS records for a given hostname or domain name.
 - **Prometheus** &ndash; Executes a Prometheus query against a given Prometheus server.
+- **Prometheus Scrape** &ndash; Scrapes raw Prometheus metrics from a /metrics endpoint and extracts values by metric name and labels.
 
 For more details see the [complete monitor reference](#monitor-reference)
 
@@ -145,7 +146,7 @@ See [Azure & Bicep docs](./deploy/azure/)
 - Vite is used for bundling, and local serving with HMR
 - Configuration is fetched from the URL `/config.json` at start up.
   - When hosted by the frontend-host this allows for values to be dynamically passed to the frontend at runtime.
-  - When running locally the makefile target `just run-frontend` builds a static config file to "fake" this config API.
+  - When running locally the just recipe `just run-frontend` builds a static config file to "fake" this config API.
 - By default no there is no authentication on the frontend, this makes the app easy to use for demos & workshops. However it can be enabled see [authentication & security](#authentication--security) section for details. The MSAL library is used for auth [see MSAL.js 2.0 for Browser-Based SPAs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-browser) and [MSAL React](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-react)
 
 ### Frontend Host
@@ -158,14 +159,14 @@ See [Azure & Bicep docs](./deploy/azure/)
 ## Just Reference
 
 ```text
- 🔸build                   # 🔨 Build binaries and bundle the frontend
+ 🔸build                   # 🔨 Build all binaries and bundle the frontend
  🔸clean                   # 🧹 Clean up, remove dev data and temp files
  🔸dev-tools               # 🔮 Install dev tools into project tools directory
  🔸format                  # 📝 Format source files and fix linting problems
  🔸generate-specs          # 🤖 Generate OpenAPI specs and JSON-Schemas using TypeSpec
  🔸helm-prep               # 🪖 Update Helm docs & repo index
  🔸images                  # 📦 Build all container images, using Docker compose
- 🔸lint fix="false"        # 🔍 Lint & format, default is to check only and set exit code
+ 🔸lint fix="false"        # 🔍 Lint & format, default is to run lint check only and set exit code
  🔸push                    # 📤 Push all container images
  🔸remove-db               # 🌊 Remove Postgres container and its data volume
  🔸run-all                 # 🚀 Run all services locally with hot-reload, plus Postgres
@@ -200,8 +201,8 @@ When running locally this is done with a dotenv file, which is located in `.dev\
 | _Name_         | _Description_                                                                                                  | _Default_   |
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ----------- |
 | PORT           | TCP port for service to listen on                                                                              | 8000 & 8001 |
-| AUTH_CLIENT_ID | Used to enable authentication with given Azure AD app client ID. See [auth section](#authentication--security) | _blank_     |
-| AUTH_TENANT    | Set to Azure AD tenant ID if not using common                                                                  | common      |
+| AUTH_CLIENT_ID | Used to enable authentication with given Entra ID app client ID. See [auth section](#authentication--security) | _blank_     |
+| AUTH_TENANT    | Set to Entra ID tenant ID if not using common                                                                  | common      |
 
 ### Variables used only by the runner:
 
@@ -216,13 +217,12 @@ When running locally this is done with a dotenv file, which is located in `.dev\
 | ALERT_SMTP_PORT     | SMTP port                                                                              | 587                   |
 | ALERT_FAIL_COUNT    | How many times a monitor returns a non-OK status, to trigger an alert email            | 3                     |
 | ALERT_LINK_BASEURL  | When hosting NanoMon and you want the link in alert emails to point to the correct URL | http://localhost:3000 |
-| POLLING_INTERVAL    | Only used when in polling mode, when change stream isn't available                     | 10s                   |
-| PROMETHEUS_ENABLE   | Enable exporting metrics in Prometheus format (see below)                              | false                 |
+| PROMETHEUS_ENABLED  | Enable exporting metrics in Prometheus format (see below)                              | false                 |
 | PROMETHEUS_PORT     | HTTP port used to serve the Prometheus metrics                                         | 8080                  |
 
 ## Monitor Reference
 
-NanoMon currently supports four types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
+NanoMon currently supports six types of monitor, which can be configured various ways, this is a reference for each monitor type, the runtime behaviour, properties that can be set, and the resulting outputs.
 
 ### HTTP Monitor
 
@@ -311,6 +311,29 @@ You're going to need to be familiar with PromQL in order to use this monitor typ
   - _prom_timestamp_ - The timestamp of the result as returned by Prometheus (string)
   - _result_count_ - The number of results returned (number)
 
+### Prometheus Scrape Monitor
+
+This monitor scrapes raw Prometheus metrics from any standard `/metrics` endpoint (in text exposition format), finds a named metric and extracts its value. It will return failed status on network errors or non-200 HTTP responses. If the target metric is not found, it returns OK with `matched` set to false and a value of 0.
+
+You'll need to know the metric names exposed by the target endpoint. Use a browser or curl to inspect the `/metrics` output first.
+
+- **Target:** The full URL of the metrics endpoint e.g. `http://localhost:9100/metrics`
+- **Value:** The value of the first matching metric sample.
+- **Properties:**
+  - _metric_ - The name of the metric to find, this is required.
+  - _labels_ - Optional label filter in the format `key=value,key2=value2` to match specific metric series (default: none)
+  - _timeout_ - Timeout interval e.g. "10s" or "500ms" (default: 5s)
+  - _valueMult_ - A numeric multiplier applied to the metric value, useful for unit conversion (default: none)
+- **Outputs / Rule Props:**
+  - _respTime_ - Time to fetch the metrics endpoint in milliseconds (number)
+  - _metricCount_ - Total number of metric families found in the scrape (number)
+  - _metricType_ - The type of the matched metric e.g. 'GAUGE', 'COUNTER', 'SUMMARY', 'HISTOGRAM' (string)
+  - _metricHelp_ - The help text of the matched metric (string)
+  - _value_ - The value of the first matching metric sample (number)
+  - _labels_ - Labels of the first matching metric as `key="value"` pairs (string)
+  - _matched_ - Whether the metric name was found and at least one sample matched (boolean)
+  - _matchCount_ - Number of metric samples that matched the label filter (number)
+
 ### Monitor Rules
 
 All monitor types have a rule property as part of their configuration, this rule is a logical expression which is evaluated after each run. You can use any of the outputs in this expression in order to set the result status of the run.
@@ -349,7 +372,7 @@ A basic guide to set this up:
 
 NanoMon provides basic alerting support, which sends emails when monitors return a non-OK status 1 or more times in a row. By default this alerting feature is not enabled, and failing monitors will not trigger emails.
 
-To enable alerting all of the env vars starting `ALERT_` will need to be set, there are six of these as described above. However as three of these variables have defaults, you only need to set the remaining three `ALERT_SMTP_PASSWORD`, `ALERT_SMTP_FROM` and `ALERT_SMTP_FROM` to switch the feature on, this will be using GMail to send emails. For the password you will need [setup an Google app password](https://support.google.com/accounts/answer/185833?hl=en) this will use your personal Google account to send the emails, so this probably isn't a good option for production (putting it mildly).
+To enable alerting all of the env vars starting `ALERT_` will need to be set, there are six of these as described above. However as three of these variables have defaults, you only need to set the remaining three `ALERT_SMTP_PASSWORD`, `ALERT_SMTP_FROM` and `ALERT_SMTP_TO` to switch the feature on, this will be using GMail to send emails. For the password you will need [setup an Google app password](https://support.google.com/accounts/answer/185833?hl=en) this will use your personal Google account to send the emails, so this probably isn't a good option for production (putting it mildly).
 
 Limitations:
 
@@ -379,7 +402,7 @@ When starting up the API and runner services, they will attempt to connect to th
 
 NanoMon has support for exporting & exposing Prometheus metrics, which are exposed from the runner service via HTTP in the standard text-based exposition format. When configuring NanoMon as a scraping target use the url `http://<runner-host>:8080/metrics` (the port can be changed with `PROMETHEUS_PORT`)
 
-This feature is disabled by default and is enabled by setting the `PROMETHEUS_ENABLE` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges (one gauge per monitor), these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
+This feature is disabled by default and is enabled by setting the `PROMETHEUS_ENABLED` env var, when enabled the metrics can be fetched/scraped from the `/metrics` endpoint. The active monitors will be provided as labelled Prometheus gauges (one gauge per monitor), these labels will hold the values for the monitor status (0 = OK, 1 = Error, 2 = Failed), and values of each numeric monitor output (string outputs are not applicable to Prometheus)
 
 Using Prometheus means you many not need to run the NanoMon frontend, as you can visualize the data through other tools like Grafana, and optionally enable things like the Prometheus alerts.
 

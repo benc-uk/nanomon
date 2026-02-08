@@ -4,6 +4,7 @@ description: "Prompt for generating a pull request (PR)"
 model: Claude Opus 4.6 (copilot)
 tools:
   [
+    "execute/runInTerminal",
     "github.vscode-pull-request-github/issue_fetch",
     "github.vscode-pull-request-github/suggest-fix",
     "github.vscode-pull-request-github/searchSyntax",

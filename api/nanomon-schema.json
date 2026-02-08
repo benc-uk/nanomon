@@ -68,7 +68,9 @@
                 "http",
                 "ping",
                 "tcp",
-                "dns"
+                "dns",
+                "prometheus",
+                "prom_scrape"
             ]
         },
         "Problem": {

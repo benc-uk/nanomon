@@ -221,15 +221,15 @@ export default function Monitor({ isAuth }: { isAuth: boolean }) {
                       <td>{lastResultDate}</td>
                     </tr>
                     {Object.entries(results[0].outputs || {}).map(([key, value]) => {
-                      // Guard against objects, arrays etc
-                      if (typeof value === 'object' || Array.isArray(value)) {
+                      // Guard against objects, arrays, booleans etc
+                      if (typeof value === 'boolean' || typeof value === 'object' || Array.isArray(value)) {
                         value = JSON.stringify(value)
                       }
 
                       return (
                         <tr key={key}>
                           <td>{key}</td>
-                          <td className="wrap-any">{value}</td>
+                          <td className="wrap-any">{value as string}</td>
                         </tr>
                       )
                     })}

@@ -120,6 +120,14 @@ generate-specs:
   cp tsp-output/@typespec/openapi3/openapi.yaml ../openapi.yaml
   cp tsp-output/@typespec/json-schema/*.json ..
 
+# Run Prometheus node exporter locally, for testing
+run-node-exporter:
+    docker run -it --rm \
+    --net="host" \
+    -v "/:/host:ro,rslave" \
+    quay.io/prometheus/node-exporter:latest \
+    --path.rootfs=/host
+
 # 🧹 Clean up, remove dev data and temp files
 [confirm('Are you sure you want to clean up?')]
 clean:

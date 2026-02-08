@@ -30,7 +30,7 @@ func newFakeMetricsServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fakeMetrics))
+		_, _ = w.Write([]byte(fakeMetrics))
 	}))
 }
 

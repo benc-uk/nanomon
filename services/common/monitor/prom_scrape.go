@@ -41,6 +41,7 @@ func (m *Monitor) runPromScrape() *result.Result {
 
 	// Optional label filter in the format "key=value,key2=value2"
 	labelFilter := make(map[string]string)
+
 	if labelsStr, ok := m.Properties["labels"]; ok && labelsStr != "" {
 		for _, pair := range strings.Split(labelsStr, ",") {
 			parts := strings.SplitN(strings.TrimSpace(pair), "=", 2)
@@ -118,6 +119,7 @@ func (m *Monitor) runPromScrape() *result.Result {
 			}
 
 			match := true
+
 			for k, v := range labelFilter {
 				if labels[k] != v {
 					match = false

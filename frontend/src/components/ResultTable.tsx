@@ -36,7 +36,7 @@ export default function ResultTable({ results, showName }: { results: ResultExte
 
                     return (
                       <li key={key}>
-                        <strong>{key}:</strong> {value}
+                        <strong>{key}:</strong> {value as string}
                       </li>
                     )
                   })}

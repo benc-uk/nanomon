@@ -292,6 +292,8 @@ components:
         - ping
         - tcp
         - dns
+        - prometheus
+        - prom_scrape
     Problem:
       type: object
       required:

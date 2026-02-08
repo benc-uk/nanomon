@@ -134,6 +134,8 @@ enum MonitorType {
   ping,
   tcp,
   dns,
+  prometheus,
+  prom_scrape,
 }
 
 // This holds the result of a single monitor check

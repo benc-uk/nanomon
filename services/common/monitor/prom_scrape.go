@@ -169,6 +169,8 @@ func (m *Monitor) runPromScrape() *result.Result {
 			outputs["value"] = value
 			outputs["labels"] = strings.Join(labelParts, ", ")
 		}
+
+		// Add each matching metric as a separate output entry, kinda messy but allows us to see all matches in the UI
 		outputs[strings.Join(labelParts, ", ")] = value
 	}
 
